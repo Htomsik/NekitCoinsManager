@@ -5,7 +5,7 @@ using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class TransactionHistoryViewModel : ObservableObject, ITransactionObserver
+public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionObserver
 {
     private readonly ITransactionService _transactionService;
 

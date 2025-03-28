@@ -9,29 +9,34 @@
              x:Class="NekitCoinsManager.Views.TransactionHistoryView"
              x:DataType="vm:TransactionHistoryViewModel">
     
-    <StackPanel Margin="{StaticResource CardPadding}">
-        <TextBlock Text="Transaction History" 
-                  Classes="header"/>
+    <Border Classes="card" Padding="20">
+        <StackPanel Spacing="10">
+            <!-- Заголовок -->
+            <TextBlock Text="Transaction History" 
+                      Classes="header"
+                      HorizontalAlignment="Center"/>
                    
-        <ItemsControl ItemsSource="{Binding Transactions}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="models:Transaction">
-                    <Border Classes="card">
-                        <StackPanel>
-                            <TextBlock Text="{Binding FromUser.Username, StringFormat='From: {0}'}"
-                                      Classes="username"/>
-                            <TextBlock Text="{Binding ToUser.Username, StringFormat='To: {0}'}"/>
-                            <TextBlock Text="{Binding Amount, StringFormat='Amount: {0} NekitCoins'}"
-                                      FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding Comment}"
-                                      IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                      Opacity="0.7"/>
-                            <TextBlock Text="{Binding CreatedAt, StringFormat='Date: {0:g}'}"
-                                      Opacity="0.7"/>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+            <!-- Список транзакций -->
+            <ItemsControl ItemsSource="{Binding Transactions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transaction">
+                        <Border Classes="card" Margin="0,5">
+                            <StackPanel Spacing="5">
+                                <TextBlock Text="{Binding FromUser.Username, StringFormat='From: {0}'}"
+                                          Classes="username"/>
+                                <TextBlock Text="{Binding ToUser.Username, StringFormat='To: {0}'}"/>
+                                <TextBlock Text="{Binding Amount, StringFormat='Amount: {0} NC'}"
+                                          FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Comment}"
+                                          IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                          Opacity="0.7"/>
+                                <TextBlock Text="{Binding CreatedAt, StringFormat='Date: {0:g}'}"
+                                          Opacity="0.7"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
 </UserControl> 

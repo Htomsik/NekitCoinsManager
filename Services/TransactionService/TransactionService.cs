@@ -11,12 +11,14 @@ namespace NekitCoinsManager.Services;
 public class TransactionService : ITransactionService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUserService _userService;
     private readonly List<ITransactionObserver> _observers = new();
     private List<Transaction> _transactions = new();
 
-    public TransactionService(AppDbContext dbContext)
+    public TransactionService(AppDbContext dbContext, IUserService userService)
     {
         _dbContext = dbContext;
+        _userService = userService;
         LoadTransactions();
     }
 
@@ -61,8 +63,9 @@ public class TransactionService : ITransactionService
 
         transaction.CreatedAt = DateTime.UtcNow;
 
-        fromUser.Balance -= transaction.Amount;
-        toUser.Balance += transaction.Amount;
+        // Обновляем балансы через UserService
+        await _userService.UpdateUserBalance(fromUser.Id, fromUser.Balance - transaction.Amount);
+        await _userService.UpdateUserBalance(toUser.Id, toUser.Balance + transaction.Amount);
 
         _dbContext.Transactions.Add(transaction);
         await _dbContext.SaveChangesAsync();

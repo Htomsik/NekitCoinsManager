@@ -124,7 +124,38 @@
 
 <Style Selector="TextBox:pointerover">
     <Setter Property="Background" Value="#333333"/>
-</Style> 
-    
-    
+</Style>
+
+<!-- Стиль для буквы в аватаре -->
+<Style Selector="TextBlock.avatar-letter">
+    <Setter Property="FontSize" Value="20"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Margin" Value="0,2,0,0"/>
+</Style>
+
+    <!-- Стили для управления пользователями -->
+    <Style Selector="Border.user-card">
+        <Setter Property="Padding" Value="10,5"/>
+    </Style>
+
+    <Style Selector="Border.user-avatar">
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumBrush}"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Margin" Value="0,0,15,0"/>
+    </Style>
+
+    <Style Selector="StackPanel.user-info">
+        <Setter Property="Spacing" Value="4"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Стиль для списка пользователей -->
+    <Style Selector="ItemsControl.user-list > StackPanel">
+        <Setter Property="Spacing" Value="5"/>
+    </Style>
+
 </Styles>

@@ -8,7 +8,7 @@ using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class TransferViewModel : ObservableObject, IUserObserver
+public partial class TransferViewModel : ViewModelBase, IUserObserver
 {
     private readonly ITransactionService _transactionService;
     private readonly IUserService _userService;

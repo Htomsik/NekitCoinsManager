@@ -14,29 +14,22 @@
         MinWidth="800"
         MinHeight="600">
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <!-- Верхняя панель - регистрация пользователя -->
-        <views:UserRegistrationView Grid.Row="0" 
-                                    DataContext="{Binding UserRegistrationViewModel}"
-                                    Margin="10"/>
-        <!-- Верхняя панель - управление пользователями -->
-        <views:UserManagementView Grid.Row="1" 
-                                DataContext="{Binding UserManagementViewModel}"
-                                Margin="10"/>
-        
-        <!-- Основной контент -->
-        <Grid Grid.Row="2" ColumnDefinitions="*,*" Margin="10,0,10,10">
-            <!-- Левая панель - перевод монет -->
-            <views:TransferView Grid.Column="0" 
-                               Margin="0,0,5,0"
-                               DataContext="{Binding TransferViewModel}"/>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Верхнее меню -->
+        <Menu Grid.Row="0" Background="#1E1E1E">
+            <MenuItem Header="_Users">
+                <MenuItem Header="_Register New User" Command="{Binding ShowRegistrationCommand}"/>
+                <MenuItem Header="_Manage Users" Command="{Binding ShowUserManagementCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Transactions">
+                <MenuItem Header="_Transfer Coins" Command="{Binding ShowTransferCommand}"/>
+                <MenuItem Header="_Transaction History" Command="{Binding ShowTransactionHistoryCommand}"/>
+            </MenuItem>
+        </Menu>
 
-            <!-- Правая панель - история транзакций -->
-            <views:TransactionHistoryView Grid.Column="1" 
-                                        Margin="5,0,0,0"
-                                        DataContext="{Binding TransactionHistoryViewModel}"/>
-        </Grid>
-        
-        
+        <!-- Основной контент -->
+        <ContentControl Grid.Row="1" 
+                        Content="{Binding CurrentView, UpdateSourceTrigger=PropertyChanged}"
+                        Margin="10"/>
     </Grid>
 </Window>

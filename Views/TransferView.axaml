@@ -9,71 +9,82 @@
              x:Class="NekitCoinsManager.Views.TransferView"
              x:DataType="vm:TransferViewModel">
     
-    <StackPanel Margin="{StaticResource CardPadding}">
-        <!-- Секция перевода монет -->
-        <TextBlock Text="Transfer Coins" Classes="header"/>
-        
-        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
-            <!-- Выбор отправителя -->
-            <TextBlock Grid.Row="0" Grid.Column="0" 
-                      Text="Transfer From:" 
-                      Classes="username"/>
+    <Border Classes="card" Padding="20">
+        <StackPanel Spacing="10">
+            <!-- Заголовок -->
+            <TextBlock Text="Transfer Coins" 
+                      Classes="header"
+                      HorizontalAlignment="Center"/>
             
-            <ComboBox Grid.Row="0" Grid.Column="1" 
-                      ItemsSource="{Binding Users}"
-                      SelectedItem="{Binding NewTransaction.FromUser}"
-                      Classes="input">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate x:DataType="models:User">
-                        <TextBlock Text="{Binding Username}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <!-- Форма перевода -->
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                  ColumnDefinitions="Auto,*"
+                  Margin="10">
+                <!-- Выбор отправителя -->
+                <TextBlock Grid.Row="0" Grid.Column="0" 
+                          Text="Transfer From:" 
+                          Classes="username"/>
+                
+                <ComboBox Grid.Row="0" Grid.Column="1" 
+                          ItemsSource="{Binding Users}"
+                          SelectedItem="{Binding NewTransaction.FromUser}"
+                          Classes="input"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:User">
+                            <TextBlock Text="{Binding Username}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
-            <!-- Выбор получателя -->
-            <TextBlock Grid.Row="1" Grid.Column="0" 
-                      Text="Transfer To:" 
-                      Classes="username"/>
-                      
-            <ComboBox Grid.Row="1" Grid.Column="1" 
-                      ItemsSource="{Binding Users}"
-                      SelectedItem="{Binding NewTransaction.ToUser}"
-                      Classes="input">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate x:DataType="models:User">
-                        <TextBlock Text="{Binding Username}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            
-            <!-- Ввод суммы перевода -->
-            <TextBlock Grid.Row="2" Grid.Column="0" 
-                      Text="Amount:" 
-                      Classes="username"/>
-                      
-            <TextBox Grid.Row="2" Grid.Column="1" 
-                     Text="{Binding NewTransaction.Amount}"
-                     Classes="input"/>
+                <!-- Выбор получателя -->
+                <TextBlock Grid.Row="1" Grid.Column="0" 
+                          Text="Transfer To:" 
+                          Classes="username"/>
+                          
+                <ComboBox Grid.Row="1" Grid.Column="1" 
+                          ItemsSource="{Binding Users}"
+                          SelectedItem="{Binding NewTransaction.ToUser}"
+                          Classes="input"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:User">
+                            <TextBlock Text="{Binding Username}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <!-- Ввод суммы перевода -->
+                <TextBlock Grid.Row="2" Grid.Column="0" 
+                          Text="Amount:" 
+                          Classes="username"/>
+                          
+                <TextBox Grid.Row="2" Grid.Column="1" 
+                         Text="{Binding NewTransaction.Amount}"
+                         Classes="input"/>
 
-            <!-- Ввод комментария -->
-            <TextBlock Grid.Row="3" Grid.Column="0" 
-                      Text="Comment:" 
-                      Classes="username"/>
-                      
-            <TextBox Grid.Row="3" Grid.Column="1" 
-                     Text="{Binding NewTransaction.Comment}"
-                     Watermark="Optional comment"
-                     Classes="input"/>
+                <!-- Ввод комментария -->
+                <TextBlock Grid.Row="3" Grid.Column="0" 
+                          Text="Comment:" 
+                          Classes="username"/>
+                          
+                <TextBox Grid.Row="3" Grid.Column="1" 
+                         Text="{Binding NewTransaction.Comment}"
+                         Watermark="Optional comment"
+                         Classes="input"/>
+                
+                <!-- Кнопка выполнения перевода -->
+                <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                        Content="Transfer" 
+                        Command="{Binding TransferCommand}"
+                        Classes="action"
+                        HorizontalAlignment="Center"/>
+            </Grid>
             
-            <!-- Кнопка выполнения перевода -->
-            <Button Grid.Row="4" Grid.Column="1" 
-                    Content="Transfer" 
-                    Command="{Binding TransferCommand}"
-                    Classes="action"/>
-        </Grid>
-        
-        <!-- Отображение сообщений об ошибках -->
-        <TextBlock Text="{Binding ErrorMessage}" 
-                   Classes="error"/>
-    </StackPanel>
+            <!-- Отображение сообщений об ошибках -->
+            <TextBlock Text="{Binding ErrorMessage}" 
+                       Classes="error"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Border>
 </UserControl> 

@@ -5,67 +5,64 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
              xmlns:models="using:NekitCoinsManager.Models"
+             xmlns:converters="using:NekitCoinsManager.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
              x:Class="NekitCoinsManager.Views.UserManagementView"
              x:DataType="vm:UserManagementViewModel">
 
-    <Border Classes="card" Padding="10">
-        <Grid>
-            <Grid ColumnDefinitions="Auto,*">
+    <UserControl.Resources>
+        <converters:FirstLetterConverter x:Key="FirstLetterConverter"/>
+    </UserControl.Resources>
+
+    <Border Classes="card">
+        <StackPanel Spacing="10">
             <!-- Заголовок -->
-            <TextBlock Grid.Column="0"
-                      Text="Users"
-                      VerticalAlignment="Center"
-                      Classes="header"/>
+            <TextBlock Text="Users"
+                      Classes="header"
+                      HorizontalAlignment="Center"/>
 
             <!-- Список пользователей -->
-            <ItemsControl Grid.Column="1"
-                         ItemsSource="{Binding Users}"
-                         Margin="20,0">
-                
-                
+            <ItemsControl ItemsSource="{Binding Users}"
+                         Classes="user-list">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Classes="card" Margin="5" Padding="10">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Grid.Column="0" 
-                                          Orientation="Horizontal">
+                    <DataTemplate x:DataType="models:User">
+                        
+                        <Border Classes="card user-card">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- Аватар пользователя -->
+                                <Border Grid.Column="0"
+                                        Classes="user-avatar">
+                                    <TextBlock Text="{Binding Username, Converter={StaticResource FirstLetterConverter}}"
+                                              Classes="avatar-letter"/>
+                                </Border>
+                                
+                                <!-- Информация о пользователе -->
+                                <StackPanel Grid.Column="1" 
+                                          Classes="user-info">
                                     <TextBlock Text="{Binding Username}"
                                              Classes="username"/>
-                                    <TextBlock Text="{Binding Balance, StringFormat=' ({0} NC)'}"
+                                    <TextBlock Text="{Binding Balance, StringFormat='{}{0} NC'}"
                                              Classes="balance"/>
                                 </StackPanel>
-                                <Button Grid.Column="1"
-                                       Margin="10,0,0,0"
+                                
+                                <!-- Кнопка удаления -->
+                                <Button Grid.Column="2"
                                        Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
                                        CommandParameter="{Binding}"
                                        Classes="icon"
                                        ToolTip.Tip="Delete User">
-                                    <PathIcon Data="{StaticResource delete_regular}"
-                                            Width="16"
-                                            Height="16"/>
+                                    <PathIcon Data="{StaticResource delete_regular}"/>
                                 </Button>
                             </Grid>
-                            <Border.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Delete"
-                                             Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
-                                             CommandParameter="{Binding}">
-                                        <MenuItem.Icon>
-                                            <PathIcon Data="{StaticResource delete_regular}"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </Border.ContextMenu>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </Grid>
 
-        <!-- Отображение сообщений об ошибках -->
-        <TextBlock Text="{Binding ErrorMessage}"
-                  Classes="error"/>
-        </Grid>
+            <!-- Отображение сообщений об ошибках -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                      Classes="error"
+                      HorizontalAlignment="Center"/>
+        </StackPanel>
     </Border>
 </UserControl> 
