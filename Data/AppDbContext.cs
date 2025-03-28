@@ -8,6 +8,12 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
 
+    public AppDbContext()
+    {
+        // Создаем БД при первом запуске, если она не существует
+        Database.EnsureCreated();
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=NekitCoins.db");
