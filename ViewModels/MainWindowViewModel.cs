@@ -39,15 +39,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isTransactionHistoryVisible;
 
-    public MainWindowViewModel(AppDbContext dbContext)
+    public MainWindowViewModel(
+        TransferViewModel transferViewModel,
+        TransactionHistoryViewModel transactionHistoryViewModel,
+        UserManagementViewModel userManagementViewModel,
+        UserRegistrationViewModel userRegistrationViewModel)
     {
-        var userService = new UserService(dbContext);
-        var transactionService = new TransactionService(dbContext, userService);
-
-        TransferViewModel = new TransferViewModel(transactionService, userService);
-        TransactionHistoryViewModel = new TransactionHistoryViewModel(transactionService);
-        UserManagementViewModel = new UserManagementViewModel(userService);
-        UserRegistrationViewModel = new UserRegistrationViewModel(userService);
+        TransferViewModel = transferViewModel;
+        TransactionHistoryViewModel = transactionHistoryViewModel;
+        UserManagementViewModel = userManagementViewModel;
+        UserRegistrationViewModel = userRegistrationViewModel;
 
         // Устанавливаем начальную view
         CurrentView = UserRegistrationViewModel;
