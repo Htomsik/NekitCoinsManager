@@ -16,9 +16,6 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
     private ObservableCollection<User> _users = new();
     
     [ObservableProperty]
-    private string _newUsername = string.Empty;
-    
-    [ObservableProperty]
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
@@ -43,21 +40,6 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
     public void OnUsersChanged()
     {
         LoadUsers();
-    }
-
-    [RelayCommand]
-    private async Task AddUser()
-    {
-        try
-        {
-            await _userService.AddUser(NewUsername);
-            NewUsername = string.Empty;
-            ErrorMessage = string.Empty;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
     }
 
     [RelayCommand]

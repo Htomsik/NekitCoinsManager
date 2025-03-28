@@ -30,11 +30,16 @@ public class UserService : IUserService
         return _users;
     }
 
-    public async Task AddUser(string username)
+    public async Task AddUser(string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username))
         {
             throw new Exception("Имя пользователя не может быть пустым");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new Exception("Пароль не может быть пустым");
         }
 
         if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
@@ -45,6 +50,7 @@ public class UserService : IUserService
         var user = new User
         {
             Username = username,
+            Password = password, // В реальном приложении пароль должен быть захеширован
             Balance = 100, // Начальный баланс для нового пользователя
             CreatedAt = DateTime.UtcNow
         };
@@ -96,5 +102,22 @@ public class UserService : IUserService
         {
             observer.OnUsersChanged();
         }
+    }
+
+    // Метод для обновления баланса пользователя
+    public async Task UpdateUserBalance(int userId, decimal newBalance)
+    {
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null)
+        {
+            throw new Exception("Пользователь не найден");
+        }
+
+        user.Balance = newBalance;
+        await _dbContext.SaveChangesAsync();
+        
+        // Обновляем кэш пользователей
+        LoadUsers();
+        NotifyObservers();
     }
 } 

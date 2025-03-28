@@ -10,7 +10,8 @@
              x:DataType="vm:UserManagementViewModel">
 
     <Border Classes="card" Padding="10">
-        <Grid ColumnDefinitions="Auto,*,Auto">
+        <Grid>
+            <Grid ColumnDefinitions="Auto,*">
             <!-- Заголовок -->
             <TextBlock Grid.Column="0"
                       Text="Users"
@@ -21,11 +22,8 @@
             <ItemsControl Grid.Column="1"
                          ItemsSource="{Binding Users}"
                          Margin="20,0">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                
+                
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Classes="card" Margin="5" Padding="10">
@@ -63,18 +61,11 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+        </Grid>
 
-            <!-- Форма добавления пользователя -->
-            <StackPanel Grid.Column="2" 
-                        Orientation="Horizontal"
-                        Spacing="10">
-                <TextBox Text="{Binding NewUsername}"
-                         Watermark="Username"
-                         Width="150"/>
-                <Button Command="{Binding AddUserCommand}"
-                        Content="Add User"
-                        Classes="action"/>
-            </StackPanel>
+        <!-- Отображение сообщений об ошибках -->
+        <TextBlock Text="{Binding ErrorMessage}"
+                  Classes="error"/>
         </Grid>
     </Border>
 </UserControl> 

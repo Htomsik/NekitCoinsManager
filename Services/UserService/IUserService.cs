@@ -12,7 +12,8 @@ public interface IUserObserver
 public interface IUserService
 {
     IEnumerable<User> GetUsers();
-    Task AddUser(string username);
+    Task AddUser(string username, string password);
     Task DeleteUser(int userId);
+    Task UpdateUserBalance(int userId, decimal newBalance);
     void Subscribe(IUserObserver observer);
 } 
