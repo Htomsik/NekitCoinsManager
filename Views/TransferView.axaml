@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:models="using:NekitCoinsManager.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NekitCoinsManager.Views.TransferView"
+             x:DataType="vm:TransferViewModel">
+    
+    <StackPanel Margin="{StaticResource CardPadding}">
+        <!-- Секция перевода монет -->
+        <TextBlock Text="Transfer Coins" Classes="header"/>
+        
+        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <!-- Выбор отправителя -->
+            <TextBlock Grid.Row="0" Grid.Column="0" 
+                      Text="Transfer From:" 
+                      Classes="username"/>
+            
+            <ComboBox Grid.Row="0" Grid.Column="1" 
+                      ItemsSource="{Binding Users}"
+                      SelectedItem="{Binding NewTransaction.FromUser}"
+                      Classes="input">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:User">
+                        <TextBlock Text="{Binding Username}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!-- Выбор получателя -->
+            <TextBlock Grid.Row="1" Grid.Column="0" 
+                      Text="Transfer To:" 
+                      Classes="username"/>
+                      
+            <ComboBox Grid.Row="1" Grid.Column="1" 
+                      ItemsSource="{Binding Users}"
+                      SelectedItem="{Binding NewTransaction.ToUser}"
+                      Classes="input">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:User">
+                        <TextBlock Text="{Binding Username}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            
+            <!-- Ввод суммы перевода -->
+            <TextBlock Grid.Row="2" Grid.Column="0" 
+                      Text="Amount:" 
+                      Classes="username"/>
+                      
+            <TextBox Grid.Row="2" Grid.Column="1" 
+                     Text="{Binding NewTransaction.Amount}"
+                     Classes="input"/>
+
+            <!-- Ввод комментария -->
+            <TextBlock Grid.Row="3" Grid.Column="0" 
+                      Text="Comment:" 
+                      Classes="username"/>
+                      
+            <TextBox Grid.Row="3" Grid.Column="1" 
+                     Text="{Binding NewTransaction.Comment}"
+                     Watermark="Optional comment"
+                     Classes="input"/>
+            
+            <!-- Кнопка выполнения перевода -->
+            <Button Grid.Row="4" Grid.Column="1" 
+                    Content="Transfer" 
+                    Command="{Binding TransferCommand}"
+                    Classes="action"/>
+        </Grid>
+        
+        <!-- Отображение сообщений об ошибках -->
+        <TextBlock Text="{Binding ErrorMessage}" 
+                   Classes="error"/>
+    </StackPanel>
+</UserControl> 

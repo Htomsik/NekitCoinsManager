@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+    <!-- Основной круг монеты -->
+    <circle cx="128" cy="128" r="120" fill="#FFD700"/>
+    
+    <!-- Обводка монеты -->
+    <circle cx="128" cy="128" r="116" fill="none" stroke="#B8860B" stroke-width="8"/>
+    
+    <!-- Буква N -->
+    <path d="M78 76 L78 180 L98 180 L158 96 L158 180 L178 180 L178 76 L158 76 L98 160 L98 76 Z" 
+          fill="#B8860B"/>
+</svg> 

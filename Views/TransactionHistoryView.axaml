@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:models="using:NekitCoinsManager.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NekitCoinsManager.Views.TransactionHistoryView"
+             x:DataType="vm:TransactionHistoryViewModel">
+    
+    <StackPanel Margin="{StaticResource CardPadding}">
+        <TextBlock Text="Transaction History" 
+                  Classes="header"/>
+                   
+        <ItemsControl ItemsSource="{Binding Transactions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:Transaction">
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Text="{Binding FromUser.Username, StringFormat='From: {0}'}"
+                                      Classes="username"/>
+                            <TextBlock Text="{Binding ToUser.Username, StringFormat='To: {0}'}"/>
+                            <TextBlock Text="{Binding Amount, StringFormat='Amount: {0} NekitCoins'}"
+                                      FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding Comment}"
+                                      IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                      Opacity="0.7"/>
+                            <TextBlock Text="{Binding CreatedAt, StringFormat='Date: {0:g}'}"
+                                      Opacity="0.7"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl> 

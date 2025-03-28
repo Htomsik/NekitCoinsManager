@@ -1,0 +1,13 @@
+ 
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+**/wwwroot/lib
+**/wwwroot/lib-*
+**/wwwroot/css
+/.idea/
+*.idea/
+logs/
+*.db*

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:NekitCoinsManager.Views"
+        xmlns:vm="clr-namespace:NekitCoinsManager.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NekitCoinsManager.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/app-icon.png"
+        Title="NekitCoins Manager"
+        Background="#121212"
+        MinWidth="800"
+        MinHeight="600">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Верхняя панель - управление пользователями -->
+        <views:UserManagementView Grid.Row="0" 
+                                DataContext="{Binding UserManagementViewModel}"
+                                Margin="10"/>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="10,0,10,10">
+            <!-- Левая панель - перевод монет -->
+            <views:TransferView Grid.Column="0" 
+                               Margin="0,0,5,0"
+                               DataContext="{Binding TransferViewModel}"/>
+
+            <!-- Правая панель - история транзакций -->
+            <views:TransactionHistoryView Grid.Column="1" 
+                                        Margin="5,0,0,0"
+                                        DataContext="{Binding TransactionHistoryViewModel}"/>
+        </Grid>
+    </Grid>
+</Window>

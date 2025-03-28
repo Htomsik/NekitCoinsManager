@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:models="using:NekitCoinsManager.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
+             x:Class="NekitCoinsManager.Views.UserManagementView"
+             x:DataType="vm:UserManagementViewModel">
+
+    <Border Classes="card" Padding="10">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <!-- Заголовок -->
+            <TextBlock Grid.Column="0"
+                      Text="Users"
+                      VerticalAlignment="Center"
+                      Classes="header"/>
+
+            <!-- Список пользователей -->
+            <ItemsControl Grid.Column="1"
+                         ItemsSource="{Binding Users}"
+                         Margin="20,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="card" Margin="5" Padding="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" 
+                                          Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Username}"
+                                             Classes="username"/>
+                                    <TextBlock Text="{Binding Balance, StringFormat=' ({0} NC)'}"
+                                             Classes="balance"/>
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                       Margin="10,0,0,0"
+                                       Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
+                                       CommandParameter="{Binding}"
+                                       Classes="icon"
+                                       ToolTip.Tip="Delete User">
+                                    <PathIcon Data="{StaticResource delete_regular}"
+                                            Width="16"
+                                            Height="16"/>
+                                </Button>
+                            </Grid>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Delete"
+                                             Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
+                                             CommandParameter="{Binding}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{StaticResource delete_regular}"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Форма добавления пользователя -->
+            <StackPanel Grid.Column="2" 
+                        Orientation="Horizontal"
+                        Spacing="10">
+                <TextBox Text="{Binding NewUsername}"
+                         Watermark="Username"
+                         Width="150"/>
+                <Button Command="{Binding AddUserCommand}"
+                        Content="Add User"
+                        Classes="action"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl> 
