@@ -19,19 +19,25 @@
         <Menu Grid.Row="0" Background="#1E1E1E">
             <MenuItem Header="_Users">
                 <MenuItem Header="Регистрация"
-                          Command="{Binding ShowRegistrationCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.Registration}"/>
                 <MenuItem Header="Авторизация"
-                          Command="{Binding ShowLoginCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.Login}"/>
                 <MenuItem Header="Пользователи"
-                          Command="{Binding ShowUserManagementCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.UserManagement}"/>
                 <MenuItem Header="Моя карточка"
-                          Command="{Binding ShowUserCardCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.UserCard}"/>
             </MenuItem>
             <MenuItem Header="_Transactions">
                 <MenuItem Header="Перевод"
-                          Command="{Binding ShowTransactionCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.Transaction}"/>
                 <MenuItem Header="История"
-                          Command="{Binding ShowTransactionHistoryCommand}"/>
+                          Command="{Binding NavigateCommand}"
+                          CommandParameter="{x:Static vm:ViewType.TransactionHistory}"/>
             </MenuItem>
         </Menu>
 

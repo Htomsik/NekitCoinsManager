@@ -2,12 +2,24 @@
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
+using System.Collections.Generic;
 
 namespace NekitCoinsManager.ViewModels;
+
+public enum ViewType
+{
+    Login,
+    Registration,
+    UserManagement,
+    Transaction,
+    TransactionHistory,
+    UserCard
+}
 
 public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
 {
     private readonly IAuthService _authService;
+    private readonly Dictionary<ViewType, object> _viewModels;
 
     [ObservableProperty]
     private UserLoginViewModel _loginViewModel;
@@ -49,8 +61,18 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
         UserRegistrationViewModel = userRegistrationViewModel;
         UserCardViewModel = userCardViewModel;
 
+        _viewModels = new Dictionary<ViewType, object>
+        {
+            { ViewType.Login, LoginViewModel },
+            { ViewType.Registration, UserRegistrationViewModel },
+            { ViewType.UserManagement, UserManagementViewModel },
+            { ViewType.Transaction, TransactionViewModel },
+            { ViewType.TransactionHistory, TransactionHistoryViewModel },
+            { ViewType.UserCard, UserCardViewModel }
+        };
+
         // Устанавливаем начальную view
-        CurrentView = UserRegistrationViewModel;
+        NavigateTo(ViewType.Login);
     }
 
     public void OnAuthStateChanged(User? user)
@@ -58,41 +80,16 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
         // В будущем здесь может быть дополнительная логика
     }
 
-    [RelayCommand]
-    private void ShowLogin()
+    private void NavigateTo(ViewType viewType)
     {
-        CurrentView = LoginViewModel;
+        if (_viewModels.TryGetValue(viewType, out var view))
+        {
+            CurrentView = view;
+        }
     }
 
     [RelayCommand]
-    private void ShowRegistration()
-    {
-        CurrentView = UserRegistrationViewModel;
-    }
-
-    [RelayCommand]
-    private void ShowUserManagement()
-    {
-        CurrentView = UserManagementViewModel;
-    }
-
-    [RelayCommand]
-    private void ShowTransaction()
-    {
-        CurrentView = TransactionViewModel;
-    }
-
-    [RelayCommand]
-    private void ShowTransactionHistory()
-    {
-        CurrentView = TransactionHistoryViewModel;
-    }
-
-    [RelayCommand]
-    private void ShowUserCard()
-    {
-        CurrentView = UserCardViewModel;
-    }
+    private void Navigate(ViewType viewType) => NavigateTo(viewType);
 
     [RelayCommand]
     private void Logout()
