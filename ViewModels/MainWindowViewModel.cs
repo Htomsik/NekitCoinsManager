@@ -17,7 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     private UserLoginViewModel _loginViewModel;
 
     [ObservableProperty]
-    private TransferViewModel _transferViewModel;
+    private TransactionViewModel _transactionViewModel;
 
     [ObservableProperty]
     private TransactionHistoryViewModel _transactionHistoryViewModel;
@@ -34,7 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     public MainWindowViewModel(
         IAuthService authService,
         UserLoginViewModel loginViewModel,
-        TransferViewModel transferViewModel,
+        TransactionViewModel transactionViewModel,
         TransactionHistoryViewModel transactionHistoryViewModel,
         UserManagementViewModel userManagementViewModel,
         UserRegistrationViewModel userRegistrationViewModel)
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
         _authService.Subscribe(this);
 
         LoginViewModel = loginViewModel;
-        TransferViewModel = transferViewModel;
+        TransactionViewModel = transactionViewModel;
         TransactionHistoryViewModel = transactionHistoryViewModel;
         UserManagementViewModel = userManagementViewModel;
         UserRegistrationViewModel = userRegistrationViewModel;
@@ -76,9 +76,9 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     }
 
     [RelayCommand]
-    private void ShowTransfer()
+    private void ShowTransaction()
     {
-        CurrentView = TransferViewModel;
+        CurrentView = TransactionViewModel;
     }
 
     [RelayCommand]

@@ -27,7 +27,7 @@
             </MenuItem>
             <MenuItem Header="_Transactions">
                 <MenuItem Header="Перевод"
-                          Command="{Binding ShowTransferCommand}"/>
+                          Command="{Binding ShowTransactionCommand}"/>
                 <MenuItem Header="История"
                           Command="{Binding ShowTransactionHistoryCommand}"/>
             </MenuItem>

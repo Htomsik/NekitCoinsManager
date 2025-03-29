@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Data;
 using NekitCoinsManager.Services;
@@ -9,21 +10,21 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // DbContext
-        services.AddSingleton<AppDbContext>();
-
-        // Services
+        // Регистрируем сервисы как Singleton
+        services.AddSingleton<IAuthService, AuthService>();
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ITransactionService, TransactionService>();
-        services.AddSingleton<IAuthService, AuthService>();
 
-        // ViewModels
+        // Регистрируем ViewModels
         services.AddSingleton<MainWindowViewModel>();
         services.AddTransient<UserLoginViewModel>();
-        services.AddTransient<UserRegistrationViewModel>();
-        services.AddTransient<UserManagementViewModel>();
-        services.AddTransient<TransferViewModel>();
+        services.AddTransient<TransactionViewModel>();
         services.AddTransient<TransactionHistoryViewModel>();
+        services.AddTransient<UserManagementViewModel>();
+        services.AddTransient<UserRegistrationViewModel>();
+
+        // Регистрируем DbContext как Singleton
+        services.AddSingleton<AppDbContext>();
 
         return services;
     }
