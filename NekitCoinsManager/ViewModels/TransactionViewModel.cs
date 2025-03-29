@@ -47,12 +47,12 @@ public partial class TransactionViewModel : ViewModelBase
         _transactionHistory.ShowAllTransactions = false;
         
         LoadCurrentUser();
-        LoadUsers();
+        LoadUsersAsync();
     }
 
-    private void LoadUsers()
+    private async void LoadUsersAsync()
     {
-        var allUsers = _userService.GetUsers();
+        var allUsers = await _userService.GetUsersAsync();
         // Исключаем текущего пользователя из списка получателей
         Users = new ObservableCollection<User>(
             allUsers.Where(u => u.Id != CurrentUser?.Id)
@@ -110,6 +110,6 @@ public partial class TransactionViewModel : ViewModelBase
         _notificationService.ShowSuccess("Перевод выполнен успешно");
 
         // Обновляем список пользователей для отображения новых балансов
-        LoadUsers();
+        LoadUsersAsync();
     }
 } 

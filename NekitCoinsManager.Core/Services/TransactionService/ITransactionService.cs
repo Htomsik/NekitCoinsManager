@@ -11,7 +11,7 @@ public interface ITransactionObserver
 
 public interface ITransactionService
 {
-    IEnumerable<Transaction> GetTransactions();
+    Task<IEnumerable<Transaction>> GetTransactionsAsync();
     Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction);
     void Subscribe(ITransactionObserver observer);
 } 

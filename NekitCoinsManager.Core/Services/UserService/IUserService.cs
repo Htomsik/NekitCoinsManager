@@ -11,10 +11,8 @@ public interface IUserObserver
 
 public interface IUserService
 {
-    IEnumerable<User> GetUsers();
-    User? GetUserByUsername(string username);
-    User? GetCurrentUser();
-    void SetCurrentUser(User? user);
+    Task<IEnumerable<User>> GetUsersAsync();
+    Task<User?> GetUserByUsernameAsync(string username);
     Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
     Task<(bool success, string? error)> DeleteUserAsync(int userId);
     Task UpdateUserBalance(int userId, decimal newBalance);

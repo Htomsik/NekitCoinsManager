@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
@@ -26,12 +27,12 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
     {
         _transactionService = transactionService;
         _transactionService.Subscribe(this);
-        LoadTransactions();
+        LoadTransactionsAsync();
     }
 
-    private void LoadTransactions()
+    private async void LoadTransactionsAsync()
     {
-        var allTransactions = _transactionService.GetTransactions();
+        var allTransactions = await _transactionService.GetTransactionsAsync();
         
         if (!ShowAllTransactions && (FirstUser != null || SecondUser != null))
         {
@@ -47,13 +48,13 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
     private static bool IsUserInvolved(User? user, Transaction transaction) =>
         user == null || transaction.FromUserId == user.Id || transaction.ToUserId == user.Id;
 
-    public void OnTransactionsChanged() => LoadTransactions();
+    public void OnTransactionsChanged() => LoadTransactionsAsync();
 
-    partial void OnShowAllTransactionsChanged(bool value) => LoadTransactions();
+    partial void OnShowAllTransactionsChanged(bool value) => LoadTransactionsAsync();
 
-    partial void OnFirstUserChanged(User? value) => LoadTransactions();
+    partial void OnFirstUserChanged(User? value) => LoadTransactionsAsync();
 
-    partial void OnSecondUserChanged(User? value) => LoadTransactions();
+    partial void OnSecondUserChanged(User? value) => LoadTransactionsAsync();
 
     public void SetUsersForFiltering(User? first, User? second)
     {

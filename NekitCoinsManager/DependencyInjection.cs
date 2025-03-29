@@ -9,13 +9,15 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // Регистрируем сервисы как Singleton
+        // Регистрируем сервисы как Transient
+        services.AddTransient<IUserService, UserService>();
+        services.AddTransient<IPasswordHasherService, PasswordHasherService>();
+
+        // Регистрируем сервисы как Singleton (требуют сохранения состояния)
         services.AddSingleton<IAuthService, AuthService>();
-        services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ITransactionService, TransactionService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         services.AddSingleton<INotificationService, NotificationService>();
-        services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
 
         // Регистрируем ViewModels
         services.AddSingleton<MainWindowViewModel>();

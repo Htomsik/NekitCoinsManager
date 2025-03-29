@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPasswordHasherService _passwordHasher;
     private readonly List<IAuthObserver> _observers = new();
@@ -16,11 +14,11 @@ public class AuthService : IAuthService
     public bool IsAuthenticated => _currentUserService.CurrentUser != null;
 
     public AuthService(
-        AppDbContext dbContext, 
+        IUserService userService,
         ICurrentUserService currentUserService,
         IPasswordHasherService passwordHasher)
     {
-        _dbContext = dbContext;
+        _userService = userService;
         _currentUserService = currentUserService;
         _passwordHasher = passwordHasher;
     }
@@ -37,9 +35,7 @@ public class AuthService : IAuthService
             return (false, "Введите пароль");
         }
 
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username == username);
-
+        var user = await _userService.GetUserByUsernameAsync(username);
         if (user == null)
         {
             return (false, "Неверное имя пользователя или пароль");
