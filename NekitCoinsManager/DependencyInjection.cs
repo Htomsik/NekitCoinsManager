@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddSingleton<ITransactionService, TransactionService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
 
         // Регистрируем ViewModels
         services.AddSingleton<MainWindowViewModel>();

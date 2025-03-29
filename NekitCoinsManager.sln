@@ -1,8 +1,8 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager", "NekitCoinsManager.csproj", "{E32210DE-4936-ADB8-AA33-49EACF13351C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager", "NekitCoinsManager\NekitCoinsManager.csproj", "{C37971F0-6D58-4A4D-9E59-785B761C9C96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.Core", "NekitCoinsManager.Core\NekitCoinsManager.Core.csproj", "{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,15 +10,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E32210DE-4936-ADB8-AA33-49EACF13351C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E32210DE-4936-ADB8-AA33-49EACF13351C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E32210DE-4936-ADB8-AA33-49EACF13351C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E32210DE-4936-ADB8-AA33-49EACF13351C}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {146E7433-3AC4-431A-BD5D-CA349974A37F}
+		{C37971F0-6D58-4A4D-9E59-785B761C9C96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C37971F0-6D58-4A4D-9E59-785B761C9C96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C37971F0-6D58-4A4D-9E59-785B761C9C96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C37971F0-6D58-4A4D-9E59-785B761C9C96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
