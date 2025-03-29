@@ -1,10 +1,9 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Models;
-using NekitCoinsManager.Services;
+using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

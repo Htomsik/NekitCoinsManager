@@ -1,8 +1,7 @@
-using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Services;
+using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

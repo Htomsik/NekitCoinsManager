@@ -9,7 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
@@ -23,9 +22,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.14"/>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
-        <PackageReference Include="EntityFramework" Version="6.5.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,5 +35,9 @@
       <Compile Update="Views\TransactionView.axaml.cs">
         <DependentUpon>TransactionView.axaml</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NekitCoinsManager.Core\NekitCoinsManager.Core.csproj" />
     </ItemGroup>
 </Project>

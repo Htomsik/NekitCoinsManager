@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using NekitCoinsManager.Models;
-using NekitCoinsManager.Services;
+using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

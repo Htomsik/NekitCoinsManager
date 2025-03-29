@@ -1,7 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NekitCoinsManager.Data;
-using NekitCoinsManager.Services;
+using NekitCoinsManager.Core.Data;
+using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager;

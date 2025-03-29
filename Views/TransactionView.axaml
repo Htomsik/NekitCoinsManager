@@ -4,7 +4,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
-             xmlns:models="using:NekitCoinsManager.Models"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
              x:Class="NekitCoinsManager.Views.TransactionView"
              x:DataType="vm:TransactionViewModel">
