@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddSingleton<IAuthService, AuthService>();
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddSingleton<ICurrentUserService, CurrentUserService>();
 
         // Регистрируем ViewModels
         services.AddSingleton<MainWindowViewModel>();
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<UserRegistrationViewModel>();
+        services.AddTransient<UserCardViewModel>();
 
         // Регистрируем DbContext как Singleton
         services.AddSingleton<AppDbContext>();

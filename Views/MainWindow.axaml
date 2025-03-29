@@ -24,6 +24,8 @@
                           Command="{Binding ShowLoginCommand}"/>
                 <MenuItem Header="Пользователи"
                           Command="{Binding ShowUserManagementCommand}"/>
+                <MenuItem Header="Моя карточка"
+                          Command="{Binding ShowUserCardCommand}"/>
             </MenuItem>
             <MenuItem Header="_Transactions">
                 <MenuItem Header="Перевод"

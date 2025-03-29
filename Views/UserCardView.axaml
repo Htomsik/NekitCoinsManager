@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NekitCoinsManager.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NekitCoinsManager.Views.UserCardView"
+        x:DataType="vm:UserCardViewModel">
+
+    <Border Classes="card">
+        <StackPanel Spacing="10">
+            <!-- Заголовок -->
+            <TextBlock Text="Информация о пользователе" 
+                      Classes="header"
+                      HorizontalAlignment="Center"/>
+
+            <!-- Информация о пользователе -->
+            <Grid RowDefinitions="Auto,Auto,Auto" 
+                  ColumnDefinitions="Auto,*"
+                  Margin="10">
+                
+                <!-- Имя пользователя -->
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                          Text="Имя пользователя:"
+                          Classes="username"
+                          VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="1"
+                          Text="{Binding CurrentUser.Username}"
+                          Classes="input"
+                          VerticalAlignment="Center"/>
+
+                <!-- ID -->
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                          Text="ID:"
+                          Classes="username"
+                          VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="1" Grid.Column="1"
+                          Text="{Binding CurrentUser.Id}"
+                          Classes="input"
+                          VerticalAlignment="Center"/>
+
+                <!-- Баланс -->
+                <TextBlock Grid.Row="2" Grid.Column="0"
+                          Text="Баланс:"
+                          Classes="username"
+                          VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="2" Grid.Column="1"
+                          Text="{Binding CurrentUser.Balance}"
+                          Classes="input"
+                          VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- Сообщение об ошибке -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                      Classes="error"
+                      HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</UserControl> 

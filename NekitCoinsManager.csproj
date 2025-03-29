@@ -35,6 +35,9 @@
       <Compile Update="Views\TransactionView.axaml.cs">
         <DependentUpon>TransactionView.axaml</DependentUpon>
       </Compile>
+      <Compile Update="Views\UserCardView.axaml.cs">
+        <DependentUpon>UserCardView.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

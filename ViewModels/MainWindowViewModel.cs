@@ -25,6 +25,9 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     private UserRegistrationViewModel _userRegistrationViewModel;
 
     [ObservableProperty]
+    private UserCardViewModel _userCardViewModel;
+
+    [ObservableProperty]
     private object _currentView;
 
     public MainWindowViewModel(
@@ -33,7 +36,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
         TransactionViewModel transactionViewModel,
         TransactionHistoryViewModel transactionHistoryViewModel,
         UserManagementViewModel userManagementViewModel,
-        UserRegistrationViewModel userRegistrationViewModel)
+        UserRegistrationViewModel userRegistrationViewModel,
+        UserCardViewModel userCardViewModel)
     {
         _authService = authService;
         _authService.Subscribe(this);
@@ -43,6 +47,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
         TransactionHistoryViewModel = transactionHistoryViewModel;
         UserManagementViewModel = userManagementViewModel;
         UserRegistrationViewModel = userRegistrationViewModel;
+        UserCardViewModel = userCardViewModel;
 
         // Устанавливаем начальную view
         CurrentView = UserRegistrationViewModel;
@@ -81,6 +86,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     private void ShowTransactionHistory()
     {
         CurrentView = TransactionHistoryViewModel;
+    }
+
+    [RelayCommand]
+    private void ShowUserCard()
+    {
+        CurrentView = UserCardViewModel;
     }
 
     [RelayCommand]
