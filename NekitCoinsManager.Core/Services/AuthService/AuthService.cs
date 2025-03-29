@@ -10,14 +10,19 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _dbContext;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IPasswordHasherService _passwordHasher;
     private readonly List<IAuthObserver> _observers = new();
 
     public bool IsAuthenticated => _currentUserService.CurrentUser != null;
 
-    public AuthService(AppDbContext dbContext, ICurrentUserService currentUserService)
+    public AuthService(
+        AppDbContext dbContext, 
+        ICurrentUserService currentUserService,
+        IPasswordHasherService passwordHasher)
     {
         _dbContext = dbContext;
         _currentUserService = currentUserService;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<(bool success, string? error)> LoginAsync(string username, string password)
@@ -36,6 +41,11 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.Username == username);
 
         if (user == null)
+        {
+            return (false, "Неверное имя пользователя или пароль");
+        }
+
+        if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
             return (false, "Неверное имя пользователя или пароль");
         }
