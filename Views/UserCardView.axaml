@@ -15,46 +15,37 @@
             
             <!-- Информация о пользователе -->
             <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto" 
-                  ColumnDefinitions="Auto,*"
-                  Margin="10">
+                  ColumnDefinitions="Auto,*">
                 
                 <!-- Имя пользователя -->
                 <TextBlock Grid.Row="0" Grid.Column="0"
                           Text="Имя пользователя:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
+                          Classes="username"/>
                 <TextBlock Grid.Row="0" Grid.Column="1"
                           Text="{Binding CurrentUser.Username}"
-                          Classes="input"
-                          VerticalAlignment="Center"/>
+                          Classes="balance"/>
 
                 <!-- ID -->
                 <TextBlock Grid.Row="1" Grid.Column="0"
                           Text="ID:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
+                          Classes="username"/>
                 <TextBlock Grid.Row="1" Grid.Column="1"
                           Text="{Binding CurrentUser.Id}"
-                          Classes="input"
-                          VerticalAlignment="Center"/>
+                          Classes="balance"/>
 
                 <!-- Баланс -->
                 <TextBlock Grid.Row="2" Grid.Column="0"
                           Text="Баланс:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
+                          Classes="username"/>
                 <TextBlock Grid.Row="2" Grid.Column="1"
                           Text="{Binding CurrentUser.Balance}"
-                          Classes="input"
-                          VerticalAlignment="Center"/>
+                          Classes="balance"/>
 
                 <!-- Кнопка выхода -->
                 <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                         Content="Выйти"
                         Command="{Binding LogoutCommand}"
-                        Classes="action"
-                        HorizontalAlignment="Center"
-                        Margin="0,10,0,0"/>
+                        Classes="action"/>
             </Grid>
         </Grid>
     </Border>

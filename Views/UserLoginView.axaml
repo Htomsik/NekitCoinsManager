@@ -4,46 +4,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
              x:Class="NekitCoinsManager.Views.UserLoginView"
              x:DataType="vm:UserLoginViewModel">
 
-    <Border Classes="card">
+    <Border Classes="auth-card">
         <Grid RowDefinitions="Auto,*">
             <!-- Заголовок -->
-            <TextBlock Grid.Column="0" Text="Авторизация" Classes="header"/>
+            <TextBlock Grid.Row="0" Text="Авторизация" Classes="auth-header"/>
             
             <!-- Форма входа -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto" 
-                  ColumnDefinitions="Auto,*"
-                  Margin="10">
-                
+            <StackPanel Grid.Row="1" Spacing="15">
                 <!-- Имя пользователя -->
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                          Text="Username:"
-                          Classes="username"/>
-                <TextBox Grid.Row="0" Grid.Column="1"
-                         Text="{Binding Username}"
-                         Watermark="Enter username"
-                         Classes="input"/>
+                <TextBox Text="{Binding Username}"
+                        Watermark="Имя пользователя"
+                        Classes="auth-input"/>
 
                 <!-- Пароль -->
-                <TextBlock Grid.Row="1" Grid.Column="0"
-                          Text="Password:"
-                          Classes="username"/>
-                <TextBox Grid.Row="1" Grid.Column="1"
-                         Text="{Binding Password}"
-                         PasswordChar="*"
-                         Watermark="Enter password"
-                         Classes="input"/>
+                <TextBox Text="{Binding Password}"
+                        PasswordChar="*"
+                        Watermark="Пароль"
+                        Classes="auth-input"/>
 
                 <!-- Кнопка входа -->
-                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Login"
+                <Button Content="Войти"
                         Command="{Binding LoginCommand}"
-                        Classes="action"
-                        HorizontalAlignment="Center"/>
-            </Grid>
+                        Classes="action"/>
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl> 

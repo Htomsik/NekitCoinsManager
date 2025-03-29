@@ -10,54 +10,52 @@
 
     <Grid ColumnDefinitions="400,*">
         <!-- Форма перевода -->
-        <Border Grid.Column="0" Classes="card">
+        <Border Grid.Column="0" Classes="transfer-form">
             <Grid RowDefinitions="Auto,*">
                 <!-- Заголовок -->
-                <TextBlock Grid.Column="0" Text="Перевод монет" Classes="header"/>
+                <TextBlock Grid.Row="0" Text="Перевод монет" Classes="header"/>
                 
                 <!-- Форма перевода -->
-                <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto" 
-                      ColumnDefinitions="Auto,*"
-                      Margin="10">
-                    
+                <StackPanel Grid.Row="1" Spacing="16">
                     <!-- Получатель -->
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                              Text="Получатель:"
-                              Classes="username"/>
-                    <ComboBox Grid.Row="0" Grid.Column="1"
-                             ItemsSource="{Binding Users}"
-                             SelectedItem="{Binding SelectedRecipient}"
-                             Classes="input">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Username}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Получатель" Classes="form-label"/>
+                        <ComboBox ItemsSource="{Binding Users}"
+                                 SelectedItem="{Binding SelectedRecipient}"
+                                 Classes="transfer-input"
+                                 HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Username}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
 
                     <!-- Сумма -->
-                    <TextBlock Grid.Row="1" Grid.Column="0"
-                              Text="Сумма:"
-                              Classes="username"/>
-                    <TextBox Grid.Row="1" Grid.Column="1"
-                             Text="{Binding NewTransaction.Amount}"
-                             Classes="input"/>
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Сумма" Classes="form-label"/>
+                        <TextBox Text="{Binding NewTransaction.Amount}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
 
                     <!-- Комментарий -->
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                              Text="Комментарий:"
-                              Classes="username"/>
-                    <TextBox Grid.Row="2" Grid.Column="1"
-                             Text="{Binding NewTransaction.Comment}"
-                             Classes="input"/>
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Комментарий" Classes="form-label"/>
+                        <TextBox Text="{Binding NewTransaction.Comment}"
+                                Classes="transfer-input"
+                                Height="80"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
 
                     <!-- Кнопка отправки -->
-                    <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                            Content="Отправить"
+                    <Button Content="Отправить"
                             Command="{Binding TransferCommand}"
-                            Classes="action"
-                            HorizontalAlignment="Center"/>
-                </Grid>
+                            Classes="action"/>
+                </StackPanel>
             </Grid>
         </Border>
 

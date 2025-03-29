@@ -4,56 +4,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
              x:Class="NekitCoinsManager.Views.UserRegistrationView"
              x:DataType="vm:UserRegistrationViewModel">
 
-    <Border Classes="card">
+    <Border Classes="auth-card">
         <Grid RowDefinitions="Auto,*">
             <!-- Заголовок -->
-            <TextBlock Grid.Column="0" Text="Регистрация" Classes="header"/>
+            <TextBlock Grid.Row="0" Text="Регистрация" Classes="auth-header"/>
             
             <!-- Форма регистрации -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
-                  ColumnDefinitions="Auto,*"
-                  Margin="10">
-                
+            <StackPanel Grid.Row="1" Spacing="15">
                 <!-- Имя пользователя -->
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                          Text="Username:"
-                          Classes="username"/>
-                <TextBox Grid.Row="0" Grid.Column="1"
-                         Text="{Binding Username}"
-                         Watermark="Enter username"
-                         Classes="input"/>
+                <TextBox Text="{Binding Username}"
+                        Watermark="Имя пользователя"
+                        Classes="auth-input"/>
 
                 <!-- Пароль -->
-                <TextBlock Grid.Row="1" Grid.Column="0"
-                          Text="Password:"
-                          Classes="username"/>
-                <TextBox Grid.Row="1" Grid.Column="1"
-                         Text="{Binding Password}"
-                         PasswordChar="*"
-                         Watermark="Enter password"
-                         Classes="input"/>
+                <TextBox Text="{Binding Password}"
+                        PasswordChar="*"
+                        Watermark="Пароль"
+                        Classes="auth-input"/>
 
                 <!-- Подтверждение пароля -->
-                <TextBlock Grid.Row="2" Grid.Column="0"
-                          Text="Confirm Password:"
-                          Classes="username"/>
-                <TextBox Grid.Row="2" Grid.Column="1"
-                         Text="{Binding ConfirmPassword}"
-                         PasswordChar="*"
-                         Watermark="Confirm password"
-                         Classes="input"/>
+                <TextBox Text="{Binding ConfirmPassword}"
+                        PasswordChar="*"
+                        Watermark="Повторите пароль"
+                        Classes="auth-input"/>
 
                 <!-- Кнопка регистрации -->
-                <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Register"
+                <Button Content="Зарегистрироваться"
                         Command="{Binding RegisterCommand}"
-                        Classes="action"
-                        HorizontalAlignment="Center"/>
-            </Grid>
+                        Classes="action"/>
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl> 

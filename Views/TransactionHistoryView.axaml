@@ -41,11 +41,9 @@
                                         </Grid>
                                         <TextBlock Text="{Binding Comment}"
                                                   IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                                  FontSize="12"
-                                                  Opacity="0.7"/>
+                                                  Classes="transaction-comment"/>
                                         <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd.MM.yyyy}}"
-                                                  FontSize="11"
-                                                  Opacity="0.7"/>
+                                                  Classes="transaction-date"/>
                                     </StackPanel>
 
                                     <!-- Сумма -->
