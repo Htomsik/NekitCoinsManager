@@ -5,21 +5,17 @@ using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class UserCardViewModel : ViewModelBase
+public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IAuthService _authService;
     
     [ObservableProperty]
     private User? _currentUser;
-    
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
 
-    public UserCardViewModel(ICurrentUserService currentUserService, IAuthService authService)
+    public UserMiniCardViewModel(ICurrentUserService currentUserService, ITransactionService transactionService)
     {
         _currentUserService = currentUserService;
-        _authService = authService;
+        _currentUserService.Subscribe(this);
         LoadCurrentUser();
     }
 
@@ -28,9 +24,9 @@ public partial class UserCardViewModel : ViewModelBase
         CurrentUser = _currentUserService.CurrentUser;
     }
 
-    [RelayCommand]
-    private void Logout()
+    public void OnCurrentUserChanged()
     {
-        _authService.Logout();
+        LoadCurrentUser();
     }
+    
 } 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:converters="clr-namespace:NekitCoinsManager.Converters"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="40"
+             x:Class="NekitCoinsManager.Views.UserMiniCardView"
+             x:DataType="vm:UserMiniCardViewModel">
+    
+    <UserControl.Resources>
+        <converters:FirstLetterConverter x:Key="FirstLetterConverter"/>
+    </UserControl.Resources>
+    
+    <Border Classes="card">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <!-- Аватар пользователя -->
+            <Border Grid.Column="0"
+                    Classes="user-avatar">
+                <TextBlock Text="{Binding CurrentUser.Username, Converter={StaticResource FirstLetterConverter}}"
+                           Classes="avatar-letter"/>
+            </Border>
+            
+            <!-- Информация о пользователе -->
+            <StackPanel Grid.Column="1" Margin="8,0" Spacing="2">
+                <TextBlock Text="{Binding CurrentUser.Username}"
+                         Classes="username"
+                         FontSize="14"/>
+                <TextBlock Text="{Binding CurrentUser.Balance, StringFormat='{}{0} NC'}"
+                         Foreground="#78B159"
+                         FontSize="12"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl> 

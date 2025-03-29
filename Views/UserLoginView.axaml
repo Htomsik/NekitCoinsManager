@@ -9,14 +9,12 @@
              x:DataType="vm:UserLoginViewModel">
 
     <Border Classes="card">
-        <StackPanel Spacing="10">
+        <Grid RowDefinitions="Auto,*">
             <!-- Заголовок -->
-            <TextBlock Text="Login"
-                      Classes="header"
-                      HorizontalAlignment="Center"/>
-
+            <TextBlock Grid.Column="0" Text="Авторизация" Classes="header"/>
+            
             <!-- Форма входа -->
-            <Grid RowDefinitions="Auto,Auto,Auto" 
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto" 
                   ColumnDefinitions="Auto,*"
                   Margin="10">
                 
@@ -51,6 +49,6 @@
             <TextBlock Text="{Binding ErrorMessage}"
                       Classes="error"
                       HorizontalAlignment="Center"/>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl> 

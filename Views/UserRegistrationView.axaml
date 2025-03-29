@@ -8,15 +8,13 @@
              x:Class="NekitCoinsManager.Views.UserRegistrationView"
              x:DataType="vm:UserRegistrationViewModel">
 
-    <Border Classes="card" Padding="20">
-        <StackPanel Spacing="10">
+    <Border Classes="card">
+        <Grid RowDefinitions="Auto,*">
             <!-- Заголовок -->
-            <TextBlock Text="User Registration"
-                      Classes="header"
-                      HorizontalAlignment="Center"/>
-
+            <TextBlock Grid.Column="0" Text="Регистрация" Classes="header"/>
+            
             <!-- Форма регистрации -->
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
                   ColumnDefinitions="Auto,*"
                   Margin="10">
                 
@@ -61,6 +59,6 @@
             <TextBlock Text="{Binding ErrorMessage}"
                       Classes="error"
                       HorizontalAlignment="Center"/>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl> 

@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="NekitCoinsManager.App"
              xmlns:local="using:NekitCoinsManager"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
@@ -13,8 +13,10 @@
         <ResourceDictionary>
             <Thickness x:Key="StandardMargin">0,0,0,10</Thickness>
             <Thickness x:Key="CardPadding">10</Thickness>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Icons.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-        <StreamGeometry x:Key="delete_regular">M18.444 3.5H29.5v2h-2.056v23.19a2.81 2.81 0 0 1-2.806 2.81H11.362a2.81 2.81 0 0 1-2.806-2.81V5.5H6.5v-2h11.056V2a1 1 0 0 1 1-1h4.888a1 1 0 0 1 1 1v1.5zM10.556 5.5v23.19a.81.81 0 0 0 .806.81h13.276a.81.81 0 0 0 .806-.81V5.5H10.556zM19.444 3V2h-2.888v1h2.888zM17.5 11v12h-2V11h2zm5 0v12h-2V11h2z</StreamGeometry>
     </Application.Resources>
              
     <Application.Styles>

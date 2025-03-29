@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserCardViewModel>();
+        services.AddTransient<UserMiniCardViewModel>();
 
         // Регистрируем DbContext как Singleton
         services.AddSingleton<AppDbContext>();

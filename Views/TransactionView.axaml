@@ -4,69 +4,71 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="NekitCoinsManager.Views.TransactionView"
              x:DataType="vm:TransactionViewModel">
 
-    <Border Classes="card">
-        <StackPanel Spacing="10">
-            <!-- Заголовок -->
-            <TextBlock Text="Перевод монет"
-                      Classes="header"
-                      HorizontalAlignment="Center"/>
-
-            <!-- Форма перевода -->
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
-                  ColumnDefinitions="Auto,*"
-                  Margin="10">
+    <Grid ColumnDefinitions="400,*">
+        <!-- Форма перевода -->
+        <Border Grid.Column="0" Classes="card">
+            <Grid RowDefinitions="Auto,*">
+                <!-- Заголовок -->
+                <TextBlock Grid.Column="0" Text="Перевод монет" Classes="header"/>
                 
-                <!-- Отправитель -->
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                          Text="От:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
-                <ComboBox Grid.Row="0" Grid.Column="1"
-                         ItemsSource="{Binding Users}"
-                         SelectedItem="{Binding NewTransaction.FromUser}"
-                         DisplayMemberBinding="{Binding Username}"
-                         Classes="input"
-                         HorizontalAlignment="Stretch"/>
+                <!-- Форма перевода -->
+                <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                      ColumnDefinitions="Auto,*"
+                      Margin="10">
+                    
+                    <!-- Получатель -->
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                              Text="Получатель:"
+                              Classes="username"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+                             ItemsSource="{Binding Users}"
+                             SelectedItem="{Binding SelectedRecipient}"
+                             Classes="input">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Username}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                <!-- Получатель -->
-                <TextBlock Grid.Row="1" Grid.Column="0"
-                          Text="Кому:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
-                <ComboBox Grid.Row="1" Grid.Column="1"
-                         ItemsSource="{Binding Users}"
-                         SelectedItem="{Binding NewTransaction.ToUser}"
-                         DisplayMemberBinding="{Binding Username}"
-                         Classes="input"
-                         HorizontalAlignment="Stretch"/>
+                    <!-- Сумма -->
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                              Text="Сумма:"
+                              Classes="username"/>
+                    <TextBox Grid.Row="1" Grid.Column="1"
+                             Text="{Binding NewTransaction.Amount}"
+                             Classes="input"/>
 
-                <!-- Сумма -->
-                <TextBlock Grid.Row="2" Grid.Column="0"
-                          Text="Сумма:"
-                          Classes="username"
-                          VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="1"
-                         Text="{Binding NewTransaction.Amount}"
-                         Watermark="Введите сумму"
-                         Classes="input"/>
+                    <!-- Комментарий -->
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                              Text="Комментарий:"
+                              Classes="username"/>
+                    <TextBox Grid.Row="2" Grid.Column="1"
+                             Text="{Binding NewTransaction.Comment}"
+                             Classes="input"/>
 
-                <!-- Кнопка перевода -->
-                <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Перевести"
-                        Command="{Binding TransferCommand}"
-                        Classes="action"
-                        HorizontalAlignment="Center"
-                        Margin="0,10,0,0"/>
+                    <!-- Кнопка отправки -->
+                    <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                            Content="Отправить"
+                            Command="{Binding TransferCommand}"
+                            Classes="action"
+                            HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Сообщения об ошибках -->
+                <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}"
+                          Classes="error"
+                          HorizontalAlignment="Center"/>
             </Grid>
+        </Border>
 
-            <!-- Сообщения об ошибках -->
-            <TextBlock Text="{Binding ErrorMessage}"
-                      Classes="error"
-                      HorizontalAlignment="Center"/>
-        </StackPanel>
-    </Border>
+        <!-- История транзакций -->
+        <ContentControl Grid.Column="1" 
+                       Content="{Binding TransactionHistory}"
+                       Margin="10,0,0,0"/>
+    </Grid>
 </UserControl> 

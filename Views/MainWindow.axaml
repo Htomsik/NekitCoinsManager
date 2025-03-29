@@ -14,36 +14,50 @@
         MinWidth="800"
         MinHeight="600">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Верхнее меню -->
-        <Menu Grid.Row="0" Background="#1E1E1E">
-            <MenuItem Header="_Users">
-                <MenuItem Header="Регистрация"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.Registration}"/>
-                <MenuItem Header="Авторизация"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.Login}"/>
-                <MenuItem Header="Пользователи"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.UserManagement}"/>
-                <MenuItem Header="Моя карточка"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.UserCard}"/>
-            </MenuItem>
-            <MenuItem Header="_Transactions">
-                <MenuItem Header="Перевод"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.Transaction}"/>
-                <MenuItem Header="История"
-                          Command="{Binding NavigateCommand}"
-                          CommandParameter="{x:Static vm:ViewType.TransactionHistory}"/>
-            </MenuItem>
-        </Menu>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <Menu Grid.Column="0" Background="#1E1E1E">
+                <MenuItem Header="Управление аккаунтом">
+                    <MenuItem Header="Регистрация"
+                              IsVisible="{Binding !IsAuthenticated}"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.Registration}"/>
+                    <MenuItem Header="Авторизация"
+                              IsVisible="{Binding !IsAuthenticated}"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.Login}"/>
+                    <MenuItem Header="Моя карточка"
+                              IsVisible="{Binding IsAuthenticated}"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.UserCard}"/>
+                </MenuItem>
+                <MenuItem Header="Транзакции" 
+                          IsVisible="{Binding IsAuthenticated}">
+                    <MenuItem Header="Перевод"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.Transaction}"/>
+                </MenuItem>
+                <MenuItem Header="Админ панель" >
+                    <MenuItem Header="Пользователи"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.UserManagement}"/>
+                    <MenuItem Header="Все транзакции"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.TransactionHistory}"/>
+                </MenuItem>
+            </Menu>
+            
+        </Grid>
 
+        <!-- Мини-карточка пользователя -->
+        <ContentControl Margin="10, 10,10,5" Grid.Row="1"
+                        Content="{Binding UserMiniCardViewModel}"
+                        IsVisible="{Binding IsAuthenticated}"/>
+        
         <!-- Основной контент -->
-        <ContentControl Grid.Row="1" 
-                        Content="{Binding CurrentView, UpdateSourceTrigger=PropertyChanged}"
-                        Margin="10"/>
+        <ContentControl Grid.Row="2" 
+                        Content="{Binding CurrentView}"
+                        Margin="10, 5, 10,10"/>
     </Grid>
 </Window>

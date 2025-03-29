@@ -15,18 +15,15 @@
     </UserControl.Resources>
 
     <Border Classes="card">
-        <StackPanel Spacing="10">
+        <Grid RowDefinitions="Auto,*">
             <!-- Заголовок -->
-            <TextBlock Text="Users"
-                      Classes="header"
-                      HorizontalAlignment="Center"/>
-
+            <TextBlock Grid.Column="0" Text="Управление пользователями" Classes="header"/>
+            
             <!-- Список пользователей -->
-            <ItemsControl ItemsSource="{Binding Users}"
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Users}"
                          Classes="user-list">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:User">
-                        
                         <Border Classes="card user-card">
                             <Grid ColumnDefinitions="Auto,*,Auto">
                                 <!-- Аватар пользователя -->
@@ -51,7 +48,7 @@
                                        CommandParameter="{Binding}"
                                        Classes="icon"
                                        ToolTip.Tip="Delete User">
-                                    <PathIcon Data="{StaticResource delete_regular}"/>
+                                    <PathIcon Data="{StaticResource DeleteRegular}"/>
                                 </Button>
                             </Grid>
                         </Border>
@@ -60,9 +57,9 @@
             </ItemsControl>
 
             <!-- Отображение сообщений об ошибках -->
-            <TextBlock Text="{Binding ErrorMessage}"
+            <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}"
                       Classes="error"
                       HorizontalAlignment="Center"/>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl> 

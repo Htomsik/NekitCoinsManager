@@ -7,7 +7,7 @@ using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class UserManagementViewModel : ViewModelBase, IUserObserver
+public partial class UserManagementViewModel : ViewModelBase
 {
     private readonly IUserService _userService;
     
@@ -23,7 +23,6 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
     public UserManagementViewModel(IUserService userService)
     {
         _userService = userService;
-        _userService.Subscribe(this);
         LoadUsers();
     }
 
@@ -34,11 +33,6 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
         {
             Users.Add(user);
         }
-    }
-
-    public void OnUsersChanged()
-    {
-        LoadUsers();
     }
 
     [RelayCommand]
@@ -59,5 +53,6 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
         }
 
         ErrorMessage = string.Empty;
+        LoadUsers(); // Обновляем список после успешного удаления
     }
 } 
