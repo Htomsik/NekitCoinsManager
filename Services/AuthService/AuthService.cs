@@ -20,19 +20,29 @@ public class AuthService : IAuthService
         _dbContext = dbContext;
     }
 
-    public async Task<bool> LoginAsync(string username, string password)
+    public async Task<(bool success, string? error)> LoginAsync(string username, string password)
     {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, "Введите имя пользователя");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return (false, "Введите пароль");
+        }
+
         var user = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
 
         if (user == null)
         {
-            return false;
+            return (false, "Неверное имя пользователя или пароль");
         }
 
         _currentUser = user;
         NotifyObservers();
-        return true;
+        return (true, null);
     }
 
     public void Logout()

@@ -30,38 +30,18 @@ public partial class UserRegistrationViewModel : ViewModelBase
     [RelayCommand]
     private async Task Register()
     {
-        try
+        var (success, error) = await _userService.AddUserAsync(Username, Password, ConfirmPassword);
+        
+        if (!success)
         {
-            ErrorMessage = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(Username))
-            {
-                ErrorMessage = "Введите имя пользователя";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(Password))
-            {
-                ErrorMessage = "Введите пароль";
-                return;
-            }
-
-            if (Password != ConfirmPassword)
-            {
-                ErrorMessage = "Пароли не совпадают";
-                return;
-            }
-
-            await _userService.AddUser(Username, Password);
-            
-            // Очищаем поля после успешной регистрации
-            Username = string.Empty;
-            Password = string.Empty;
-            ConfirmPassword = string.Empty;
+            ErrorMessage = error ?? "Произошла ошибка при регистрации";
+            return;
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+
+        // Очищаем поля после успешной регистрации
+        Username = string.Empty;
+        Password = string.Empty;
+        ConfirmPassword = string.Empty;
+        ErrorMessage = string.Empty;
     }
 } 

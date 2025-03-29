@@ -51,14 +51,14 @@ public partial class UserManagementViewModel : ViewModelBase, IUserObserver
             return;
         }
 
-        try
+        var (success, error) = await _userService.DeleteUserAsync(user.Id);
+        
+        if (!success)
         {
-            await _userService.DeleteUser(user.Id);
-            ErrorMessage = string.Empty;
+            ErrorMessage = error ?? "Произошла ошибка при удалении пользователя";
+            return;
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+
+        ErrorMessage = string.Empty;
     }
 } 

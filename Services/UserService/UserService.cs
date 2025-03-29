@@ -30,21 +30,26 @@ public class UserService : IUserService
         return _users;
     }
 
-    public async Task AddUser(string username, string password)
+    public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)
     {
         if (string.IsNullOrWhiteSpace(username))
         {
-            throw new Exception("Имя пользователя не может быть пустым");
+            return (false, "Имя пользователя не может быть пустым");
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            throw new Exception("Пароль не может быть пустым");
+            return (false, "Пароль не может быть пустым");
+        }
+
+        if (password != confirmPassword)
+        {
+            return (false, "Пароли не совпадают");
         }
 
         if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new Exception("Пользователь с таким именем уже существует");
+            return (false, "Пользователь с таким именем уже существует");
         }
 
         var user = new User
@@ -61,9 +66,10 @@ public class UserService : IUserService
         // Обновляем кэш пользователей
         LoadUsers();
         NotifyObservers();
+        return (true, null);
     }
 
-    public async Task DeleteUser(int userId)
+    public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
         var user = await _dbContext.Users
             .Include(u => u.SentTransactions)
@@ -72,12 +78,12 @@ public class UserService : IUserService
 
         if (user == null)
         {
-            throw new Exception("Пользователь не найден");
+            return (false, "Пользователь не найден");
         }
 
         if (user.SentTransactions.Any() || user.ReceivedTransactions.Any())
         {
-            throw new Exception("Невозможно удалить пользователя с историей транзакций");
+            return (false, "Невозможно удалить пользователя с историей транзакций");
         }
 
         _dbContext.Users.Remove(user);
@@ -86,6 +92,7 @@ public class UserService : IUserService
         // Обновляем кэш пользователей
         _users.Remove(user);
         NotifyObservers();
+        return (true, null);
     }
 
     public void Subscribe(IUserObserver observer)

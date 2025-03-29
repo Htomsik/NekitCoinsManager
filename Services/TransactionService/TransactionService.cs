@@ -36,11 +36,20 @@ public class TransactionService : ITransactionService
         return _transactions;
     }
 
-    public async Task TransferCoins(Transaction transaction)
+    public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
     {
+        if (transaction.FromUser == null || transaction.ToUser == null)
+        {
+            return (false, "Выберите отправителя и получателя");
+        }
+
+        // Заполняем ID пользователей
+        transaction.FromUserId = transaction.FromUser.Id;
+        transaction.ToUserId = transaction.ToUser.Id;
+
         if (transaction.Amount <= 0)
         {
-            throw new Exception("Сумма перевода должна быть больше 0");
+            return (false, "Сумма перевода должна быть больше 0");
         }
 
         var fromUser = await _dbContext.Users.FindAsync(transaction.FromUserId);
@@ -48,17 +57,17 @@ public class TransactionService : ITransactionService
 
         if (fromUser == null || toUser == null)
         {
-            throw new Exception("Пользователь не найден");
+            return (false, "Пользователь не найден");
         }
 
         if (fromUser.Id == toUser.Id)
         {
-            throw new Exception("Нельзя переводить монеты самому себе");
+            return (false, "Нельзя переводить монеты самому себе");
         }
 
         if (fromUser.Balance < transaction.Amount)
         {
-            throw new Exception("Недостаточно монет для перевода");
+            return (false, "Недостаточно монет для перевода");
         }
 
         transaction.CreatedAt = DateTime.UtcNow;
@@ -73,6 +82,7 @@ public class TransactionService : ITransactionService
         // Обновляем кэш транзакций
         LoadTransactions();
         NotifyObservers();
+        return (true, null);
     }
 
     public void Subscribe(ITransactionObserver observer)

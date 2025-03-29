@@ -27,36 +27,17 @@ public partial class UserLoginViewModel : ViewModelBase
     [RelayCommand]
     private async Task Login()
     {
-        try
+        var (success, error) = await _authService.LoginAsync(Username, Password);
+        
+        if (!success)
         {
-            ErrorMessage = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(Username))
-            {
-                ErrorMessage = "Введите имя пользователя";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(Password))
-            {
-                ErrorMessage = "Введите пароль";
-                return;
-            }
-
-            var success = await _authService.LoginAsync(Username, Password);
-            if (!success)
-            {
-                ErrorMessage = "Неверное имя пользователя или пароль";
-                return;
-            }
-
-            // Очищаем поля после успешной авторизации
-            Username = string.Empty;
-            Password = string.Empty;
+            ErrorMessage = error ?? "Произошла ошибка при входе";
+            return;
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+
+        // Очищаем поля после успешной авторизации
+        Username = string.Empty;
+        Password = string.Empty;
+        ErrorMessage = string.Empty;
     }
 } 

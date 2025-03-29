@@ -43,30 +43,19 @@ public partial class TransferViewModel : ViewModelBase, IUserObserver
     [RelayCommand]
     private async Task Transfer()
     {
-        try
+        var (success, error) = await _transactionService.TransferCoinsAsync(NewTransaction);
+        
+        if (!success)
         {
-            ErrorMessage = string.Empty;
-
-            if (NewTransaction.FromUser == null || NewTransaction.ToUser == null)
-            {
-                ErrorMessage = "Выберите отправителя и получателя";
-                return;
-            }
-
-            NewTransaction.FromUserId = NewTransaction.FromUser.Id;
-            NewTransaction.ToUserId = NewTransaction.ToUser.Id;
-
-            await _transactionService.TransferCoins(NewTransaction);
-
-            // Очищаем поля после успешного перевода
-            NewTransaction = new Transaction();
-
-            // Обновляем список пользователей для отображения новых балансов
-            LoadUsers();
+            ErrorMessage = error ?? "Произошла ошибка при переводе";
+            return;
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+
+        // Очищаем поля после успешного перевода
+        NewTransaction = new Transaction();
+        ErrorMessage = string.Empty;
+
+        // Обновляем список пользователей для отображения новых балансов
+        LoadUsers();
     }
 } 
