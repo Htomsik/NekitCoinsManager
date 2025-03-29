@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:Class="NekitCoinsManager.Views.UserLoginView"
+             x:DataType="vm:UserLoginViewModel">
+
+    <Border Classes="card">
+        <StackPanel Spacing="10">
+            <!-- Заголовок -->
+            <TextBlock Text="Login"
+                      Classes="header"
+                      HorizontalAlignment="Center"/>
+
+            <!-- Форма входа -->
+            <Grid RowDefinitions="Auto,Auto,Auto" 
+                  ColumnDefinitions="Auto,*"
+                  Margin="10">
+                
+                <!-- Имя пользователя -->
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                          Text="Username:"
+                          Classes="username"/>
+                <TextBox Grid.Row="0" Grid.Column="1"
+                         Text="{Binding Username}"
+                         Watermark="Enter username"
+                         Classes="input"/>
+
+                <!-- Пароль -->
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                          Text="Password:"
+                          Classes="username"/>
+                <TextBox Grid.Row="1" Grid.Column="1"
+                         Text="{Binding Password}"
+                         PasswordChar="*"
+                         Watermark="Enter password"
+                         Classes="input"/>
+
+                <!-- Кнопка входа -->
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                        Content="Login"
+                        Command="{Binding LoginCommand}"
+                        Classes="action"
+                        HorizontalAlignment="Center"/>
+            </Grid>
+
+            <!-- Сообщения об ошибках -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                      Classes="error"
+                      HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</UserControl> 

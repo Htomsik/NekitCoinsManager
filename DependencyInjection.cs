@@ -15,9 +15,11 @@ public static class DependencyInjection
         // Services
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddSingleton<IAuthService, AuthService>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
+        services.AddTransient<UserLoginViewModel>();
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<TransferViewModel>();

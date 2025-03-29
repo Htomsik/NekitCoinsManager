@@ -18,12 +18,18 @@
         <!-- Верхнее меню -->
         <Menu Grid.Row="0" Background="#1E1E1E">
             <MenuItem Header="_Users">
-                <MenuItem Header="_Register New User" Command="{Binding ShowRegistrationCommand}"/>
-                <MenuItem Header="_Manage Users" Command="{Binding ShowUserManagementCommand}"/>
+                <MenuItem Header="Регистрация"
+                          Command="{Binding ShowRegistrationCommand}"/>
+                <MenuItem Header="Авторизация"
+                          Command="{Binding ShowLoginCommand}"/>
+                <MenuItem Header="Пользователи"
+                          Command="{Binding ShowUserManagementCommand}"/>
             </MenuItem>
             <MenuItem Header="_Transactions">
-                <MenuItem Header="_Transfer Coins" Command="{Binding ShowTransferCommand}"/>
-                <MenuItem Header="_Transaction History" Command="{Binding ShowTransactionHistoryCommand}"/>
+                <MenuItem Header="Перевод"
+                          Command="{Binding ShowTransferCommand}"/>
+                <MenuItem Header="История"
+                          Command="{Binding ShowTransactionHistoryCommand}"/>
             </MenuItem>
         </Menu>
 

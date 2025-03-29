@@ -9,8 +9,13 @@ using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
 {
+    private readonly IAuthService _authService;
+
+    [ObservableProperty]
+    private UserLoginViewModel _loginViewModel;
+
     [ObservableProperty]
     private TransferViewModel _transferViewModel;
 
@@ -26,25 +31,18 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private object _currentView;
 
-    // Свойства видимости для разных views
-    [ObservableProperty]
-    private bool _isRegistrationVisible = true;
-
-    [ObservableProperty]
-    private bool _isUserManagementVisible;
-
-    [ObservableProperty]
-    private bool _isTransferVisible;
-
-    [ObservableProperty]
-    private bool _isTransactionHistoryVisible;
-
     public MainWindowViewModel(
+        IAuthService authService,
+        UserLoginViewModel loginViewModel,
         TransferViewModel transferViewModel,
         TransactionHistoryViewModel transactionHistoryViewModel,
         UserManagementViewModel userManagementViewModel,
         UserRegistrationViewModel userRegistrationViewModel)
     {
+        _authService = authService;
+        _authService.Subscribe(this);
+
+        LoginViewModel = loginViewModel;
         TransferViewModel = transferViewModel;
         TransactionHistoryViewModel = transactionHistoryViewModel;
         UserManagementViewModel = userManagementViewModel;
@@ -54,7 +52,17 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentView = UserRegistrationViewModel;
     }
 
-    // Команды для навигации
+    public void OnAuthStateChanged(User? user)
+    {
+        // В будущем здесь может быть дополнительная логика
+    }
+
+    [RelayCommand]
+    private void ShowLogin()
+    {
+        CurrentView = LoginViewModel;
+    }
+
     [RelayCommand]
     private void ShowRegistration()
     {
@@ -79,11 +87,9 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentView = TransactionHistoryViewModel;
     }
 
-    private void HideAllViews()
+    [RelayCommand]
+    private void Logout()
     {
-        IsRegistrationVisible = false;
-        IsUserManagementVisible = false;
-        IsTransferVisible = false;
-        IsTransactionHistoryVisible = false;
+        _authService.Logout();
     }
 }
