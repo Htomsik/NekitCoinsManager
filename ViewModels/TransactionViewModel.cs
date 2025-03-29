@@ -13,15 +13,13 @@ public partial class TransactionViewModel : ViewModelBase
     private readonly ITransactionService _transactionService;
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly INotificationService _notificationService;
 
     [ObservableProperty]
     private ObservableCollection<User> _users = new();
 
     [ObservableProperty]
     private Transaction _newTransaction = new();
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
 
     [ObservableProperty]
     private User? _currentUser;
@@ -36,21 +34,20 @@ public partial class TransactionViewModel : ViewModelBase
         ITransactionService transactionService, 
         IUserService userService,
         ICurrentUserService currentUserService,
+        INotificationService notificationService,
         TransactionHistoryViewModel transactionHistory)
     {
         _transactionService = transactionService;
         _userService = userService;
         _currentUserService = currentUserService;
+        _notificationService = notificationService;
         _transactionHistory = transactionHistory;
         
         // Устанавливаем режим отображения только транзакций между пользователями
         _transactionHistory.ShowAllTransactions = false;
         
-        LoadUsers();
         LoadCurrentUser();
-        
-        // Инициализируем отправителя как текущего пользователя
-        NewTransaction.FromUser = CurrentUser;
+        LoadUsers();
     }
 
     private void LoadUsers()
@@ -86,18 +83,21 @@ public partial class TransactionViewModel : ViewModelBase
     {
         if (CurrentUser == null)
         {
-            ErrorMessage = "Необходимо авторизоваться";
+            _notificationService.ShowError("Необходимо авторизоваться");
             return;
         }
 
-        // Устанавливаем текущего пользователя как отправителя
-        NewTransaction.FromUser = CurrentUser;
-        
+        if (NewTransaction.Amount <= 0)
+        {
+            _notificationService.ShowError("Сумма должна быть больше нуля");
+            return;
+        }
+
         var (success, error) = await _transactionService.TransferCoinsAsync(NewTransaction);
         
         if (!success)
         {
-            ErrorMessage = error ?? "Произошла ошибка при переводе";
+            _notificationService.ShowError(error ?? "Произошла ошибка при переводе");
             return;
         }
 
@@ -107,7 +107,7 @@ public partial class TransactionViewModel : ViewModelBase
             FromUser = CurrentUser // Устанавливаем текущего пользователя для новой транзакции
         };
         SelectedRecipient = null;
-        ErrorMessage = string.Empty;
+        _notificationService.ShowSuccess("Перевод выполнен успешно");
 
         // Обновляем список пользователей для отображения новых балансов
         LoadUsers();

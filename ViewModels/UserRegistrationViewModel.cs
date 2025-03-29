@@ -8,6 +8,7 @@ namespace NekitCoinsManager.ViewModels;
 public partial class UserRegistrationViewModel : ViewModelBase
 {
     private readonly IUserService _userService;
+    private readonly INotificationService _notificationService;
     
     [ObservableProperty]
     private string _username = string.Empty;
@@ -21,9 +22,10 @@ public partial class UserRegistrationViewModel : ViewModelBase
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    public UserRegistrationViewModel(IUserService userService)
+    public UserRegistrationViewModel(IUserService userService, INotificationService notificationService)
     {
         _userService = userService;
+        _notificationService = notificationService;
     }
 
     [RelayCommand]
@@ -33,7 +35,7 @@ public partial class UserRegistrationViewModel : ViewModelBase
         
         if (!success)
         {
-            ErrorMessage = error ?? "Произошла ошибка при регистрации";
+            _notificationService.ShowError(error ?? "Произошла ошибка при регистрации");
             return;
         }
 
@@ -41,6 +43,6 @@ public partial class UserRegistrationViewModel : ViewModelBase
         Username = string.Empty;
         Password = string.Empty;
         ConfirmPassword = string.Empty;
-        ErrorMessage = string.Empty;
+        _notificationService.ShowSuccess("Регистрация выполнена успешно");
     }
 } 

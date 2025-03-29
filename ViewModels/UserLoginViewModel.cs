@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Core.Services;
 
-
 namespace NekitCoinsManager.ViewModels;
 
 public partial class UserLoginViewModel : ViewModelBase
 {
     private readonly IAuthService _authService;
+    private readonly INotificationService _notificationService;
     
     [ObservableProperty]
     private string _username = string.Empty;
@@ -19,9 +19,10 @@ public partial class UserLoginViewModel : ViewModelBase
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    public UserLoginViewModel(IAuthService authService)
+    public UserLoginViewModel(IAuthService authService, INotificationService notificationService)
     {
         _authService = authService;
+        _notificationService = notificationService;
     }
 
     [RelayCommand]
@@ -31,13 +32,13 @@ public partial class UserLoginViewModel : ViewModelBase
         
         if (!success)
         {
-            ErrorMessage = error ?? "Произошла ошибка при входе";
+            _notificationService.ShowError(error ?? "Произошла ошибка при входе");
             return;
         }
 
         // Очищаем поля после успешной авторизации
         Username = string.Empty;
         Password = string.Empty;
-        ErrorMessage = string.Empty;
+        _notificationService.ShowSuccess("Вход выполнен успешно");
     }
 } 

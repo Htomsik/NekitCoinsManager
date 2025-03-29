@@ -10,6 +10,7 @@ namespace NekitCoinsManager.ViewModels;
 public partial class UserManagementViewModel : ViewModelBase
 {
     private readonly IUserService _userService;
+    private readonly INotificationService _notificationService;
     
     [ObservableProperty]
     private ObservableCollection<User> _users = new();
@@ -20,9 +21,12 @@ public partial class UserManagementViewModel : ViewModelBase
     [ObservableProperty]
     private User? _selectedUser;
 
-    public UserManagementViewModel(IUserService userService)
+    public UserManagementViewModel(
+        IUserService userService,
+        INotificationService notificationService)
     {
         _userService = userService;
+        _notificationService = notificationService;
         LoadUsers();
     }
 
@@ -40,7 +44,7 @@ public partial class UserManagementViewModel : ViewModelBase
     {
         if (user == null)
         {
-            ErrorMessage = "Выберите пользователя для удаления";
+            _notificationService.ShowError("Выберите пользователя для удаления");
             return;
         }
 
@@ -48,11 +52,11 @@ public partial class UserManagementViewModel : ViewModelBase
         
         if (!success)
         {
-            ErrorMessage = error ?? "Произошла ошибка при удалении пользователя";
+            _notificationService.ShowError(error ?? "Произошла ошибка при удалении пользователя");
             return;
         }
 
-        ErrorMessage = string.Empty;
+        _notificationService.ShowSuccess("Пользователь успешно удален");
         LoadUsers(); // Обновляем список после успешного удаления
     }
 } 

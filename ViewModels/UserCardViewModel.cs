@@ -9,6 +9,7 @@ public partial class UserCardViewModel : ViewModelBase
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthService _authService;
+    private readonly INotificationService _notificationService;
     
     [ObservableProperty]
     private User? _currentUser;
@@ -16,10 +17,14 @@ public partial class UserCardViewModel : ViewModelBase
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    public UserCardViewModel(ICurrentUserService currentUserService, IAuthService authService)
+    public UserCardViewModel(
+        ICurrentUserService currentUserService, 
+        IAuthService authService,
+        INotificationService notificationService)
     {
         _currentUserService = currentUserService;
         _authService = authService;
+        _notificationService = notificationService;
         LoadCurrentUser();
     }
 
@@ -32,5 +37,6 @@ public partial class UserCardViewModel : ViewModelBase
     private void Logout()
     {
         _authService.Logout();
+        _notificationService.ShowInfo("Выход выполнен успешно");
     }
 } 

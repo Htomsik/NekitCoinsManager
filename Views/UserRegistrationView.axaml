@@ -54,11 +54,6 @@
                         Classes="action"
                         HorizontalAlignment="Center"/>
             </Grid>
-
-            <!-- Сообщения об ошибках -->
-            <TextBlock Text="{Binding ErrorMessage}"
-                      Classes="error"
-                      HorizontalAlignment="Center"/>
         </Grid>
     </Border>
 </UserControl> 

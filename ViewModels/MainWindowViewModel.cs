@@ -22,14 +22,19 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     [ObservableProperty]
     private UserMiniCardViewModel _userMiniCardViewModel;
 
+    [ObservableProperty]
+    private NotificationViewModel _notificationViewModel;
+
     public MainWindowViewModel(
         IAuthService authService,
         IServiceProvider serviceProvider,
-        UserMiniCardViewModel userMiniCardViewModel)
+        UserMiniCardViewModel userMiniCardViewModel,
+        NotificationViewModel notificationViewModel)
     {
         _authService = authService;
         _serviceProvider = serviceProvider;
         _userMiniCardViewModel = userMiniCardViewModel;
+        _notificationViewModel = notificationViewModel;
         
         _authService.Subscribe(this);
         

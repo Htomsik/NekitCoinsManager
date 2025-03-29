@@ -59,5 +59,13 @@
         <ContentControl Grid.Row="2" 
                         Content="{Binding CurrentView}"
                         Margin="10, 5, 10,10"/>
+
+        <!-- Уведомления -->
+        <ContentControl Grid.Row="0" Grid.RowSpan="3"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Content="{Binding NotificationViewModel}"
+                        IsHitTestVisible="True"
+                        ZIndex="1000"/>
     </Grid>
 </Window>

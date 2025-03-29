@@ -127,4 +127,15 @@
     <Style Selector="ItemsControl.user-list > StackPanel">
         <Setter Property="Spacing" Value="5"/>
     </Style>
+
+    <!-- Стили для уведомлений -->
+    <Style Selector="Border.notification">
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="MinWidth" Value="300"/>
+        <Setter Property="MaxWidth" Value="400"/>
+    </Style>
 </Styles>

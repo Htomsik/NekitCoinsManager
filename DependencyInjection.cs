@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ITransactionService, TransactionService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<INotificationService, NotificationService>();
 
         // Регистрируем ViewModels
         services.AddSingleton<MainWindowViewModel>();
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserCardViewModel>();
         services.AddTransient<UserMiniCardViewModel>();
+        services.AddSingleton<NotificationViewModel>();
 
         // Регистрируем DbContext как Singleton
         services.AddSingleton<AppDbContext>();

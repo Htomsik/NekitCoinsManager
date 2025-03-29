@@ -55,11 +55,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-
-            <!-- Отображение сообщений об ошибках -->
-            <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}"
-                      Classes="error"
-                      HorizontalAlignment="Center"/>
+            
         </Grid>
     </Border>
 </UserControl> 
