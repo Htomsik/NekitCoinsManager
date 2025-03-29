@@ -8,16 +8,13 @@ using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
+public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
 {
-    private readonly IAuthService _authService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IServiceProvider _serviceProvider;
 
     [ObservableProperty]
     private object _currentView;
-
-    [ObservableProperty]
-    private bool _isAuthenticated;
 
     [ObservableProperty]
     private UserMiniCardViewModel _userMiniCardViewModel;
@@ -25,26 +22,28 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
     [ObservableProperty]
     private NotificationViewModel _notificationViewModel;
 
+    public bool IsAuthenticated => _currentUserService.CurrentUser != null;
+
     public MainWindowViewModel(
-        IAuthService authService,
+        ICurrentUserService currentUserService,
         IServiceProvider serviceProvider,
         UserMiniCardViewModel userMiniCardViewModel,
         NotificationViewModel notificationViewModel)
     {
-        _authService = authService;
+        _currentUserService = currentUserService;
         _serviceProvider = serviceProvider;
         _userMiniCardViewModel = userMiniCardViewModel;
         _notificationViewModel = notificationViewModel;
         
-        _authService.Subscribe(this);
+        _currentUserService.Subscribe(this);
         
         // Устанавливаем начальную view
-        NavigateTo(ViewType.Login);
+        Navigate(ViewType.Login);
     }
-
-    private void NavigateTo(ViewType viewType)
+    
+    [RelayCommand]
+    private void Navigate(ViewType viewType)
     {
-        // Получаем инстанс ViewModel через DI в зависимости от типа
         CurrentView = viewType switch
         {
             ViewType.Login => _serviceProvider.GetRequiredService<UserLoginViewModel>(),
@@ -53,25 +52,16 @@ public partial class MainWindowViewModel : ViewModelBase, IAuthObserver
             ViewType.Transaction => _serviceProvider.GetRequiredService<TransactionViewModel>(),
             ViewType.TransactionHistory => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
             ViewType.UserCard => _serviceProvider.GetRequiredService<UserCardViewModel>(),
-            _ => throw new ArgumentException($"Неизвестный тип представления: {viewType}")
+            _ => throw new ArgumentException($"Unknown view type: {viewType}")
         };
     }
-
-    [RelayCommand]
-    private void Navigate(ViewType viewType) => NavigateTo(viewType);
     
-    public void OnAuthStateChanged()
+    public void OnCurrentUserChanged()
     {
-        IsAuthenticated = _authService.IsAuthenticated;
+        // Обновляем view в зависимости от состояния авторизации
+        Navigate(_currentUserService.CurrentUser != null ? ViewType.Transaction : ViewType.Login);
         
-        // Если пользователь вышел из системы, перенаправляем на страницу входа
-        if (!IsAuthenticated)
-        {
-            NavigateTo(ViewType.Login);
-        }
-        else
-        {
-            NavigateTo(ViewType.Transaction);
-        }
+        // Уведомляем UI об изменении состояния авторизации
+        OnPropertyChanged(nameof(IsAuthenticated));
     }
 }

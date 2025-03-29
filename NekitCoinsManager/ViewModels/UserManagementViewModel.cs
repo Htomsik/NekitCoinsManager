@@ -30,13 +30,9 @@ public partial class UserManagementViewModel : ViewModelBase
         LoadUsers();
     }
 
-    private void LoadUsers()
+    private async void LoadUsers()
     {
-        Users.Clear();
-        foreach (var user in _userService.GetUsers())
-        {
-            Users.Add(user);
-        }
+        Users = new ObservableCollection<User>(await _userService.GetUsersAsync());
     }
 
     [RelayCommand]

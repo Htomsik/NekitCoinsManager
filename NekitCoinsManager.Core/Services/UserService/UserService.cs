@@ -12,42 +12,22 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
     private readonly IPasswordHasherService _passwordHasherService;
-    private readonly List<IUserObserver> _observers = new();
-    private List<User> _users = new();
-    private User? _currentUser;
 
     public UserService(AppDbContext dbContext, IPasswordHasherService passwordHasherService)
     {
         _dbContext = dbContext;
         _passwordHasherService = passwordHasherService;
-        LoadUsers();
     }
 
-    private void LoadUsers()
+    public async Task<IEnumerable<User>> GetUsersAsync()
     {
-        _users = _dbContext.Users.ToList();
+        return await _dbContext.Users.ToListAsync();
     }
 
-    public IEnumerable<User> GetUsers()
+    public async Task<User?> GetUserByUsernameAsync(string username)
     {
-        return _users;
-    }
-
-    public User? GetUserByUsername(string username)
-    {
-        return _users.FirstOrDefault(u => 
-            u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public User? GetCurrentUser()
-    {
-        return _currentUser;
-    }
-
-    public void SetCurrentUser(User? user)
-    {
-        _currentUser = user;
-        NotifyObservers();
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Username.Equals(username));
     }
 
     public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)
@@ -67,7 +47,8 @@ public class UserService : IUserService
             return (false, "Пароли не совпадают");
         }
 
-        if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+        var existingUser = await GetUserByUsernameAsync(username);
+        if (existingUser != null)
         {
             return (false, "Пользователь с таким именем уже существует");
         }
@@ -83,9 +64,6 @@ public class UserService : IUserService
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
-        // Обновляем кэш пользователей
-        LoadUsers();
-        NotifyObservers();
         return (true, null);
     }
 
@@ -109,29 +87,9 @@ public class UserService : IUserService
         _dbContext.Users.Remove(user);
         await _dbContext.SaveChangesAsync();
         
-        // Обновляем кэш пользователей
-        _users.Remove(user);
-        NotifyObservers();
         return (true, null);
     }
 
-    public void Subscribe(IUserObserver observer)
-    {
-        if (!_observers.Contains(observer))
-        {
-            _observers.Add(observer);
-        }
-    }
-
-    private void NotifyObservers()
-    {
-        foreach (var observer in _observers)
-        {
-            observer.OnUsersChanged();
-        }
-    }
-
-    // Метод для обновления баланса пользователя
     public async Task UpdateUserBalance(int userId, decimal newBalance)
     {
         var user = await _dbContext.Users.FindAsync(userId);
@@ -142,9 +100,5 @@ public class UserService : IUserService
 
         user.Balance = newBalance;
         await _dbContext.SaveChangesAsync();
-        
-        // Обновляем кэш пользователей
-        LoadUsers();
-        NotifyObservers();
     }
 } 

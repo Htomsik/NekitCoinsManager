@@ -13,27 +13,20 @@ public class TransactionService : ITransactionService
     private readonly AppDbContext _dbContext;
     private readonly IUserService _userService;
     private readonly List<ITransactionObserver> _observers = new();
-    private List<Transaction> _transactions = new();
 
     public TransactionService(AppDbContext dbContext, IUserService userService)
     {
         _dbContext = dbContext;
         _userService = userService;
-        LoadTransactions();
     }
 
-    private void LoadTransactions()
+    public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
     {
-        _transactions = _dbContext.Transactions
+        return await _dbContext.Transactions
             .Include(t => t.FromUser)
             .Include(t => t.ToUser)
             .OrderByDescending(t => t.CreatedAt)
-            .ToList();
-    }
-
-    public IEnumerable<Transaction> GetTransactions()
-    {
-        return _transactions;
+            .ToListAsync();
     }
 
     public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
@@ -79,8 +72,6 @@ public class TransactionService : ITransactionService
         _dbContext.Transactions.Add(transaction);
         await _dbContext.SaveChangesAsync();
 
-        // Обновляем кэш транзакций
-        LoadTransactions();
         NotifyObservers();
         return (true, null);
     }
