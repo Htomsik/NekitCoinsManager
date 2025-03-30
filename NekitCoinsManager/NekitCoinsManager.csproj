@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.2.6" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.6" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.6" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.6" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
@@ -40,6 +41,9 @@
       </Compile>
       <Compile Update="Views\UserMiniCardView.axaml.cs">
         <DependentUpon>UserMiniCardView.axaml</DependentUpon>
+      </Compile>
+      <Compile Update="Views\CurrencyManagementView.axaml.cs">
+        <DependentUpon>CurrencyManagementView.axaml</DependentUpon>
       </Compile>
     </ItemGroup>
 

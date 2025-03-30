@@ -32,6 +32,21 @@
                         </ComboBox>
                     </StackPanel>
 
+                    <!-- Валюта -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Валюта" Classes="form-label"/>
+                        <ComboBox ItemsSource="{Binding Currencies}"
+                                 SelectedItem="{Binding SelectedCurrency}"
+                                 Classes="transfer-input"
+                                 HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
                     <!-- Сумма -->
                     <StackPanel Classes="form-group">
                         <TextBlock Text="Сумма" Classes="form-label"/>

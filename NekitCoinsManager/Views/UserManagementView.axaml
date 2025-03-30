@@ -38,8 +38,20 @@
                                           Classes="user-info">
                                     <TextBlock Text="{Binding Username}"
                                              Classes="username"/>
-                                    <TextBlock Text="{Binding Balance, StringFormat='{}{0} NC'}"
-                                             Classes="balance"/>
+                                    <ItemsControl ItemsSource="{Binding Balances}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Classes="balance">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} {1}">
+                                                            <Binding Path="Amount"/>
+                                                            <Binding Path="Currency.Symbol"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                                 
                                 <!-- Кнопка удаления -->

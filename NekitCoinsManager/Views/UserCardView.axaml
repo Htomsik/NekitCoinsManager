@@ -33,13 +33,19 @@
                           Text="{Binding CurrentUser.Id}"
                           Classes="balance"/>
 
-                <!-- Баланс -->
+                <!-- Балансы -->
                 <TextBlock Grid.Row="2" Grid.Column="0"
-                          Text="Баланс:"
+                          Text="Балансы:"
                           Classes="username"/>
-                <TextBlock Grid.Row="2" Grid.Column="1"
-                          Text="{Binding CurrentUser.Balance}"
-                          Classes="balance"/>
+                <ItemsControl Grid.Row="2" Grid.Column="1"
+                            ItemsSource="{Binding Balances}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Amount, StringFormat='{}{0} NC'}"
+                                     Classes="balance"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
                 <!-- Кнопка выхода -->
                 <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"

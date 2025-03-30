@@ -10,5 +10,4 @@ public interface IUserService
     Task<User?> GetUserByUsernameAsync(string username);
     Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
     Task<(bool success, string? error)> DeleteUserAsync(int userId);
-    Task UpdateUserBalance(int userId, decimal newBalance);
 } 

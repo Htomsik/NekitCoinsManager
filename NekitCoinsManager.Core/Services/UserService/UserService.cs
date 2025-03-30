@@ -12,11 +12,19 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
     private readonly IPasswordHasherService _passwordHasherService;
+    private readonly IUserBalanceService _userBalanceService;
+    private readonly ICurrencyService _currencyService;
 
-    public UserService(AppDbContext dbContext, IPasswordHasherService passwordHasherService)
+    public UserService(
+        AppDbContext dbContext, 
+        IPasswordHasherService passwordHasherService,
+        IUserBalanceService userBalanceService,
+        ICurrencyService currencyService)
     {
         _dbContext = dbContext;
         _passwordHasherService = passwordHasherService;
+        _userBalanceService = userBalanceService;
+        _currencyService = currencyService;
     }
 
     public async Task<IEnumerable<User>> GetUsersAsync()
@@ -57,12 +65,33 @@ public class UserService : IUserService
         {
             Username = username,
             PasswordHash = _passwordHasherService.HashPassword(password),
-            Balance = 100, // Начальный баланс для нового пользователя
             CreatedAt = DateTime.UtcNow
         };
 
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
+
+        // Получаем валюту с самым низким коэффициентом обмена
+        var currencies = await _currencyService.GetCurrenciesAsync();
+        var lowestRateCurrency = currencies.OrderBy(c => c.ExchangeRate).FirstOrDefault();
+
+        if (lowestRateCurrency != null)
+        {
+            // Создаем начальный баланс в валюте с самым низким коэффициентом
+            var (success, error) = await _userBalanceService.CreateBalanceAsync(
+                user.Id,
+                lowestRateCurrency.Id,
+                100 // Начальный баланс
+            );
+
+            if (!success)
+            {
+                // Если не удалось создать баланс, удаляем пользователя
+                _dbContext.Users.Remove(user);
+                await _dbContext.SaveChangesAsync();
+                return (false, error ?? "Не удалось создать начальный баланс");
+            }
+        }
 
         return (true, null);
     }
@@ -88,17 +117,5 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
         
         return (true, null);
-    }
-
-    public async Task UpdateUserBalance(int userId, decimal newBalance)
-    {
-        var user = await _dbContext.Users.FindAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("Пользователь не найден");
-        }
-
-        user.Balance = newBalance;
-        await _dbContext.SaveChangesAsync();
     }
 } 

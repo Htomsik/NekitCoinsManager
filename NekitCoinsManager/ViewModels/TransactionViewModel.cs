@@ -14,9 +14,13 @@ public partial class TransactionViewModel : ViewModelBase
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
+    private readonly ICurrencyService _currencyService;
 
     [ObservableProperty]
     private ObservableCollection<User> _users = new();
+
+    [ObservableProperty]
+    private ObservableCollection<Currency> _currencies = new();
 
     [ObservableProperty]
     private Transaction _newTransaction = new();
@@ -30,17 +34,22 @@ public partial class TransactionViewModel : ViewModelBase
     [ObservableProperty]
     private User? _selectedRecipient;
 
+    [ObservableProperty]
+    private Currency? _selectedCurrency;
+
     public TransactionViewModel(
         ITransactionService transactionService, 
         IUserService userService,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
+        ICurrencyService currencyService,
         TransactionHistoryViewModel transactionHistory)
     {
         _transactionService = transactionService;
         _userService = userService;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
+        _currencyService = currencyService;
         _transactionHistory = transactionHistory;
         
         // Устанавливаем режим отображения только транзакций между пользователями
@@ -48,6 +57,7 @@ public partial class TransactionViewModel : ViewModelBase
         
         LoadCurrentUser();
         LoadUsersAsync();
+        LoadCurrenciesAsync();
     }
 
     private async void LoadUsersAsync()
@@ -57,6 +67,12 @@ public partial class TransactionViewModel : ViewModelBase
         Users = new ObservableCollection<User>(
             allUsers.Where(u => u.Id != CurrentUser?.Id)
         );
+    }
+
+    private async void LoadCurrenciesAsync()
+    {
+        var currencies = await _currencyService.GetCurrenciesAsync();
+        Currencies = new ObservableCollection<Currency>(currencies);
     }
 
     private void LoadCurrentUser()
@@ -71,6 +87,12 @@ public partial class TransactionViewModel : ViewModelBase
         if (value != null) 
             NewTransaction.ToUser = value;
         UpdateTransactionHistory();
+    }
+
+    partial void OnSelectedCurrencyChanged(Currency? value)
+    {
+        if (value != null)
+            NewTransaction.Currency = value;
     }
 
     private void UpdateTransactionHistory()
@@ -93,6 +115,12 @@ public partial class TransactionViewModel : ViewModelBase
             return;
         }
 
+        if (NewTransaction.Currency == null)
+        {
+            _notificationService.ShowError("Выберите валюту для перевода");
+            return;
+        }
+
         var (success, error) = await _transactionService.TransferCoinsAsync(NewTransaction);
         
         if (!success)
@@ -107,6 +135,7 @@ public partial class TransactionViewModel : ViewModelBase
             FromUser = CurrentUser // Устанавливаем текущего пользователя для новой транзакции
         };
         SelectedRecipient = null;
+        SelectedCurrency = null;
         _notificationService.ShowSuccess("Перевод выполнен успешно");
 
         // Обновляем список пользователей для отображения новых балансов

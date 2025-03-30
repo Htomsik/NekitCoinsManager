@@ -46,11 +46,17 @@
                                                   Classes="transaction-date"/>
                                     </StackPanel>
 
-                                    <!-- Сумма -->
+                                    <!-- Сумма и валюта -->
                                     <TextBlock Grid.Column="2"
-                                              Text="{Binding Amount, StringFormat={}{0} NC}"
                                               Classes="username"
-                                              VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0} {1}">
+                                                <Binding Path="Amount"/>
+                                                <Binding Path="Currency.Symbol"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                         </DataTemplate>

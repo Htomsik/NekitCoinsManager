@@ -52,6 +52,7 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
             ViewType.Transaction => _serviceProvider.GetRequiredService<TransactionViewModel>(),
             ViewType.TransactionHistory => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
             ViewType.UserCard => _serviceProvider.GetRequiredService<UserCardViewModel>(),
+            ViewType.CurrencyManagement => _serviceProvider.GetRequiredService<CurrencyManagementViewModel>(),
             _ => throw new ArgumentException($"Unknown view type: {viewType}")
         };
     }

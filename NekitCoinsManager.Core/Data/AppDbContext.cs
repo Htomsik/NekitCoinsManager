@@ -7,6 +7,8 @@ public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
+    public DbSet<Currency> Currencies { get; set; } = null!;
+    public DbSet<UserBalance> UserBalances { get; set; } = null!;
 
     public AppDbContext()
     {
@@ -32,5 +34,28 @@ public class AppDbContext : DbContext
             .WithMany(u => u.ReceivedTransactions)
             .HasForeignKey(t => t.ToUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Currency)
+            .WithMany()
+            .HasForeignKey(t => t.CurrencyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<UserBalance>()
+            .HasOne(ub => ub.User)
+            .WithMany(u => u.Balances)
+            .HasForeignKey(ub => ub.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserBalance>()
+            .HasOne(ub => ub.Currency)
+            .WithMany()
+            .HasForeignKey(ub => ub.CurrencyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Создаем уникальный индекс для комбинации UserId и CurrencyId
+        modelBuilder.Entity<UserBalance>()
+            .HasIndex(ub => new { ub.UserId, ub.CurrencyId })
+            .IsUnique();
     }
 } 

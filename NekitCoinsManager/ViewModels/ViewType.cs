@@ -7,5 +7,6 @@ public enum ViewType
     UserManagement,
     Transaction,
     TransactionHistory,
-    UserCard
+    UserCard,
+    CurrencyManagement
 } 

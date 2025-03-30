@@ -11,6 +11,7 @@ public partial class UserManagementViewModel : ViewModelBase
 {
     private readonly IUserService _userService;
     private readonly INotificationService _notificationService;
+    private readonly IUserBalanceService _userBalanceService;
     
     [ObservableProperty]
     private ObservableCollection<User> _users = new();
@@ -23,16 +24,30 @@ public partial class UserManagementViewModel : ViewModelBase
 
     public UserManagementViewModel(
         IUserService userService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IUserBalanceService userBalanceService)
     {
         _userService = userService;
         _notificationService = notificationService;
+        _userBalanceService = userBalanceService;
         LoadUsers();
     }
 
     private async void LoadUsers()
     {
-        Users = new ObservableCollection<User>(await _userService.GetUsersAsync());
+        var users = await _userService.GetUsersAsync();
+        Users.Clear();
+        
+        foreach (var user in users)
+        {
+            var balances = await _userBalanceService.GetUserBalancesAsync(user.Id);
+            user.Balances.Clear();
+            foreach (var balance in balances)
+            {
+                user.Balances.Add(balance);
+            }
+            Users.Add(user);
+        }
     }
 
     [RelayCommand]

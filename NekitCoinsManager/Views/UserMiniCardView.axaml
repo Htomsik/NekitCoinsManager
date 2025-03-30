@@ -14,7 +14,7 @@
     </UserControl.Resources>
     
     <Border Classes="card">
-        <Grid ColumnDefinitions="Auto,*,Auto">
+        <Grid ColumnDefinitions="Auto,*">
             <!-- Аватар пользователя -->
             <Border Grid.Column="0"
                     Classes="user-avatar">
@@ -27,9 +27,22 @@
                 <TextBlock Text="{Binding CurrentUser.Username}"
                          Classes="username"
                          FontSize="14"/>
-                <TextBlock Text="{Binding CurrentUser.Balance, StringFormat='{}{0} NC'}"
-                         Foreground="#78B159"
-                         FontSize="12"/>
+                
+                <!-- Балансы -->
+                <ItemsControl ItemsSource="{Binding Balances}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Classes="balance" FontSize="12">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0} {1}">
+                                        <Binding Path="Amount"/>
+                                        <Binding Path="Currency.Symbol"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Grid>
     </Border>

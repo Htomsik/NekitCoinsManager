@@ -45,6 +45,9 @@
                     <MenuItem Header="Все транзакции"
                               Command="{Binding NavigateCommand}"
                               CommandParameter="{x:Static vm:ViewType.TransactionHistory}"/>
+                    <MenuItem Header="Управление валютами"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.CurrencyManagement}"/>
                 </MenuItem>
             </Menu>
             

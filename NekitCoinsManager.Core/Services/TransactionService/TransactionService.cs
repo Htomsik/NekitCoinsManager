@@ -11,13 +11,13 @@ namespace NekitCoinsManager.Core.Services;
 public class TransactionService : ITransactionService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IUserService _userService;
+    private readonly IUserBalanceService _userBalanceService;
     private readonly List<ITransactionObserver> _observers = new();
 
-    public TransactionService(AppDbContext dbContext, IUserService userService)
+    public TransactionService(AppDbContext dbContext, IUserBalanceService userBalanceService)
     {
         _dbContext = dbContext;
-        _userService = userService;
+        _userBalanceService = userBalanceService;
     }
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
@@ -36,9 +36,10 @@ public class TransactionService : ITransactionService
             return (false, "Выберите отправителя и получателя");
         }
 
-        // Заполняем ID пользователей
+        // Заполняем недостающие данные
         transaction.FromUserId = transaction.FromUser.Id;
         transaction.ToUserId = transaction.ToUser.Id;
+        transaction.CurrencyId = transaction.Currency.Id;
 
         if (transaction.Amount <= 0)
         {
@@ -58,16 +59,27 @@ public class TransactionService : ITransactionService
             return (false, "Нельзя переводить монеты самому себе");
         }
 
-        if (fromUser.Balance < transaction.Amount)
+        // Проверяем баланс отправителя
+        var fromBalance = await _userBalanceService.GetUserBalanceAsync(fromUser.Id, transaction.CurrencyId);
+        if (fromBalance == null || fromBalance.Amount < transaction.Amount)
         {
             return (false, "Недостаточно монет для перевода");
         }
 
         transaction.CreatedAt = DateTime.UtcNow;
 
-        // Обновляем балансы через UserService
-        await _userService.UpdateUserBalance(fromUser.Id, fromUser.Balance - transaction.Amount);
-        await _userService.UpdateUserBalance(toUser.Id, toUser.Balance + transaction.Amount);
+        // Выполняем перевод через UserBalanceService
+        var (success, error) = await _userBalanceService.TransferBalanceAsync(
+            fromUser.Id, 
+            toUser.Id, 
+            transaction.CurrencyId, 
+            transaction.Amount
+        );
+
+        if (!success)
+        {
+            return (false, error ?? "Ошибка при переводе средств");
+        }
 
         _dbContext.Transactions.Add(transaction);
         await _dbContext.SaveChangesAsync();

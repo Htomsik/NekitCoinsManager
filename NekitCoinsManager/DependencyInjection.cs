@@ -13,6 +13,8 @@ public static class DependencyInjection
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IPasswordHasherService, PasswordHasherService>();
+        services.AddTransient<ICurrencyService, CurrencyService>();
+        services.AddTransient<IUserBalanceService, UserBalanceService>();
 
         // Регистрируем сервисы как Singleton (требуют сохранения состояния)
         services.AddSingleton<ITransactionService, TransactionService>();
@@ -28,6 +30,7 @@ public static class DependencyInjection
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserCardViewModel>();
         services.AddTransient<UserMiniCardViewModel>();
+        services.AddTransient<CurrencyManagementViewModel>();
         services.AddSingleton<NotificationViewModel>();
 
         // Регистрируем DbContext как Singleton
