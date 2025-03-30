@@ -14,7 +14,7 @@
             <TextBlock Grid.Column="0" Text="Информация о пользователе" Classes="header"/>
             
             <!-- Информация о пользователе -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto" 
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
                   ColumnDefinitions="Auto,*">
                 
                 <!-- Имя пользователя -->
@@ -46,12 +46,20 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-
-                <!-- Кнопка выхода -->
-                <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Выйти"
-                        Command="{Binding LogoutCommand}"
-                        Classes="action"/>
+                
+                <!-- Кнопки действий -->
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                            Orientation="Horizontal" Spacing="10" Margin="0,10,0,10">
+                    <!-- Кнопка просмотра токенов -->
+                    <Button Content="Просмотр токенов"
+                            Command="{Binding ViewUserTokensCommand}"
+                            Classes="action"/>
+                            
+                    <!-- Кнопка выхода -->
+                    <Button Content="Выйти"
+                            Command="{Binding LogoutCommand}"
+                            Classes="action"/>
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>

@@ -46,6 +46,7 @@ public static class DependencyInjection
         services.AddTransient<TransactionViewModel>();
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<CurrencyManagementViewModel>();
+        services.AddTransient<UserTokensViewModel>();
 
         return services;
     }

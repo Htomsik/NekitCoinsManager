@@ -25,7 +25,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:User">
                         <Border Classes="card user-card">
-                            <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                 <!-- Аватар пользователя -->
                                 <Border Grid.Column="0"
                                         Classes="user-avatar">
@@ -54,12 +54,22 @@
                                     </ItemsControl>
                                 </StackPanel>
                                 
-                                <!-- Кнопка удаления -->
+                                <!-- Кнопка просмотра токенов -->
                                 <Button Grid.Column="2"
+                                       Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).ViewUserTokensCommand}"
+                                       CommandParameter="{Binding}"
+                                       Classes="icon"
+                                       Margin="4,0"
+                                       ToolTip.Tip="Просмотр токенов">
+                                    <PathIcon Data="{StaticResource SettingsRegular}"/>
+                                </Button>
+                                
+                                <!-- Кнопка удаления -->
+                                <Button Grid.Column="3"
                                        Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
                                        CommandParameter="{Binding}"
                                        Classes="icon"
-                                       ToolTip.Tip="Delete User">
+                                       ToolTip.Tip="Удалить пользователя">
                                     <PathIcon Data="{StaticResource DeleteRegular}"/>
                                 </Button>
                             </Grid>
@@ -67,7 +77,6 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            
         </Grid>
     </Border>
 </UserControl> 

@@ -45,6 +45,9 @@
       <Compile Update="Views\CurrencyManagementView.axaml.cs">
         <DependentUpon>CurrencyManagementView.axaml</DependentUpon>
       </Compile>
+      <Compile Update="Views\UserTokensView.axaml.cs">
+        <DependentUpon>UserTokensView.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

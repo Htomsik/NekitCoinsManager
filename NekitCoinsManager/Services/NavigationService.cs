@@ -50,7 +50,33 @@ public class NavigationService : INavigationService
         CurrentView = viewModel;
     }
 
-    
+    public async Task NavigateToWithParamsAsync<TParams>(ViewType viewType, TParams parameters, ViewType returnViewType)
+    {
+        // Запоминаем, откуда пришли, чтобы знать, куда вернуться
+        _previousViewType = returnViewType;
+        
+        // Создаем вьюмодель для указанного типа представления
+        var viewModel = viewType switch
+        {
+            ViewType.UserTokens => _serviceProvider.GetRequiredService<UserTokensViewModel>(),
+            // Добавьте другие типы представлений здесь по мере необходимости
+            _ => throw new NotSupportedException($"Навигация к {viewType} с параметрами типа {typeof(TParams).Name} не поддерживается")
+        };
+        
+        // Инициализируем вьюмодель в соответствии с типом параметра
+        switch (viewModel)
+        {
+            case UserTokensViewModel tokenViewModel when parameters is User user:
+                await tokenViewModel.LoadUserTokens(user);
+                break;
+            // Добавьте другие типы вьюмоделей и параметров здесь по мере необходимости
+            default:
+                throw new NotSupportedException($"Инициализация вьюмодели {viewModel.GetType().Name} с параметрами типа {typeof(TParams).Name} не поддерживается");
+        }
+        
+        // Устанавливаем текущее представление
+        CurrentView = viewModel;
+    }
     
     public void NavigateBack()
     {

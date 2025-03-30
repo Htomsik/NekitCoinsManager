@@ -23,7 +23,11 @@ public interface INavigationService
     /// Навигация к указанному типу представления
     /// </summary>
     void NavigateTo(ViewType viewType);
-    
+
+    /// <summary>
+    /// Навигация к указанному представлению с параметрами
+    /// </summary>
+    Task NavigateToWithParamsAsync<TParams>(ViewType viewType, TParams parameters, ViewType returnViewType);
     
     /// <summary>
     /// Возвращение к предыдущему представлению

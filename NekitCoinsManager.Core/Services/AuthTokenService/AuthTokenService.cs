@@ -87,6 +87,14 @@ public class AuthTokenService : IAuthTokenService
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId)
+    {
+        return await _dbContext.AuthTokens
+            .Where(t => t.UserId == userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+    }
+
     private string GenerateSecureToken()
     {
         using var rng = new RNGCryptoServiceProvider();

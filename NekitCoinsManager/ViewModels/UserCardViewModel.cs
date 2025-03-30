@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
@@ -12,6 +14,7 @@ public partial class UserCardViewModel : ViewModelBase
     private readonly IAuthService _authService;
     private readonly INotificationService _notificationService;
     private readonly IUserBalanceService _userBalanceService;
+    private readonly INavigationService _navigationService;
     
     [ObservableProperty]
     private User? _currentUser;
@@ -26,12 +29,14 @@ public partial class UserCardViewModel : ViewModelBase
         ICurrentUserService currentUserService, 
         IAuthService authService,
         INotificationService notificationService,
-        IUserBalanceService userBalanceService)
+        IUserBalanceService userBalanceService,
+        INavigationService navigationService)
     {
         _currentUserService = currentUserService;
         _authService = authService;
         _notificationService = notificationService;
         _userBalanceService = userBalanceService;
+        _navigationService = navigationService;
         LoadCurrentUser();
         LoadBalancesAsync();
     }
@@ -58,5 +63,18 @@ public partial class UserCardViewModel : ViewModelBase
     {
         _authService.Logout();
         _notificationService.ShowInfo("Выход выполнен успешно");
+    }
+    
+    [RelayCommand]
+    private async Task ViewUserTokens()
+    {
+        if (CurrentUser == null)
+        {
+            _notificationService.ShowError("Пользователь не найден");
+            return;
+        }
+        
+        // Используем универсальный метод навигации с параметрами
+        await _navigationService.NavigateToWithParamsAsync(ViewType.UserTokens, CurrentUser, ViewType.UserCard);
     }
 } 
