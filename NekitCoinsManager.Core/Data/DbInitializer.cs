@@ -31,7 +31,7 @@ public static class DbInitializer
             bool hasNekitCoins = context.Currencies.Any(c => c.Code == "NKC");
             
             // Проверяем наличие аккаунта банка
-            bool hasBankAccount = context.Users.Any(u => u.Username == "BankAccount" && u.IsBankAccount);
+            bool hasBankAccount = context.Users.Any(u => u.Username == "РОФЛОБАНК" && u.IsBankAccount);
             
             // Если основные данные отсутствуют, пересоздаем базу
             if (!hasNekitCoins || !hasBankAccount)

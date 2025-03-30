@@ -1,19 +1,19 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IServiceProvider _serviceProvider;
     private readonly IAuthService _authService;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty]
-    private object _currentView;
+    private IViewModel _currentView;
 
     [ObservableProperty]
     private UserMiniCardViewModel _userMiniCardViewModel;
@@ -25,21 +25,31 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
 
     public MainWindowViewModel(
         ICurrentUserService currentUserService,
-        IServiceProvider serviceProvider,
         UserMiniCardViewModel userMiniCardViewModel,
         NotificationViewModel notificationViewModel,
-        IAuthService authService)
+        IAuthService authService,
+        INavigationService navigationService)
     {
         _currentUserService = currentUserService;
-        _serviceProvider = serviceProvider;
         _userMiniCardViewModel = userMiniCardViewModel;
         _notificationViewModel = notificationViewModel;
         _authService = authService;
+        _navigationService = navigationService;
+        
+        // Подписываемся на изменение текущего представления
+        _navigationService.CurrentViewChanged += OnCurrentViewChanged;
+        
+        // Текущее представление будет установлено через событие CurrentViewChanged
         
         _currentUserService.Subscribe(this);
         
         // Пытаемся восстановить сессию
         TryRestoreSessionAsync();
+    }
+    
+    private void OnCurrentViewChanged(object sender, IViewModel viewModel)
+    {
+        CurrentView = viewModel;
     }
     
     private async void TryRestoreSessionAsync()
@@ -48,30 +58,20 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
         if (!success)
         {
             // Если не удалось восстановить сессию, показываем форму входа
-            Navigate(ViewType.Login);
+            _navigationService.NavigateTo(ViewType.Login);
         }
     }
     
     [RelayCommand]
     private void Navigate(ViewType viewType)
     {
-        CurrentView = viewType switch
-        {
-            ViewType.Login => _serviceProvider.GetRequiredService<UserLoginViewModel>(),
-            ViewType.Registration => _serviceProvider.GetRequiredService<UserRegistrationViewModel>(),
-            ViewType.UserManagement => _serviceProvider.GetRequiredService<UserManagementViewModel>(),
-            ViewType.Transaction => _serviceProvider.GetRequiredService<TransactionViewModel>(),
-            ViewType.TransactionHistory => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
-            ViewType.UserCard => _serviceProvider.GetRequiredService<UserCardViewModel>(),
-            ViewType.CurrencyManagement => _serviceProvider.GetRequiredService<CurrencyManagementViewModel>(),
-            _ => throw new ArgumentException($"Unknown view type: {viewType}")
-        };
+        _navigationService.NavigateTo(viewType);
     }
     
     public void OnCurrentUserChanged()
     {
         // Обновляем view в зависимости от состояния авторизации
-        Navigate(_currentUserService.CurrentUser != null ? ViewType.Transaction : ViewType.Login);
+        _navigationService.NavigateTo(_currentUserService.CurrentUser != null ? ViewType.Transaction : ViewType.Login);
         
         // Уведомляем UI об изменении состояния авторизации
         OnPropertyChanged(nameof(IsAuthenticated));
