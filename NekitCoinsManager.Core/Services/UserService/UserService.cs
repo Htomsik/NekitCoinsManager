@@ -109,6 +109,12 @@ public class UserService : IUserService
         {
             return (false, "Пользователь не найден");
         }
+        
+        // Проверяем, является ли аккаунт банковским
+        if (user.IsBankAccount)
+        {
+            return (false, "Невозможно удалить системный банковский аккаунт");
+        }
 
         if (user.SentTransactions.Any() || user.ReceivedTransactions.Any())
         {

@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
+using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Services.AppSettingsService;
 using NekitCoinsManager.ViewModels;
 using NekitCoinsManager.Views;
@@ -24,6 +25,10 @@ namespace NekitCoinsManager
             var services = new ServiceCollection();
             services.AddServices();
             Services = services.BuildServiceProvider();
+
+            // Инициализируем базу данных
+            var dbContext = Services.GetRequiredService<AppDbContext>();
+            DbInitializer.Initialize(dbContext);
 
             // Загружаем настройки приложения при старте
             Task.Run(async () => 

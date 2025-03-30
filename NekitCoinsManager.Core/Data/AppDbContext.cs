@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.Core.Data;
 
@@ -10,13 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Currency> Currencies { get; set; } = null!;
     public DbSet<UserBalance> UserBalances { get; set; } = null!;
     public DbSet<UserAuthToken> AuthTokens { get; set; } = null!;
-
-    public AppDbContext()
-    {
-        // Создаем БД при первом запуске, если она не существует
-        Database.EnsureCreated();
-    }
-
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=NekitCoins.db");
@@ -69,5 +64,50 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserAuthToken>()
             .HasIndex(t => t.Token)
             .IsUnique();
+        
+        // Инициализация стартовых значений
+        SeedInitialData(modelBuilder);
+    }
+
+    private void SeedInitialData(ModelBuilder modelBuilder)
+    {
+        // Добавляем базовую валюту NekitCoins
+        var nekitCoinsCurrency = new Currency
+        {
+            Id = 1,
+            Name = "NekitCoins",
+            Code = "NKC",
+            Symbol = "₦",
+            ExchangeRate = 1m, // Базовый курс
+            LastUpdateTime = DateTime.UtcNow,
+            IsActive = true
+        };
+        
+        modelBuilder.Entity<Currency>().HasData(nekitCoinsCurrency);
+
+        // Создаем банковский аккаунт
+        var bankUser = new User
+        {
+            Id = 1,
+            Username = "РОФЛОБАНК",
+            // Хешируем стандартный пароль для безопасности
+            PasswordHash = new PasswordHasherService().HashPassword("Bank@BankAccount!"),
+            CreatedAt = DateTime.UtcNow,
+            IsBankAccount = true // Устанавливаем признак банковского аккаунта
+        };
+        
+        modelBuilder.Entity<User>().HasData(bankUser);
+
+        // Добавляем баланс банка - 500,000 NekitCoins
+        var bankBalance = new UserBalance
+        {
+            Id = 1,
+            UserId = bankUser.Id,
+            CurrencyId = nekitCoinsCurrency.Id,
+            Amount = 500000m,
+            LastUpdateTime = DateTime.UtcNow
+        };
+        
+        modelBuilder.Entity<UserBalance>().HasData(bankBalance);
     }
 } 
