@@ -13,5 +13,6 @@ public interface ITransactionService
 {
     Task<IEnumerable<Transaction>> GetTransactionsAsync();
     Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction);
+    Task<(bool success, string? error)> GrantWelcomeBonusAsync(int userId);
     void Subscribe(ITransactionObserver observer);
 } 

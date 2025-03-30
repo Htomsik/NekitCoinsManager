@@ -29,6 +29,12 @@ public partial class CurrencyManagementViewModel : ViewModelBase
     private decimal _newCurrencyExchangeRate = 1.0m;
 
     [ObservableProperty]
+    private bool _newCurrencyIsDefaultForNewUsers = false;
+
+    [ObservableProperty]
+    private decimal _newCurrencyDefaultAmount = 100.0m;
+
+    [ObservableProperty]
     private Currency? _selectedCurrency;
 
     public CurrencyManagementViewModel(
@@ -66,7 +72,11 @@ public partial class CurrencyManagementViewModel : ViewModelBase
             Name = NewCurrencyName,
             Code = NewCurrencyCode,
             Symbol = NewCurrencySymbol,
-            ExchangeRate = NewCurrencyExchangeRate
+            ExchangeRate = NewCurrencyExchangeRate,
+            IsDefaultForNewUsers = NewCurrencyIsDefaultForNewUsers,
+            DefaultAmount = NewCurrencyDefaultAmount,
+            IsActive = true,
+            LastUpdateTime = DateTime.UtcNow
         };
 
         var (success, error) = await _currencyService.AddCurrencyAsync(currency);
@@ -110,5 +120,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         NewCurrencyCode = string.Empty;
         NewCurrencySymbol = string.Empty;
         NewCurrencyExchangeRate = 1.0m;
+        NewCurrencyIsDefaultForNewUsers = false;
+        NewCurrencyDefaultAmount = 100.0m;
     }
 } 

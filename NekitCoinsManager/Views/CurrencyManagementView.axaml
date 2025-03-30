@@ -48,6 +48,21 @@
                                 HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
+                    <!-- Начислять новым пользователям -->
+                    <StackPanel Classes="form-group">
+                        <CheckBox Content="Начислять новым пользователям"
+                                 IsChecked="{Binding NewCurrencyIsDefaultForNewUsers}"/>
+                    </StackPanel>
+                    
+                    <!-- Количество для новых пользователей -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Начальная сумма" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencyDefaultAmount}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding NewCurrencyIsDefaultForNewUsers}"/>
+                    </StackPanel>
+
                     <!-- Кнопка добавления -->
                     <Button Content="Добавить валюту"
                             Command="{Binding AddCurrencyCommand}"
@@ -74,6 +89,8 @@
                         <DataGridTextColumn Header="Код" Binding="{Binding Code}"/>
                         <DataGridTextColumn Header="Символ" Binding="{Binding Symbol}"/>
                         <DataGridTextColumn Header="Курс обмена" Binding="{Binding ExchangeRate}"/>
+                        <DataGridCheckBoxColumn Header="Для новых" Binding="{Binding IsDefaultForNewUsers}"/>
+                        <DataGridTextColumn Header="Начальная сумма" Binding="{Binding DefaultAmount}"/>
                         <DataGridTextColumn Header="Последнее обновление" Binding="{Binding LastUpdateTime, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}"/>
                     </DataGrid.Columns>
                     

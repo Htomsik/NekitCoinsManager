@@ -2,12 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.Core.Data;
 
 public static class DbInitializer
 {
-    private const string DbFileName = "Data/NekitCoins.db";
+    private const string DbFileName = "NekitCoins.db";
     
     /// <summary>
     /// Проверяет и инициализирует базу данных
@@ -39,7 +40,7 @@ public static class DbInitializer
                 context.Database.EnsureDeleted();
                 
                 // Удаляем файл базы данных
-                string dbPath = Path.Combine(Environment.CurrentDirectory, DbFileName);
+                string dbPath = Path.Combine(SettingsConstants.SettingsDirectory, DbFileName);
                 if (File.Exists(dbPath))
                 {
                     File.Delete(dbPath);

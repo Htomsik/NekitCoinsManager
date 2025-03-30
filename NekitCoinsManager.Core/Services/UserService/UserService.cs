@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
@@ -8,19 +12,16 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
     private readonly IPasswordHasherService _passwordHasherService;
-    private readonly IUserBalanceService _userBalanceService;
-    private readonly ICurrencyService _currencyService;
+    private readonly ITransactionService _transactionService;
 
     public UserService(
         AppDbContext dbContext, 
         IPasswordHasherService passwordHasherService,
-        IUserBalanceService userBalanceService,
-        ICurrencyService currencyService)
+        ITransactionService transactionService)
     {
         _dbContext = dbContext;
         _passwordHasherService = passwordHasherService;
-        _userBalanceService = userBalanceService;
-        _currencyService = currencyService;
+        _transactionService = transactionService;
     }
 
     public async Task<IEnumerable<User>> GetUsersAsync()
@@ -73,26 +74,12 @@ public class UserService : IUserService
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
-        // Получаем валюту с самым низким коэффициентом обмена
-        var currencies = await _currencyService.GetCurrenciesAsync();
-        var lowestRateCurrency = currencies.OrderBy(c => c.ExchangeRate).FirstOrDefault();
-
-        if (lowestRateCurrency != null)
+        var (bonusSuccess, bonusError) = await _transactionService.GrantWelcomeBonusAsync(user.Id);
+        if (!bonusSuccess)
         {
-            // Создаем начальный баланс в валюте с самым низким коэффициентом
-            var (success, error) = await _userBalanceService.CreateBalanceAsync(
-                user.Id,
-                lowestRateCurrency.Id,
-                100 // Начальный баланс
-            );
-
-            if (!success)
-            {
-                // Если не удалось создать баланс, удаляем пользователя
-                _dbContext.Users.Remove(user);
-                await _dbContext.SaveChangesAsync();
-                return (false, error ?? "Не удалось создать начальный баланс");
-            }
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            return (false, bonusError);
         }
 
         return (true, null);
@@ -110,7 +97,6 @@ public class UserService : IUserService
             return (false, "Пользователь не найден");
         }
         
-        // Проверяем, является ли аккаунт банковским
         if (user.IsBankAccount)
         {
             return (false, "Невозможно удалить системный банковский аккаунт");

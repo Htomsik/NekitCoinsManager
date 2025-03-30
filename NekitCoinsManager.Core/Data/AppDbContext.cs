@@ -80,7 +80,9 @@ public class AppDbContext : DbContext
             Symbol = "₦",
             ExchangeRate = 1m, // Базовый курс
             LastUpdateTime = DateTime.UtcNow,
-            IsActive = true
+            IsActive = true,
+            IsDefaultForNewUsers = true, // Это валюта по умолчанию для новых пользователей
+            DefaultAmount = 100m // Начальное количество для новых пользователей
         };
         
         modelBuilder.Entity<Currency>().HasData(nekitCoinsCurrency);

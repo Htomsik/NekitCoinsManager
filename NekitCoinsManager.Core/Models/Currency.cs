@@ -11,5 +11,15 @@ namespace NekitCoinsManager.Core.Models
         public decimal ExchangeRate { get; set; }
         public DateTime LastUpdateTime { get; set; }
         public bool IsActive { get; set; }
+        
+        /// <summary>
+        /// Признак того, что валюта начисляется новым пользователям при регистрации
+        /// </summary>
+        public bool IsDefaultForNewUsers { get; set; }
+        
+        /// <summary>
+        /// Количество валюты, начисляемое при регистрации
+        /// </summary>
+        public decimal DefaultAmount { get; set; }
     }
 } 
