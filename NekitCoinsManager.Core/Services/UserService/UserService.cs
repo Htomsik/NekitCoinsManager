@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
@@ -36,6 +32,12 @@ public class UserService : IUserService
     {
         return await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Username.Equals(username));
+    }
+
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)

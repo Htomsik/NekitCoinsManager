@@ -10,6 +10,9 @@ public interface ICurrentUserObserver
 public interface ICurrentUserService
 {
     User? CurrentUser { get; }
+    UserSettings Settings { get; }
     void SetCurrentUser(User? user);
     void Subscribe(ICurrentUserObserver observer);
+    void UpdateSettings(UserSettings settings);
+    void ResetSettings();
 } 

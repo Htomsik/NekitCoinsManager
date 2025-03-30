@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
-using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
@@ -12,6 +10,7 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IAuthService _authService;
 
     [ObservableProperty]
     private object _currentView;
@@ -28,17 +27,29 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
         ICurrentUserService currentUserService,
         IServiceProvider serviceProvider,
         UserMiniCardViewModel userMiniCardViewModel,
-        NotificationViewModel notificationViewModel)
+        NotificationViewModel notificationViewModel,
+        IAuthService authService)
     {
         _currentUserService = currentUserService;
         _serviceProvider = serviceProvider;
         _userMiniCardViewModel = userMiniCardViewModel;
         _notificationViewModel = notificationViewModel;
+        _authService = authService;
         
         _currentUserService.Subscribe(this);
         
-        // Устанавливаем начальную view
-        Navigate(ViewType.Login);
+        // Пытаемся восстановить сессию
+        TryRestoreSessionAsync();
+    }
+    
+    private async void TryRestoreSessionAsync()
+    {
+        var success = await _authService.TryRestoreSessionAsync();
+        if (!success)
+        {
+            // Если не удалось восстановить сессию, показываем форму входа
+            Navigate(ViewType.Login);
+        }
     }
     
     [RelayCommand]

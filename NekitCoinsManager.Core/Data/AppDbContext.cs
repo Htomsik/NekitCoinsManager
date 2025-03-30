@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<Currency> Currencies { get; set; } = null!;
     public DbSet<UserBalance> UserBalances { get; set; } = null!;
+    public DbSet<UserAuthToken> AuthTokens { get; set; } = null!;
 
     public AppDbContext()
     {
@@ -56,6 +57,17 @@ public class AppDbContext : DbContext
         // Создаем уникальный индекс для комбинации UserId и CurrencyId
         modelBuilder.Entity<UserBalance>()
             .HasIndex(ub => new { ub.UserId, ub.CurrencyId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserAuthToken>()
+            .HasOne(t => t.User)
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Создаем уникальный индекс для токена
+        modelBuilder.Entity<UserAuthToken>()
+            .HasIndex(t => t.Token)
             .IsUnique();
     }
 } 

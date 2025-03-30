@@ -3,6 +3,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
+using NekitCoinsManager.Core.Services.AppSettingsService;
 using NekitCoinsManager.ViewModels;
 using NekitCoinsManager.Views;
 
@@ -22,6 +24,13 @@ namespace NekitCoinsManager
             var services = new ServiceCollection();
             services.AddServices();
             Services = services.BuildServiceProvider();
+
+            // Загружаем настройки приложения при старте
+            Task.Run(async () => 
+            {
+                var appSettingsService = Services.GetRequiredService<IAppSettingsService>();
+                await appSettingsService.LoadSettings();
+            }).GetAwaiter().GetResult();
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
