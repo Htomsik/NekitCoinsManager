@@ -24,6 +24,7 @@
         </PackageReference>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.6" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="Mapster" Version="7.4.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +48,9 @@
       </Compile>
       <Compile Update="Views\UserTokensView.axaml.cs">
         <DependentUpon>UserTokensView.axaml</DependentUpon>
+      </Compile>
+      <Compile Update="Views\TransactionTransferView.axaml.cs">
+        <DependentUpon>TransactionTransferView.axaml</DependentUpon>
       </Compile>
     </ItemGroup>
 

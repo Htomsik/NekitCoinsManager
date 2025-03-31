@@ -1,3 +1,5 @@
+using Mapster;
+using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Services;
@@ -15,6 +17,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(ServiceLifetime.Scoped);
         
         // Регистрируем инфраструктурные сервисы
+        services.AddTransient<IMapper, Mapper>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
@@ -45,6 +48,7 @@ public static class DependencyInjection
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<UserCardViewModel>();
+        services.AddTransient<TransactionTransferViewModel>();
         services.AddTransient<TransactionViewModel>();
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<CurrencyManagementViewModel>();

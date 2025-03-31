@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Services.AppSettingsService;
+using NekitCoinsManager.Models;
 using NekitCoinsManager.ViewModels;
 using NekitCoinsManager.Views;
 
@@ -22,6 +23,9 @@ namespace NekitCoinsManager
 
         public override void OnFrameworkInitializationCompleted()
         {
+            // Конфигурируем маппинг
+            MappingConfig.ConfigureMapping();
+            
             var services = new ServiceCollection();
             services.AddServices();
             Services = services.BuildServiceProvider();
