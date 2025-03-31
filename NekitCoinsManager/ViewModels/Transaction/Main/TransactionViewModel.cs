@@ -4,7 +4,7 @@ using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class TransactionViewModel : ViewModelBase
+public abstract partial class TransactionViewModel : ViewModelBase
 {
     private readonly ICurrentUserService _currentUserService;
 
@@ -12,35 +12,35 @@ public partial class TransactionViewModel : ViewModelBase
     private User? _currentUser;
 
     [ObservableProperty]
-    private TransactionHistoryViewModel _transactionHistory;
+    private TransactionHistoryViewModel _transactionCardHistory;
 
     [ObservableProperty]
-    private TransactionTransferViewModel _transactionTransfer;
+    private IViewModel _transactionCardViewModel;
 
     public TransactionViewModel(
         ICurrentUserService currentUserService,
-        TransactionHistoryViewModel transactionHistory,
-        TransactionTransferViewModel transactionTransfer)
+        TransactionHistoryViewModel transactionCardHistory,
+        IViewModel transactionCardViewModel)
     {
         _currentUserService = currentUserService;
-        _transactionHistory = transactionHistory;
-        _transactionTransfer = transactionTransfer;
+        _transactionCardHistory = transactionCardHistory;
+        _transactionCardViewModel = transactionCardViewModel;
         
         // Устанавливаем режим отображения только транзакций между пользователями
-        _transactionHistory.ShowAllTransactions = false;
+        _transactionCardHistory.ShowAllTransactions = false;
         
         LoadCurrentUser();
     }
 
-    private void LoadCurrentUser()
+    public void LoadCurrentUser()
     {
         CurrentUser = _currentUserService.CurrentUser;
         UpdateTransactionHistory();
     }
 
-    private void UpdateTransactionHistory()
+    public void UpdateTransactionHistory()
     {
         // При первичной загрузке получатель может быть не выбран
-        TransactionHistory.SetUsersForFiltering(CurrentUser, null);
+        TransactionCardHistory.SetUsersForFiltering(CurrentUser, null);
     }
 } 

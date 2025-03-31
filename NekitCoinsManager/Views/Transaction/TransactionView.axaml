@@ -12,11 +12,11 @@
     <Grid ColumnDefinitions="400,*">
         <!-- Форма перевода -->
         <ContentControl Grid.Column="0" 
-                        Content="{Binding TransactionTransfer}"/>
+                        Content="{Binding TransactionCardViewModel}"/>
 
         <!-- История транзакций -->
         <ContentControl Grid.Column="1" 
-                       Content="{Binding TransactionHistory}"
+                       Content="{Binding TransactionCardHistory}"
                        Margin="10,0,0,0"/>
     </Grid>
 </UserControl> 

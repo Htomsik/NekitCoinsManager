@@ -71,7 +71,7 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
     public void OnCurrentUserChanged()
     {
         // Обновляем view в зависимости от состояния авторизации
-        _navigationService.NavigateTo(_currentUserService.CurrentUser != null ? ViewType.Transaction : ViewType.Login);
+        _navigationService.NavigateTo(_currentUserService.CurrentUser != null ? ViewType.TransactionTransfer : ViewType.Login);
         
         // Уведомляем UI об изменении состояния авторизации
         OnPropertyChanged(nameof(IsAuthenticated));

@@ -36,7 +36,10 @@
                           IsVisible="{Binding IsAuthenticated}">
                     <MenuItem Header="Перевод"
                               Command="{Binding NavigateCommand}"
-                              CommandParameter="{x:Static vm:ViewType.Transaction}"/>
+                              CommandParameter="{x:Static vm:ViewType.TransactionTransfer}"/>
+                    <MenuItem Header="Пополнение баланса"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.TransactionDeposit}"/>
                 </MenuItem>
                 <MenuItem Header="Админ панель" >
                     <MenuItem Header="Пользователи"

@@ -83,6 +83,44 @@ public class TransactionService : ITransactionService
         return (true, null);
     }
 
+    /// <summary>
+    /// Проверяет валидность депозита
+    /// </summary>
+    /// <param name="transaction">Транзакция депозита</param>
+    /// <returns>Результат проверки и сообщение об ошибке</returns>
+    private async Task<(bool isValid, string? errorMessage)> ValidateDepositAsync(Transaction transaction)
+    {
+        if (transaction.ToUserId <= 0)
+        {
+            return (false, "Не указан пользователь для пополнения");
+        }
+
+        if (transaction.CurrencyId <= 0)
+        {
+            return (false, "Не указана валюта для пополнения");
+        }
+
+        if (transaction.Amount <= 0)
+        {
+            return (false, "Сумма пополнения должна быть больше нуля");
+        }
+
+        // Проверяем существование пользователя и валюты
+        var userExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.ToUserId);
+        if (!userExists)
+        {
+            return (false, $"Пользователь с ID {transaction.ToUserId} не найден");
+        }
+
+        var currencyExists = await _dbContext.Currencies.AnyAsync(c => c.Id == transaction.CurrencyId);
+        if (!currencyExists)
+        {
+            return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
+        }
+
+        return (true, null);
+    }
+
     public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
     {
         // Валидируем транзакцию
@@ -111,6 +149,68 @@ public class TransactionService : ITransactionService
             return (false, error ?? "Ошибка при переводе средств");
         }
 
+        _dbContext.Transactions.Add(transaction);
+        await _dbContext.SaveChangesAsync();
+
+        NotifyObservers();
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Пополняет баланс пользователя (депозит)
+    /// </summary>
+    /// <param name="transaction">Транзакция для пополнения баланса</param>
+    /// <returns>Результат операции и сообщение об ошибке</returns>
+    public async Task<(bool success, string? error)> DepositCoinsAsync(Transaction transaction)
+    {
+        // Валидируем данные депозита
+        var (isValid, errorMessage) = await ValidateDepositAsync(transaction);
+        if (!isValid)
+        {
+            return (false, errorMessage);
+        }
+
+        // Получаем банковский аккаунт для использования как источник пополнения
+        var (bankAccount, bankError) = await GetBankAccountAsync();
+        if (bankAccount == null)
+        {
+            return (false, bankError ?? "Не удалось найти банковский аккаунт для пополнения");
+        }
+
+        // Устанавливаем свойства для транзакции депозита
+        transaction.FromUserId = bankAccount.Id; // Используем банковский аккаунт как отправителя
+        transaction.Type = TransactionType.Deposit;
+        
+        // Устанавливаем время создания, если не задано
+        if (transaction.CreatedAt == default)
+        {
+            transaction.CreatedAt = DateTime.UtcNow;
+        }
+        
+        // Устанавливаем комментарий, если не задан
+        if (string.IsNullOrEmpty(transaction.Comment))
+        {
+            transaction.Comment = "Пополнение баланса";
+        }
+
+        // Получаем или создаем баланс пользователя
+        var balance = await _userBalanceService.GetUserBalanceAsync(transaction.ToUserId, transaction.CurrencyId);
+        if (balance == null)
+        {
+            var createResult = await _userBalanceService.CreateBalanceAsync(transaction.ToUserId, transaction.CurrencyId, 0);
+            if (!createResult.success)
+            {
+                return (false, createResult.error ?? "Не удалось создать баланс пользователя");
+            }
+            
+            balance = await _userBalanceService.GetUserBalanceAsync(transaction.ToUserId, transaction.CurrencyId);
+        }
+
+        // Увеличиваем баланс пользователя
+        balance!.Amount += transaction.Amount;
+        balance.LastUpdateTime = DateTime.UtcNow;
+        
+        // Сохраняем транзакцию и обновляем баланс
         _dbContext.Transactions.Add(transaction);
         await _dbContext.SaveChangesAsync();
 

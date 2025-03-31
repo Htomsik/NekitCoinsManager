@@ -49,7 +49,12 @@ public static class DependencyInjection
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<UserCardViewModel>();
         services.AddTransient<TransactionTransferViewModel>();
-        services.AddTransient<TransactionViewModel>();
+        services.AddTransient<TransactionDepositViewModel>();
+        
+        // Регистрируем конкретные реализации TransactionViewModel
+        services.AddTransient<TransactionMainTransferViewModel>();
+        services.AddTransient<TransactionMainDepositViewModel>();
+        
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<CurrencyManagementViewModel>();
         services.AddTransient<UserTokensViewModel>();

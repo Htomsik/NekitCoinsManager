@@ -9,7 +9,7 @@ namespace NekitCoinsManager.Services;
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
-    private ViewType _previousViewType = ViewType.Transaction;
+    private ViewType _previousViewType = ViewType.TransactionTransfer;
     private IViewModel _currentView;
 
     public IViewModel CurrentView
@@ -39,7 +39,8 @@ public class NavigationService : INavigationService
             ViewType.Login => _serviceProvider.GetRequiredService<UserLoginViewModel>(),
             ViewType.Registration => _serviceProvider.GetRequiredService<UserRegistrationViewModel>(),
             ViewType.UserManagement => _serviceProvider.GetRequiredService<UserManagementViewModel>(),
-            ViewType.Transaction => _serviceProvider.GetRequiredService<TransactionViewModel>(),
+            ViewType.TransactionTransfer => _serviceProvider.GetRequiredService<TransactionMainTransferViewModel>(),
+            ViewType.TransactionDeposit => _serviceProvider.GetRequiredService<TransactionMainDepositViewModel>(),
             ViewType.TransactionHistory => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
             ViewType.UserCard => _serviceProvider.GetRequiredService<UserCardViewModel>(),
             ViewType.CurrencyManagement => _serviceProvider.GetRequiredService<CurrencyManagementViewModel>(),
