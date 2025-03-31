@@ -14,7 +14,8 @@ public class AppDbContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=NekitCoins.db");
+        string dbPath = Path.Combine(SettingsConstants.SettingsDirectory, "NekitCoins.db");
+        optionsBuilder.UseSqlite($"Data Source={dbPath}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

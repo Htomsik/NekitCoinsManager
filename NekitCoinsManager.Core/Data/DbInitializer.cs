@@ -15,41 +15,103 @@ public static class DbInitializer
     /// </summary>
     public static void Initialize(AppDbContext context, bool forceReset = false)
     {
-        if (forceReset)
+        try
         {
-            // Удаляем существующую базу данных
-            context.Database.EnsureDeleted();
-        }
-        
-        // Проверяем существование базы данных
-        bool created = context.Database.EnsureCreated();
-        
-        // Если база данных уже существует, проверяем наличие данных
-        if (!created && !forceReset)
-        {
-            // Проверяем наличие валюты NekitCoins
-            bool hasNekitCoins = context.Currencies.Any(c => c.Code == "NKC");
+            // Создаем директорию для базы данных, если она не существует
+            Directory.CreateDirectory(SettingsConstants.SettingsDirectory);
             
-            // Проверяем наличие аккаунта банка
-            bool hasBankAccount = context.Users.Any(u => u.Username == "РОФЛОБАНК" && u.IsBankAccount);
-            
-            // Если основные данные отсутствуют, пересоздаем базу
-            if (!hasNekitCoins || !hasBankAccount)
+            if (forceReset)
             {
-                // Закрываем подключение к БД
+                // Удаляем существующую базу данных только при явном указании
                 context.Database.EnsureDeleted();
+            }
+            
+            // Проверяем/создаем базу данных
+            bool created = context.Database.EnsureCreated();
+            
+            // Если база данных только что создана, то данные уже заполнены через SeedInitialData
+            if (created)
+            {
+                Console.WriteLine("База данных успешно создана и инициализирована.");
+                return;
+            }
+            
+            // Если база данных существует, проверяем только критические данные
+            if (!forceReset)
+            {
+                bool hasBankAccount = context.Users.Any(u => u.IsBankAccount);
+                bool hasNekitCoins = context.Currencies.Any(c => c.Code == "NKC");
                 
-                // Удаляем файл базы данных
-                string dbPath = Path.Combine(SettingsConstants.SettingsDirectory, DbFileName);
-                if (File.Exists(dbPath))
+                // Если критически важные данные отсутствуют, восстанавливаем только их
+                if (!hasBankAccount)
                 {
-                    File.Delete(dbPath);
+                    // Создаем банковский аккаунт, если он отсутствует
+                    var bankUser = new NekitCoinsManager.Core.Models.User
+                    {
+                        Username = "РОФЛОБАНК",
+                        PasswordHash = new PasswordHasherService().HashPassword("Bank@BankAccount!"),
+                        CreatedAt = DateTime.UtcNow,
+                        IsBankAccount = true
+                    };
+                    
+                    context.Users.Add(bankUser);
+                    context.SaveChanges();
+                    
+                    Console.WriteLine("Банковский аккаунт восстановлен.");
                 }
                 
-                // Создаем новую БД
-                using var newContext = new AppDbContext();
-                newContext.Database.EnsureCreated();
+                if (!hasNekitCoins)
+                {
+                    // Создаем валюту NekitCoins, если она отсутствует
+                    var nekitCoinsCurrency = new NekitCoinsManager.Core.Models.Currency
+                    {
+                        Name = "NekitCoins",
+                        Code = "NKC",
+                        Symbol = "₦",
+                        ExchangeRate = 1m,
+                        LastUpdateTime = DateTime.UtcNow,
+                        IsActive = true,
+                        IsDefaultForNewUsers = true,
+                        DefaultAmount = 100m
+                    };
+                    
+                    context.Currencies.Add(nekitCoinsCurrency);
+                    context.SaveChanges();
+                    
+                    Console.WriteLine("Валюта NekitCoins восстановлена.");
+                }
+                
+                // Проверяем, есть ли у банка баланс NekitCoins
+                var bankUser2 = context.Users.FirstOrDefault(u => u.IsBankAccount);
+                var nekitCoinsCurrency2 = context.Currencies.FirstOrDefault(c => c.Code == "NKC");
+                
+                if (bankUser2 != null && nekitCoinsCurrency2 != null)
+                {
+                    bool hasBankBalance = context.UserBalances.Any(b => 
+                        b.UserId == bankUser2.Id && b.CurrencyId == nekitCoinsCurrency2.Id);
+                    
+                    if (!hasBankBalance)
+                    {
+                        // Если у банка нет баланса, создаем его с начальным значением
+                        var bankBalance = new NekitCoinsManager.Core.Models.UserBalance
+                        {
+                            UserId = bankUser2.Id,
+                            CurrencyId = nekitCoinsCurrency2.Id,
+                            Amount = 500000m,
+                            LastUpdateTime = DateTime.UtcNow
+                        };
+                        
+                        context.UserBalances.Add(bankBalance);
+                        context.SaveChanges();
+                        
+                        Console.WriteLine("Баланс банка восстановлен.");
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при инициализации базы данных: {ex.Message}");
         }
     }
 } 

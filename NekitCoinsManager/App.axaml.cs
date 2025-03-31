@@ -26,9 +26,12 @@ namespace NekitCoinsManager
             services.AddServices();
             Services = services.BuildServiceProvider();
 
-            // Инициализируем базу данных
-            var dbContext = Services.GetRequiredService<AppDbContext>();
-            DbInitializer.Initialize(dbContext);
+            // Инициализируем базу данных в рамках отдельной области видимости
+            using (var scope = Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                DbInitializer.Initialize(dbContext);
+            }
 
             // Загружаем настройки приложения при старте
             Task.Run(async () => 

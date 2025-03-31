@@ -11,22 +11,24 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
+        // Регистрируем DbContext - используем Scoped для лучшей производительности и отслеживания изменений
+        services.AddDbContext<AppDbContext>(ServiceLifetime.Scoped);
+        
         // Регистрируем инфраструктурные сервисы
-        services.AddSingleton<AppDbContext>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         
         // Регистрируем бизнес-сервисы
-        services.AddTransient<IAuthService, AuthService>();
-        services.AddTransient<IAuthTokenService, AuthTokenService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthTokenService, AuthTokenService>();
         services.AddTransient<IHardwareInfoService, HardwareInfoService>();
-        services.AddTransient<IUserService, UserService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-        services.AddTransient<ICurrencyService, CurrencyService>();
-        services.AddTransient<IUserBalanceService, UserBalanceService>();
+        services.AddScoped<ICurrencyService, CurrencyService>();
+        services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddTransient<IUserSettingsService, UserFileSettingsService>();
-        services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddScoped<ITransactionService, TransactionService>();
 
         // Регистрируем сервис навигации
         services.AddSingleton<INavigationService, NavigationService>();
