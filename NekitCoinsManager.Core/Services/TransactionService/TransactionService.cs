@@ -95,7 +95,7 @@ public class TransactionService : ITransactionService
         {
             transaction.CreatedAt = DateTime.UtcNow;
         }
-
+        
         // Выполняем перевод через UserBalanceService
         var (success, error) = await _userBalanceService.TransferBalanceAsync(
             transaction.FromUserId, 
@@ -177,7 +177,8 @@ public class TransactionService : ITransactionService
                 CurrencyId = currency.Id,
                 Amount = amount,
                 Comment = $"Приветственный бонус для {user.Username}",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Type = TransactionType.Transfer
             };
             
             // Выполняем транзакцию

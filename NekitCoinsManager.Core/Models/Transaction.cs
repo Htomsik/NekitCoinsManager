@@ -11,6 +11,7 @@ public class Transaction
     public decimal Amount { get; set; }
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public TransactionType Type { get; set; } = TransactionType.Transfer;
     
     public virtual User FromUser { get; set; } = null!;
     public virtual User ToUser { get; set; } = null!;

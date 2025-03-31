@@ -26,6 +26,9 @@
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <PathIcon Width="16" Height="16"
                                                  Data="{StaticResource TransferRegular}"/>
+                                        <TextBlock Text="{Binding Type}" 
+                                                 FontSize="10" 
+                                                 HorizontalAlignment="Center"/>
                                     </StackPanel>
 
                                     <!-- Информация о транзакции -->
