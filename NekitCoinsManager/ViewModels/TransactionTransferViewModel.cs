@@ -95,21 +95,20 @@ public partial class TransactionTransferViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Проверяет корректность заполнения формы
+    /// Проверяет необходимые UI-условия перед отправкой формы
+    /// (Основная валидация выполняется в TransactionService)
     /// </summary>
-    private (bool isValid, string? errorMessage) ValidateForm()
+    private (bool isValid, string? errorMessage) ValidateFormUI()
     {
         if (CurrentUser == null)
             return (false, "Необходимо авторизоваться");
 
-        if (TransactionForm.Amount <= 0)
-            return (false, "Сумма должна быть больше нуля");
+        // Базовая проверка заполненности полей формы, остальные проверки выполнит сервис
+        if (TransactionForm.ToUserId <= 0)
+            return (false, "Выберите получателя");
 
         if (TransactionForm.CurrencyId <= 0)
             return (false, "Выберите валюту для перевода");
-
-        if (TransactionForm.ToUserId <= 0)
-            return (false, "Выберите получателя");
 
         return (true, null);
     }
@@ -128,7 +127,7 @@ public partial class TransactionTransferViewModel : ViewModelBase
     [RelayCommand]
     private async Task Transfer()
     {
-        var (isValid, errorMessage) = ValidateForm();
+        var (isValid, errorMessage) = ValidateFormUI();
         if (!isValid)
         {
             _notificationService.ShowError(errorMessage ?? "Некорректные данные");

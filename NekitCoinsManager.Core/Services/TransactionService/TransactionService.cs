@@ -25,58 +25,51 @@ public class TransactionService : ITransactionService
         return await _dbContext.Transactions
             .Include(t => t.FromUser)
             .Include(t => t.ToUser)
+            .Include(t => t.Currency)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }
 
-    public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
+    /// <summary>
+    /// Проверяет валидность транзакции
+    /// </summary>
+    /// <param name="transaction">Транзакция для проверки</param>
+    /// <returns>Результат проверки и сообщение об ошибке</returns>
+    private async Task<(bool isValid, string? errorMessage)> ValidateTransactionAsync(Transaction transaction)
     {
-        // Проверяем и загружаем данные пользователей, если их нет
-        if (transaction.FromUser == null)
+        // Проверяем валидность ID пользователей и валюты
+        if (transaction.FromUserId <= 0)
         {
-            var fromUser = await _dbContext.Users.FindAsync(transaction.FromUserId);
-            if (fromUser == null)
-            {
-                return (false, $"Отправитель с ID {transaction.FromUserId} не найден");
-            }
-            transaction.FromUser = fromUser;
-        }
-        else
-        {
-            transaction.FromUserId = transaction.FromUser.Id;
+            return (false, "Не указан отправитель перевода");
         }
 
-        if (transaction.ToUser == null)
+        if (transaction.ToUserId <= 0)
         {
-            var toUser = await _dbContext.Users.FindAsync(transaction.ToUserId);
-            if (toUser == null)
-            {
-                return (false, $"Получатель с ID {transaction.ToUserId} не найден");
-            }
-            transaction.ToUser = toUser;
-        }
-        else
-        {
-            transaction.ToUserId = transaction.ToUser.Id;
+            return (false, "Не указан получатель перевода");
         }
 
-        if (transaction.Currency == null)
+        if (transaction.CurrencyId <= 0)
         {
-            var currency = await _dbContext.Currencies.FindAsync(transaction.CurrencyId);
-            if (currency == null)
-            {
-                return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
-            }
-            transaction.Currency = currency;
-        }
-        else
-        {
-            transaction.CurrencyId = transaction.Currency.Id;
+            return (false, "Не указана валюта перевода");
         }
 
-        if (transaction.Amount <= 0)
+        // Проверяем существование пользователей и валюты в базе данных
+        var fromUserExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.FromUserId);
+        if (!fromUserExists)
         {
-            return (false, "Сумма перевода должна быть больше 0");
+            return (false, $"Отправитель с ID {transaction.FromUserId} не найден");
+        }
+
+        var toUserExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.ToUserId);
+        if (!toUserExists)
+        {
+            return (false, $"Получатель с ID {transaction.ToUserId} не найден");
+        }
+
+        var currencyExists = await _dbContext.Currencies.AnyAsync(c => c.Id == transaction.CurrencyId);
+        if (!currencyExists)
+        {
+            return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
         }
 
         if (transaction.FromUserId == transaction.ToUserId)
@@ -84,13 +77,22 @@ public class TransactionService : ITransactionService
             return (false, "Нельзя переводить монеты самому себе");
         }
 
-        // Проверяем баланс отправителя
-        var fromBalance = await _userBalanceService.GetUserBalanceAsync(transaction.FromUserId, transaction.CurrencyId);
-        if (fromBalance == null || fromBalance.Amount < transaction.Amount)
+        // Проверка суммы перевода и баланса выполняется в UserBalanceService,
+        // поэтому здесь эти проверки не дублируем
+
+        return (true, null);
+    }
+
+    public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
+    {
+        // Валидируем транзакцию
+        var (isValid, errorMessage) = await ValidateTransactionAsync(transaction);
+        if (!isValid)
         {
-            return (false, "Недостаточно монет для перевода");
+            return (false, errorMessage);
         }
 
+        // Устанавливаем время создания, если не задано
         if (transaction.CreatedAt == default)
         {
             transaction.CreatedAt = DateTime.UtcNow;
@@ -115,30 +117,30 @@ public class TransactionService : ITransactionService
         NotifyObservers();
         return (true, null);
     }
-    
+
     /// <summary>
-    /// Начисляет приветственный бонус новому пользователю
+    /// Получает банковский аккаунт
     /// </summary>
-    /// <param name="userId">ID нового пользователя</param>
-    /// <returns>Результат операции и сообщение об ошибке</returns>
-    public async Task<(bool success, string? error)> GrantWelcomeBonusAsync(int userId)
+    /// <returns>Банковский аккаунт или null, если не найден</returns>
+    private async Task<(User? user, string? error)> GetBankAccountAsync()
     {
-        // Получаем пользователя
-        var user = await _dbContext.Users.FindAsync(userId);
-        if (user == null)
-        {
-            return (false, $"Пользователь с ID {userId} не найден");
-        }
-        
-        // Получаем банковский аккаунт
         var bankAccount = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.IsBankAccount);
 
         if (bankAccount == null)
         {
-            return (false, "Ошибка: банковский аккаунт не найден");
+            return (null, "Ошибка: банковский аккаунт не найден");
         }
-        
+
+        return (bankAccount, null);
+    }
+
+    /// <summary>
+    /// Получает список валют для начисления приветственного бонуса
+    /// </summary>
+    /// <returns>Список валют или пустой список, если валюты не найдены</returns>
+    private async Task<(List<Currency> currencies, string? error)> GetWelcomeBonusCurrenciesAsync()
+    {
         // Получаем валюты, начисляемые при регистрации
         var defaultCurrencies = await _dbContext.Currencies
             .Where(c => c.IsActive && c.IsDefaultForNewUsers)
@@ -160,11 +162,42 @@ public class TransactionService : ITransactionService
         
         if (!defaultCurrencies.Any())
         {
-            return (false, "Не найдено ни одной активной валюты для начисления бонуса");
+            return (new List<Currency>(), "Не найдено ни одной активной валюты для начисления бонуса");
+        }
+
+        return (defaultCurrencies, null);
+    }
+    
+    /// <summary>
+    /// Начисляет приветственный бонус новому пользователю
+    /// </summary>
+    /// <param name="userId">ID нового пользователя</param>
+    /// <returns>Результат операции и сообщение об ошибке</returns>
+    public async Task<(bool success, string? error)> GrantWelcomeBonusAsync(int userId)
+    {
+        // Получаем пользователя
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return (false, $"Пользователь с ID {userId} не найден");
+        }
+        
+        // Получаем банковский аккаунт
+        var (bankAccount, bankError) = await GetBankAccountAsync();
+        if (bankAccount == null)
+        {
+            return (false, bankError);
+        }
+        
+        // Получаем валюты для начисления бонуса
+        var (currencies, currencyError) = await GetWelcomeBonusCurrenciesAsync();
+        if (!currencies.Any())
+        {
+            return (false, currencyError);
         }
         
         // Выполняем транзакции для каждой валюты
-        foreach (var currency in defaultCurrencies)
+        foreach (var currency in currencies)
         {
             // Определяем количество начисляемой валюты
             decimal amount = currency.IsDefaultForNewUsers ? currency.DefaultAmount : 100;

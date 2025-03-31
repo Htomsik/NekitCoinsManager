@@ -80,38 +80,81 @@ public class UserBalanceService : IUserBalanceService
         return (true, null);
     }
 
-    public async Task<(bool success, string? error)> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount)
+    /// <summary>
+    /// Проверяет возможность перевода средств
+    /// </summary>
+    /// <param name="fromUserId">ID отправителя</param>
+    /// <param name="currencyId">ID валюты</param>
+    /// <param name="amount">Сумма перевода</param>
+    /// <returns>Результат проверки и сообщение об ошибке</returns>
+    private async Task<(bool canTransfer, UserBalance? fromBalance, string? error)> ValidateTransferAsync(
+        int fromUserId, int currencyId, decimal amount)
     {
         if (amount <= 0)
         {
-            return (false, "Сумма перевода должна быть больше нуля");
+            return (false, null, "Сумма перевода должна быть больше нуля");
         }
 
         var fromBalance = await GetUserBalanceAsync(fromUserId, currencyId);
         if (fromBalance == null)
         {
-            return (false, "У отправителя нет баланса в данной валюте");
+            return (false, null, "У отправителя нет баланса в данной валюте");
         }
 
         if (fromBalance.Amount < amount)
         {
-            return (false, "Недостаточно средств для перевода");
+            return (false, null, "Недостаточно средств для перевода");
         }
 
+        return (true, fromBalance, null);
+    }
+
+    /// <summary>
+    /// Получает или создает баланс получателя
+    /// </summary>
+    /// <param name="toUserId">ID получателя</param>
+    /// <param name="currencyId">ID валюты</param>
+    /// <returns>Баланс получателя и сообщение об ошибке</returns>
+    private async Task<(UserBalance? toBalance, string? error)> GetOrCreateRecipientBalanceAsync(
+        int toUserId, int currencyId)
+    {
         var toBalance = await GetUserBalanceAsync(toUserId, currencyId);
+        if (toBalance != null)
+        {
+            return (toBalance, null);
+        }
+        
+        var result = await CreateBalanceAsync(toUserId, currencyId, 0);
+        if (!result.success)
+        {
+            return (null, result.error);
+        }
+        
+        toBalance = await GetUserBalanceAsync(toUserId, currencyId);
+        return (toBalance, null);
+    }
+
+    public async Task<(bool success, string? error)> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount)
+    {
+        // Валидируем возможность перевода
+        var (canTransfer, fromBalance, validationError) = await ValidateTransferAsync(fromUserId, currencyId, amount);
+        if (!canTransfer)
+        {
+            return (false, validationError);
+        }
+        
+        // Получаем или создаем баланс получателя
+        var (toBalance, balanceError) = await GetOrCreateRecipientBalanceAsync(toUserId, currencyId);
         if (toBalance == null)
         {
-            var result = await CreateBalanceAsync(toUserId, currencyId, 0);
-            if (!result.success)
-            {
-                return result;
-            }
-            toBalance = await GetUserBalanceAsync(toUserId, currencyId);
+            return (false, balanceError);
         }
 
-        fromBalance.Amount -= amount;
-        toBalance!.Amount += amount;
+        // Выполняем перевод
+        fromBalance!.Amount -= amount;
+        toBalance.Amount += amount;
 
+        // Обновляем время последнего обновления
         var now = DateTime.UtcNow;
         fromBalance.LastUpdateTime = now;
         toBalance.LastUpdateTime = now;

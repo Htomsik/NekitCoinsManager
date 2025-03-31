@@ -21,6 +21,7 @@
                     <TextBlock Text="Получатель" Classes="form-label"/>
                     <ComboBox ItemsSource="{Binding UsersDictionary}"
                              SelectedValue="{Binding TransactionForm.ToUserId}"
+                             SelectedValueBinding="{Binding Key}"
                              Classes="transfer-input"
                              HorizontalAlignment="Stretch">
                         <ComboBox.ItemTemplate>
@@ -36,6 +37,7 @@
                     <TextBlock Text="Валюта" Classes="form-label"/>
                     <ComboBox ItemsSource="{Binding CurrenciesDictionary}"
                              SelectedValue="{Binding TransactionForm.CurrencyId}"
+                             SelectedValueBinding="{Binding Key}"
                              Classes="transfer-input"
                              HorizontalAlignment="Stretch">
                         <ComboBox.ItemTemplate>
