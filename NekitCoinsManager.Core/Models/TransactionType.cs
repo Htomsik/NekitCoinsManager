@@ -15,5 +15,15 @@ public enum TransactionType
     /// <summary>
     /// Пополнение счета 
     /// </summary>
-    Deposit = 1
+    Deposit = 1,
+    
+    /// <summary>
+    /// Конвертация валюты
+    /// </summary>
+    Conversion = 2,
+    
+    /// <summary>
+    /// Комиссия за операцию
+    /// </summary>
+    Fee = 3
 } 

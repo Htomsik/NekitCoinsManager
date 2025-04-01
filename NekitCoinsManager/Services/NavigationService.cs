@@ -41,6 +41,7 @@ public class NavigationService : INavigationService
             ViewType.UserManagement => _serviceProvider.GetRequiredService<UserManagementViewModel>(),
             ViewType.TransactionTransfer => _serviceProvider.GetRequiredService<TransactionMainTransferViewModel>(),
             ViewType.TransactionDeposit => _serviceProvider.GetRequiredService<TransactionMainDepositViewModel>(),
+            ViewType.TransactionConversion => _serviceProvider.GetRequiredService<TransactionMainConversionViewModel>(),
             ViewType.TransactionHistory => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
             ViewType.UserCard => _serviceProvider.GetRequiredService<UserCardViewModel>(),
             ViewType.CurrencyManagement => _serviceProvider.GetRequiredService<CurrencyManagementViewModel>(),

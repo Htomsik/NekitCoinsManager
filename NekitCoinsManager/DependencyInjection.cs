@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddTransient<IUserSettingsService, UserFileSettingsService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
 
         // Регистрируем сервис навигации
         services.AddSingleton<INavigationService, NavigationService>();
@@ -50,10 +51,12 @@ public static class DependencyInjection
         services.AddTransient<UserCardViewModel>();
         services.AddTransient<TransactionTransferViewModel>();
         services.AddTransient<TransactionDepositViewModel>();
+        services.AddTransient<TransactionConversionViewModel>();
         
         // Регистрируем конкретные реализации TransactionViewModel
         services.AddTransient<TransactionMainTransferViewModel>();
         services.AddTransient<TransactionMainDepositViewModel>();
+        services.AddTransient<TransactionMainConversionViewModel>();
         
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<CurrencyManagementViewModel>();

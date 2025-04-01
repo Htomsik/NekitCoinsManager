@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:Class="NekitCoinsManager.Views.TransactionConversionView"
+             x:DataType="vm:TransactionConversionViewModel">
+    
+    <Border Classes="transfer-form">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Заголовок формы -->
+            <TextBlock Grid.Row="0" Text="Конвертация валюты" Classes="header" />
+
+            <!-- Форма конвертации -->
+            <StackPanel Grid.Row="1" Spacing="16">
+                <!-- Выбор исходной валюты -->
+                <StackPanel Classes="form-group">
+                    <TextBlock Text="Из валюты" Classes="form-label" />
+                    <ComboBox Classes="transfer-input" 
+                              SelectedValueBinding="{Binding Key}"
+                              SelectedValue="{Binding FromCurrencyId}"
+                              ItemsSource="{Binding CurrenciesDictionary}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Value.Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                
+                <!-- Сумма для конвертации -->
+                <StackPanel Classes="form-group">
+                    <TextBlock Text="Сумма" Classes="form-label" />
+                    <TextBox Text="{Binding Amount}"
+                             Classes="transfer-input"
+                             HorizontalAlignment="Stretch"/>
+                </StackPanel>
+                
+                <!-- Выбор целевой валюты -->
+                <StackPanel Classes="form-group">
+                    <TextBlock Text="В валюту" Classes="form-label" />
+                    <ComboBox Classes="transfer-input" 
+                              SelectedValueBinding="{Binding Key}"
+                              SelectedValue="{Binding ToCurrencyId}"
+                              ItemsSource="{Binding CurrenciesDictionary}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Value.Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                
+                <!-- Результат конвертации -->
+                <StackPanel Classes="form-group" 
+                           IsVisible="{Binding ConvertedAmount, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <TextBlock Text="Вы получите:" Classes="form-label" />
+                    <TextBlock Classes="transfer-result" FontSize="18" FontWeight="SemiBold">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} {1}">
+                                <Binding Path="ConvertedAmount" />
+                                <Binding Path="TargetCurrencySymbol" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+                
+                <!-- Кнопка конвертации -->
+                <Button Content="Конвертировать" 
+                        Command="{Binding ConvertCommand}"
+                        Classes="action"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl> 

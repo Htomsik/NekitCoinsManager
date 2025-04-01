@@ -173,4 +173,36 @@ public class UserBalanceService : IUserBalanceService
 
         return await CreateBalanceAsync(userId, currencyId, 0);
     }
+
+    /// <summary>
+    /// Получает баланс пользователя, а если его нет - создает с указанной начальной суммой
+    /// </summary>
+    /// <param name="userId">ID пользователя</param>
+    /// <param name="currencyId">ID валюты</param>
+    /// <param name="initialAmount">Начальная сумма при создании (по умолчанию 0)</param>
+    /// <returns>Результат операции, сообщение об ошибке и баланс пользователя</returns>
+    public async Task<(bool success, string? error, UserBalance? balance)> GetOrCreateBalanceAsync(
+        int userId, int currencyId, decimal initialAmount = 0)
+    {
+        // Сначала пытаемся получить существующий баланс
+        var balance = await GetUserBalanceAsync(userId, currencyId);
+        
+        // Если баланс уже существует, просто возвращаем его
+        if (balance != null)
+        {
+            return (true, null, balance);
+        }
+        
+        // Если баланса нет, создаем новый
+        var result = await CreateBalanceAsync(userId, currencyId, initialAmount);
+        if (!result.success)
+        {
+            return (false, result.error, null);
+        }
+        
+        // Получаем созданный баланс
+        balance = await GetUserBalanceAsync(userId, currencyId);
+        
+        return (true, null, balance);
+    }
 } 

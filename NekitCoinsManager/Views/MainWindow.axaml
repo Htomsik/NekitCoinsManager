@@ -40,6 +40,9 @@
                     <MenuItem Header="Пополнение"
                               Command="{Binding NavigateCommand}"
                               CommandParameter="{x:Static vm:ViewType.TransactionDeposit}"/>
+                    <MenuItem Header="Конвертация валюты"
+                              Command="{Binding NavigateCommand}"
+                              CommandParameter="{x:Static vm:ViewType.TransactionConversion}"/>
                 </MenuItem>
                 <MenuItem Header="Админ панель" >
                     <MenuItem Header="Пользователи"

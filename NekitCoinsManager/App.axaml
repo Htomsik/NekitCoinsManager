@@ -11,8 +11,6 @@
   
     <Application.Resources>
         <ResourceDictionary>
-            <Thickness x:Key="StandardMargin">0,0,0,10</Thickness>
-            <Thickness x:Key="CardPadding">10</Thickness>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Styles/Colors.axaml"/>
                 <ResourceInclude Source="/Styles/Icons.axaml"/>

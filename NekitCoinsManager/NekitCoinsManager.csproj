@@ -62,6 +62,9 @@
         <DependentUpon>TransactionTransferView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\Transaction\TransactionConversionView.axaml.cs">
+        <DependentUpon>TransactionConversionView.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

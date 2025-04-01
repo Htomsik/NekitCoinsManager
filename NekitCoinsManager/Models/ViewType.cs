@@ -16,6 +16,7 @@ public enum ViewType
     // Финансовые операции
     TransactionTransfer,          // Перевод между пользователями
     TransactionDeposit,   // Пополнение баланса
+    TransactionConversion,        // Конвертация валют
     TransactionHistory,   // История операций
     
     // Административные

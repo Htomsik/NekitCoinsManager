@@ -12,12 +12,17 @@ public class TransactionService : ITransactionService
 {
     private readonly AppDbContext _dbContext;
     private readonly IUserBalanceService _userBalanceService;
+    private readonly ICurrencyConversionService _currencyConversionService;
     private readonly List<ITransactionObserver> _observers = new();
 
-    public TransactionService(AppDbContext dbContext, IUserBalanceService userBalanceService)
+    public TransactionService(
+        AppDbContext dbContext, 
+        IUserBalanceService userBalanceService,
+        ICurrencyConversionService currencyConversionService)
     {
         _dbContext = dbContext;
         _userBalanceService = userBalanceService;
+        _currencyConversionService = currencyConversionService;
     }
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
@@ -323,6 +328,203 @@ public class TransactionService : ITransactionService
         }
         
         return (true, null);
+    }
+
+    /// <summary>
+    /// Проверяет валидность конвертации валюты
+    /// </summary>
+    /// <param name="userId">ID пользователя, выполняющего конвертацию</param>
+    /// <param name="fromCurrencyId">ID исходной валюты</param>
+    /// <param name="toCurrencyId">ID целевой валюты</param>
+    /// <param name="amount">Сумма для конвертации</param>
+    /// <returns>Результат проверки, сообщение об ошибке, а также найденные сущности для дальнейшего использования</returns>
+    private async Task<(bool isValid, string? errorMessage, User? user, Currency? fromCurrency, Currency? toCurrency, UserBalance? fromBalance)> 
+        ValidateConversionAsync(int userId, int fromCurrencyId, int toCurrencyId, decimal amount)
+    {
+        // Проверяем, что валюты различаются
+        if (fromCurrencyId == toCurrencyId)
+        {
+            return (false, "Нельзя конвертировать валюту саму в себя", null, null, null, null);
+        }
+        
+        // Проверяем, что сумма положительна
+        if (amount <= 0)
+        {
+            return (false, "Сумма для конвертации должна быть больше нуля", null, null, null, null);
+        }
+        
+        // Получаем пользователя
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return (false, $"Пользователь с ID {userId} не найден", null, null, null, null);
+        }
+        
+        // Получаем исходную валюту
+        var fromCurrency = await _dbContext.Currencies.FindAsync(fromCurrencyId);
+        if (fromCurrency == null)
+        {
+            return (false, $"Исходная валюта с ID {fromCurrencyId} не найдена", user, null, null, null);
+        }
+        
+        // Получаем целевую валюту
+        var toCurrency = await _dbContext.Currencies.FindAsync(toCurrencyId);
+        if (toCurrency == null)
+        {
+            return (false, $"Целевая валюта с ID {toCurrencyId} не найдена", user, fromCurrency, null, null);
+        }
+        
+        // Проверяем баланс пользователя в исходной валюте
+        var fromBalance = await _userBalanceService.GetUserBalanceAsync(userId, fromCurrencyId);
+        if (fromBalance == null || fromBalance.Amount < amount)
+        {
+            return (false, $"Недостаточно средств для конвертации. Требуется: {amount} {fromCurrency.Code}, доступно: {fromBalance?.Amount ?? 0} {fromCurrency.Code}", 
+                   user, fromCurrency, toCurrency, null);
+        }
+        
+        return (true, null, user, fromCurrency, toCurrency, fromBalance);
+    }
+
+    /// <summary>
+    /// Конвертирует указанную сумму из одной валюты в другую
+    /// </summary>
+    /// <param name="userId">ID пользователя</param>
+    /// <param name="fromCurrencyId">ID исходной валюты</param>
+    /// <param name="toCurrencyId">ID целевой валюты</param>
+    /// <param name="amount">Сумма для конвертации</param>
+    /// <returns>Результат операции, сообщение об ошибке и сконвертированная сумма</returns>
+    public async Task<(bool success, string? error, decimal? convertedAmount)> ConvertCurrencyAsync(
+        int userId, 
+        int fromCurrencyId, 
+        int toCurrencyId, 
+        decimal amount)
+    {
+        // Валидируем данные для конвертации
+        var (isValid, errorMessage, user, fromCurrency, toCurrency, fromBalance) = 
+            await ValidateConversionAsync(userId, fromCurrencyId, toCurrencyId, amount);
+        
+        if (!isValid)
+        {
+            return (false, errorMessage, null);
+        }
+        
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        
+        try
+        {
+            // Конвертируем сумму с помощью сервиса конвертации
+            decimal convertedAmount = await _currencyConversionService.ConvertAsync(
+                amount, 
+                fromCurrency!.Code, 
+                toCurrency!.Code);
+            
+            // Получаем или создаем баланс пользователя в целевой валюте
+            var (toBalanceSuccess, toBalanceError, toBalance) = await _userBalanceService.GetOrCreateBalanceAsync(userId, toCurrencyId);
+            if (!toBalanceSuccess || toBalance == null)
+            {
+                return (false, toBalanceError ?? "Не удалось получить или создать баланс пользователя в целевой валюте", null);
+            }
+            
+            // Получаем банковский аккаунт для записи транзакций
+            var (bankAccount, bankError) = await GetBankAccountAsync();
+            if (bankAccount == null)
+            {
+                return (false, bankError ?? "Не удалось найти банковский аккаунт для операции конвертации", null);
+            }
+            
+            // Проверяем баланс банка в целевой валюте
+            var bankBalance = await _userBalanceService.GetUserBalanceAsync(bankAccount.Id, toCurrencyId);
+            if (bankBalance == null || bankBalance.Amount < convertedAmount)
+            {
+                return (false, $"Банк не имеет достаточно средств в валюте {toCurrency.Code} для выполнения конвертации. Требуется: {convertedAmount} {toCurrency.Code}, доступно: {bankBalance?.Amount ?? 0} {toCurrency.Code}", null);
+            }
+            
+            // Обновляем балансы
+            fromBalance!.Amount -= amount;
+            fromBalance.LastUpdateTime = DateTime.UtcNow;
+            
+            toBalance!.Amount += convertedAmount;
+            toBalance.LastUpdateTime = DateTime.UtcNow;
+            
+            // Обновляем баланс банка
+            bankBalance!.Amount -= convertedAmount;
+            bankBalance.LastUpdateTime = DateTime.UtcNow;
+            
+            // Создаем транзакции
+            // 1. Списание исходной валюты
+            var withdrawTransaction = new Transaction
+            {
+                FromUserId = userId,
+                ToUserId = bankAccount.Id,
+                CurrencyId = fromCurrencyId,
+                Amount = amount,
+                Comment = $"Конвертация {amount} {fromCurrency.Code} в {toCurrency.Code}",
+                CreatedAt = DateTime.UtcNow,
+                Type = TransactionType.Conversion
+            };
+            
+            // Сначала добавляем транзакцию списания, чтобы получить ее ID
+            _dbContext.Transactions.Add(withdrawTransaction);
+            await _dbContext.SaveChangesAsync();
+            
+            // 2. Зачисление целевой валюты
+            var depositTransaction = new Transaction
+            {
+                FromUserId = bankAccount.Id,
+                ToUserId = userId,
+                CurrencyId = toCurrencyId,
+                Amount = convertedAmount,
+                Comment = $"Получено в результате конвертации {amount} {fromCurrency.Code}",
+                CreatedAt = DateTime.UtcNow,
+                Type = TransactionType.Conversion,
+                ParentTransactionId = withdrawTransaction.Id // Связь с транзакцией списания
+            };
+            
+            // Добавляем транзакцию зачисления
+            _dbContext.Transactions.Add(depositTransaction);
+            
+            // Применяем комиссию, если она предусмотрена (примерная логика)
+            decimal feePercentage = 0.01m; // 1% комиссия
+            decimal feeAmount = amount * feePercentage;
+            
+            if (feeAmount > 0)
+            {
+                // Создаем транзакцию комиссии
+                var feeTransaction = new Transaction
+                {
+                    FromUserId = userId,
+                    ToUserId = bankAccount.Id,
+                    CurrencyId = fromCurrencyId,
+                    Amount = feeAmount,
+                    Comment = $"Комиссия за конвертацию {amount} {fromCurrency.Code}",
+                    CreatedAt = DateTime.UtcNow,
+                    Type = TransactionType.Fee,
+                    ParentTransactionId = withdrawTransaction.Id // Связь с основной транзакцией
+                };
+                
+                // Списываем комиссию с баланса пользователя
+                fromBalance!.Amount -= feeAmount;
+                
+                // Добавляем транзакцию комиссии
+                _dbContext.Transactions.Add(feeTransaction);
+            }
+            
+            await _dbContext.SaveChangesAsync();
+            
+            // Фиксируем транзакцию в БД
+            await transaction.CommitAsync();
+            
+            // Уведомляем наблюдателей
+            NotifyObservers();
+            
+            return (true, null, convertedAmount);
+        }
+        catch (Exception ex)
+        {
+            // В случае ошибки откатываем изменения
+            await transaction.RollbackAsync();
+            return (false, $"Ошибка при конвертации валюты: {ex.Message}", null);
+        }
     }
 
     public void Subscribe(ITransactionObserver observer)
