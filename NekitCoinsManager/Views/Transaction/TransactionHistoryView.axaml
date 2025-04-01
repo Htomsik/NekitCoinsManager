@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
              xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
+             xmlns:mtype="using:NekitCoinsManager.Core.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NekitCoinsManager.Views.TransactionHistoryView"
              x:DataType="vm:TransactionHistoryViewModel">
@@ -19,29 +20,42 @@
                 <ItemsControl ItemsSource="{Binding Transactions}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:Transaction">
-                            <Border Classes="card" Margin="0,0,0,5" Padding="10">
+                            <Border Classes="transaction-item">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
                                     
                                     <!-- Иконка и направление -->
-                                    <StackPanel Grid.Column="0" Spacing="2">
-                                        <PathIcon Width="16" Height="16"
-                                                 Data="{StaticResource TransferRegular}"/>
-                                        <TextBlock Text="{Binding Type}" 
-                                                 FontSize="10" 
-                                                 HorizontalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Grid Grid.Column="0" Classes="transaction-icon-container">
+                                        <StackPanel Classes="transaction-icon">
+                                            <!-- Иконка перевода (двусторонняя стрелка) -->
+                                            <PathIcon Classes="transaction-icon"
+                                                     IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}"
+                                                     Data="{StaticResource TransferIcon}"/>
+                                            
+                                            <!-- Иконка пополнения (плюс в круге) -->
+                                            <PathIcon Classes="transaction-icon"
+                                                     IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
+                                                     Data="{StaticResource DepositIcon}"/>
+                                            
+                                            <TextBlock Text="{Binding Type}" Classes="transaction-type"/>
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!-- Информация о транзакции -->
-                                    <StackPanel Grid.Column="1" Margin="10,0">
-                                        <Grid ColumnDefinitions="Auto,Auto,*">
-                                            <TextBlock Grid.Column="0" 
-                                                      Text="{Binding FromUser.Username}"/>
-                                            <TextBlock Grid.Column="1" 
-                                                      Text="→"
-                                                      Margin="5,0"/>
-                                            <TextBlock Grid.Column="2" 
-                                                      Text="{Binding ToUser.Username}"/>
+                                    <StackPanel Grid.Column="1" Classes="transaction-details">
+                                        <!-- Перевод: показываем "Отправитель → Получатель" -->
+                                        <Grid ColumnDefinitions="Auto,Auto,*" 
+                                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}">
+                                            <TextBlock Grid.Column="0" Text="{Binding FromUser.Username}" Classes="transaction-users"/>
+                                            <TextBlock Grid.Column="1" Text=" → " Margin="3,0"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding ToUser.Username}" Classes="transaction-users"/>
                                         </Grid>
+                                        
+                                        <!-- Депозит: показываем только получателя -->
+                                        <Grid ColumnDefinitions="*" 
+                                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}">
+                                            <TextBlock Grid.Column="0" Text="{Binding ToUser.Username}" Classes="transaction-users"/>
+                                        </Grid>
+                                        
                                         <TextBlock Text="{Binding Comment}"
                                                   IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                                   Classes="transaction-comment"/>
@@ -50,9 +64,7 @@
                                     </StackPanel>
 
                                     <!-- Сумма и валюта -->
-                                    <TextBlock Grid.Column="2"
-                                              Classes="username"
-                                              VerticalAlignment="Center">
+                                    <TextBlock Grid.Column="2" Classes="transaction-amount">
                                         <TextBlock.Text>
                                             <MultiBinding StringFormat="{}{0} {1}">
                                                 <Binding Path="Amount"/>

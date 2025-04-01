@@ -37,7 +37,7 @@
                     <MenuItem Header="Перевод"
                               Command="{Binding NavigateCommand}"
                               CommandParameter="{x:Static vm:ViewType.TransactionTransfer}"/>
-                    <MenuItem Header="Пополнение баланса"
+                    <MenuItem Header="Пополнение"
                               Command="{Binding NavigateCommand}"
                               CommandParameter="{x:Static vm:ViewType.TransactionDeposit}"/>
                 </MenuItem>
