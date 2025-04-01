@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
+using System;
+using System.IO;
 
 namespace NekitCoinsManager.Core.Data;
 
@@ -15,7 +17,9 @@ public class AppDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         string dbPath = Path.Combine(SettingsConstants.SettingsDirectory, "NekitCoins.db");
-        optionsBuilder.UseSqlite($"Data Source={dbPath}");
+        optionsBuilder
+            .UseLazyLoadingProxies() // Включаем ленивую загрузку
+            .UseSqlite($"Data Source={dbPath}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +40,13 @@ public class AppDbContext : DbContext
             .HasOne(t => t.Currency)
             .WithMany()
             .HasForeignKey(t => t.CurrencyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Настройка для дочерних транзакций
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.ParentTransaction)
+            .WithMany(t => t.ChildTransactions)
+            .HasForeignKey(t => t.ParentTransactionId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<UserBalance>()

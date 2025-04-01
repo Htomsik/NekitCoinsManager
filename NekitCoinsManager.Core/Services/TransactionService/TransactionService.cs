@@ -27,10 +27,9 @@ public class TransactionService : ITransactionService
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
     {
+        // С включенной ленивой загрузкой нам не нужно явно использовать Include,
+        // так как EF загрузит связанные сущности автоматически при обращении к ним
         return await _dbContext.Transactions
-            .Include(t => t.FromUser)
-            .Include(t => t.ToUser)
-            .Include(t => t.Currency)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }

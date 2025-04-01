@@ -1,5 +1,7 @@
 using Mapster;
 using NekitCoinsManager.Core.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NekitCoinsManager.Models;
 
@@ -22,5 +24,11 @@ public static class MappingConfig
         // Настройка обратного маппинга Transaction -> TransactionFormModel
         TypeAdapterConfig<Transaction, TransactionFormModel>
             .NewConfig();
+            
+        // Настройка маппинга Transaction -> TransactionDisplayModel с рекурсивной обработкой дочерних транзакций
+        TypeAdapterConfig<Transaction, TransactionDisplayModel>
+            .NewConfig()
+            .MaxDepth(3) // Ограничиваем глубину рекурсии
+            .PreserveReference(true); // Сохраняем ссылки для предотвращения зацикливания
     }
 } 

@@ -6,74 +6,74 @@
              xmlns:vm="using:NekitCoinsManager.ViewModels"
              xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
              xmlns:mtype="using:NekitCoinsManager.Core.Models"
+             xmlns:localModels="using:NekitCoinsManager.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NekitCoinsManager.Views.TransactionHistoryView"
              x:DataType="vm:TransactionHistoryViewModel">
     
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- Конвертер для текста индикатора экспандера -->
+            <x:Boolean x:Key="True">True</x:Boolean>
+            <x:Boolean x:Key="False">False</x:Boolean>
+            
+            <DataTemplate x:Key="ExpanderContentTemplate" DataType="{x:Type localModels:TransactionDisplayModel}">
+                <ContentControl Content="{Binding}" 
+                              ContentTemplate="{StaticResource TransactionTemplate}"
+                              Margin="0,0,0,5"
+                              HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Stretch"/>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
     <Border Classes="card">
         <Grid RowDefinitions="Auto,*">
-            <!-- Заголовок и переключатель -->
+            <!-- Заголовок -->
             <TextBlock Grid.Column="0" Text="История транзакций" Classes="header"/>
             
             <!-- Список транзакций -->
-            <ScrollViewer Grid.Row="1">
-                <ItemsControl ItemsSource="{Binding Transactions}">
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Transactions}" Margin="0,5">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:Transaction">
-                            <Border Classes="transaction-item">
-                                <Grid ColumnDefinitions="Auto,*,Auto">
-                                    
-                                    <!-- Иконка и направление -->
-                                    <Grid Grid.Column="0" Classes="transaction-icon-container">
-                                        <StackPanel Classes="transaction-icon">
-                                            <!-- Иконка перевода (двусторонняя стрелка) -->
-                                            <PathIcon Classes="transaction-icon"
-                                                     IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}"
-                                                     Data="{StaticResource TransferIcon}"/>
-                                            
-                                            <!-- Иконка пополнения (плюс в круге) -->
-                                            <PathIcon Classes="transaction-icon"
-                                                     IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
-                                                     Data="{StaticResource DepositIcon}"/>
-                                            
-                                            <TextBlock Text="{Binding Type}" Classes="transaction-type"/>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- Информация о транзакции -->
-                                    <StackPanel Grid.Column="1" Classes="transaction-details">
-                                        <!-- Перевод: показываем "Отправитель → Получатель" -->
-                                        <Grid ColumnDefinitions="Auto,Auto,*" 
-                                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}">
-                                            <TextBlock Grid.Column="0" Text="{Binding FromUser.Username}" Classes="transaction-users"/>
-                                            <TextBlock Grid.Column="1" Text=" → " Margin="3,0"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding ToUser.Username}" Classes="transaction-users"/>
-                                        </Grid>
-                                        
-                                        <!-- Депозит: показываем только получателя -->
-                                        <Grid ColumnDefinitions="*" 
-                                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}">
-                                            <TextBlock Grid.Column="0" Text="{Binding ToUser.Username}" Classes="transaction-users"/>
-                                        </Grid>
-                                        
-                                        <TextBlock Text="{Binding Comment}"
-                                                  IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                                  Classes="transaction-comment"/>
-                                        <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd.MM.yyyy}}"
-                                                  Classes="transaction-date"/>
-                                    </StackPanel>
-
-                                    <!-- Сумма и валюта -->
-                                    <TextBlock Grid.Column="2" Classes="transaction-amount">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0} {1}">
-                                                <Binding Path="Amount"/>
-                                                <Binding Path="Currency.Symbol"/>
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
+                        <DataTemplate>
+                            <Panel Margin="0,0,0,10" HorizontalAlignment="Stretch">
+                                <!-- Транзакции с дочерними элементами -->
+                                <Expander Classes="transaction-expander"
+                                          IsVisible="{Binding HasChildTransactions}"
+                                          HorizontalAlignment="Stretch"
+                                          Tag="{Binding IsExpanded, RelativeSource={RelativeSource Self}}">
+                                    <Expander.Header>
+                                        <ContentControl Content="{Binding}" 
+                                                      ContentTemplate="{StaticResource TransactionTemplate}"
+                                                      HorizontalAlignment="Stretch"
+                                                      HorizontalContentAlignment="Stretch"
+                                                      Margin="0"/>
+                                    </Expander.Header>
+                                
+                                    <!-- Дочерние транзакции -->
+                                    <ItemsControl ItemsSource="{Binding ChildTransactions}" 
+                                                Margin="0,6,0,0"
+                                                HorizontalAlignment="Stretch">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <ContentControl Content="{Binding}" 
+                                                              ContentTemplate="{StaticResource TransactionTemplate}"
+                                                              Margin="0,0,0,5"
+                                                              HorizontalAlignment="Stretch"
+                                                              HorizontalContentAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
+                            
+                                <!-- Для транзакций без дочерних элементов отображаем обычный шаблон -->
+                                <ContentControl Content="{Binding}" 
+                                              ContentTemplate="{StaticResource TransactionTemplate}"
+                                              IsVisible="{Binding !HasChildTransactions}"
+                                              HorizontalAlignment="Stretch"
+                                              HorizontalContentAlignment="Stretch"/>
+                            </Panel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
