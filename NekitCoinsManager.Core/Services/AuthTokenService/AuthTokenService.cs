@@ -1,25 +1,24 @@
 using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
-using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class AuthTokenService : IAuthTokenService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IUserAuthTokenRepository _tokenRepository;
     private const int TokenLength = 64;
     private const int TokenExpirationDays = 30;
 
-    public AuthTokenService(AppDbContext dbContext)
+    public AuthTokenService(IUserAuthTokenRepository tokenRepository)
     {
-        _dbContext = dbContext;
+        _tokenRepository = tokenRepository;
     }
 
     public async Task<UserAuthToken> CreateTokenAsync(int userId, string hardwareId)
     {
         // Деактивируем все предыдущие токены пользователя
-        await DeactivateAllUserTokensAsync(userId);
+        await _tokenRepository.DeactivateAllUserTokensAsync(userId);
 
         var token = new UserAuthToken
         {
@@ -31,19 +30,15 @@ public class AuthTokenService : IAuthTokenService
             IsActive = true
         };
 
-        _dbContext.AuthTokens.Add(token);
-        await _dbContext.SaveChangesAsync();
-
+        await _tokenRepository.AddAsync(token);
         return token;
     }
 
     public async Task<UserAuthToken?> ValidateTokenAsync(string token, string hardwareId)
     {
-        var authToken = await _dbContext.AuthTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.Token == token && t.IsActive);
+        var authToken = await _tokenRepository.GetByTokenAsync(token);
 
-        if (authToken == null)
+        if (authToken == null || !authToken.IsActive)
         {
             return null;
         }
@@ -56,7 +51,7 @@ public class AuthTokenService : IAuthTokenService
         if (authToken.ExpiresAt < DateTime.UtcNow)
         {
             authToken.IsActive = false;
-            await _dbContext.SaveChangesAsync();
+            await _tokenRepository.UpdateAsync(authToken);
             return null;
         }
 
@@ -65,34 +60,22 @@ public class AuthTokenService : IAuthTokenService
 
     public async Task DeactivateTokenAsync(int tokenId)
     {
-        var token = await _dbContext.AuthTokens.FindAsync(tokenId);
+        var token = await _tokenRepository.GetByIdAsync(tokenId);
         if (token != null)
         {
             token.IsActive = false;
-            await _dbContext.SaveChangesAsync();
+            await _tokenRepository.UpdateAsync(token);
         }
     }
 
     public async Task DeactivateAllUserTokensAsync(int userId)
     {
-        var tokens = await _dbContext.AuthTokens
-            .Where(t => t.UserId == userId && t.IsActive)
-            .ToListAsync();
-
-        foreach (var token in tokens)
-        {
-            token.IsActive = false;
-        }
-
-        await _dbContext.SaveChangesAsync();
+        await _tokenRepository.DeactivateAllUserTokensAsync(userId);
     }
 
     public async Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId)
     {
-        return await _dbContext.AuthTokens
-            .Where(t => t.UserId == userId)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
+        return await _tokenRepository.GetUserTokensAsync(userId);
     }
 
     private string GenerateSecureToken()

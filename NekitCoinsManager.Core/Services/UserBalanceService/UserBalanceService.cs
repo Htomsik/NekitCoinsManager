@@ -5,31 +5,34 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class UserBalanceService : IUserBalanceService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IUserBalanceRepository _userBalanceRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly ICurrencyRepository _currencyRepository;
 
-    public UserBalanceService(AppDbContext dbContext)
+    public UserBalanceService(
+        IUserBalanceRepository userBalanceRepository,
+        IUserRepository userRepository,
+        ICurrencyRepository currencyRepository)
     {
-        _dbContext = dbContext;
+        _userBalanceRepository = userBalanceRepository;
+        _userRepository = userRepository;
+        _currencyRepository = currencyRepository;
     }
 
     public async Task<IEnumerable<UserBalance>> GetUserBalancesAsync(int userId)
     {
-        return await _dbContext.UserBalances
-            .Include(ub => ub.Currency)
-            .Where(ub => ub.UserId == userId)
-            .ToListAsync();
+        return await _userBalanceRepository.GetUserBalancesAsync(userId);
     }
 
     public async Task<UserBalance?> GetUserBalanceAsync(int userId, int currencyId)
     {
-        return await _dbContext.UserBalances
-            .Include(ub => ub.Currency)
-            .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.CurrencyId == currencyId);
+        return await _userBalanceRepository.GetUserBalanceAsync(userId, currencyId);
     }
 
     public async Task<(bool success, string? error)> UpdateBalanceAsync(int userId, int currencyId, decimal amount)
@@ -43,25 +46,26 @@ public class UserBalanceService : IUserBalanceService
         balance.Amount = amount;
         balance.LastUpdateTime = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
+        await _userBalanceRepository.UpdateAsync(balance);
         return (true, null);
     }
 
     public async Task<(bool success, string? error)> CreateBalanceAsync(int userId, int currencyId, decimal amount)
     {
-        var user = await _dbContext.Users.FindAsync(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             return (false, "Пользователь не найден");
         }
 
-        var currency = await _dbContext.Currencies.FindAsync(currencyId);
+        var currency = await _currencyRepository.GetByIdAsync(currencyId);
         if (currency == null)
         {
             return (false, "Валюта не найдена");
         }
 
-        var existingBalance = await GetUserBalanceAsync(userId, currencyId);
+        // Проверяем, существует ли уже баланс для этой валюты у пользователя
+        var existingBalance = await _userBalanceRepository.GetUserBalanceAsync(userId, currencyId);
         if (existingBalance != null)
         {
             return (false, "Баланс для данной валюты уже существует");
@@ -75,8 +79,7 @@ public class UserBalanceService : IUserBalanceService
             LastUpdateTime = DateTime.UtcNow
         };
 
-        _dbContext.UserBalances.Add(newBalance);
-        await _dbContext.SaveChangesAsync();
+        await _userBalanceRepository.AddAsync(newBalance);
         return (true, null);
     }
 
@@ -95,7 +98,7 @@ public class UserBalanceService : IUserBalanceService
             return (false, null, "Сумма перевода должна быть больше нуля");
         }
 
-        var fromBalance = await GetUserBalanceAsync(fromUserId, currencyId);
+        var fromBalance = await _userBalanceRepository.GetUserBalanceAsync(fromUserId, currencyId);
         if (fromBalance == null)
         {
             return (false, null, "У отправителя нет баланса в данной валюте");
@@ -118,7 +121,7 @@ public class UserBalanceService : IUserBalanceService
     private async Task<(UserBalance? toBalance, string? error)> GetOrCreateRecipientBalanceAsync(
         int toUserId, int currencyId)
     {
-        var toBalance = await GetUserBalanceAsync(toUserId, currencyId);
+        var toBalance = await _userBalanceRepository.GetUserBalanceAsync(toUserId, currencyId);
         if (toBalance != null)
         {
             return (toBalance, null);
@@ -130,7 +133,7 @@ public class UserBalanceService : IUserBalanceService
             return (null, result.error);
         }
         
-        toBalance = await GetUserBalanceAsync(toUserId, currencyId);
+        toBalance = await _userBalanceRepository.GetUserBalanceAsync(toUserId, currencyId);
         return (toBalance, null);
     }
 
@@ -159,14 +162,17 @@ public class UserBalanceService : IUserBalanceService
         fromBalance.LastUpdateTime = now;
         toBalance.LastUpdateTime = now;
 
-        await _dbContext.SaveChangesAsync();
+        // Обновляем оба баланса
+        await _userBalanceRepository.UpdateAsync(fromBalance);
+        await _userBalanceRepository.UpdateAsync(toBalance);
+        
         return (true, null);
     }
 
     public async Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId)
     {
-        var balance = await GetUserBalanceAsync(userId, currencyId);
-        if (balance != null)
+        var hasBalance = await _userBalanceRepository.HasBalanceAsync(userId, currencyId);
+        if (hasBalance)
         {
             return (true, null);
         }
@@ -185,7 +191,7 @@ public class UserBalanceService : IUserBalanceService
         int userId, int currencyId, decimal initialAmount = 0)
     {
         // Сначала пытаемся получить существующий баланс
-        var balance = await GetUserBalanceAsync(userId, currencyId);
+        var balance = await _userBalanceRepository.GetUserBalanceAsync(userId, currencyId);
         
         // Если баланс уже существует, просто возвращаем его
         if (balance != null)
@@ -201,7 +207,7 @@ public class UserBalanceService : IUserBalanceService
         }
         
         // Получаем созданный баланс
-        balance = await GetUserBalanceAsync(userId, currencyId);
+        balance = await _userBalanceRepository.GetUserBalanceAsync(userId, currencyId);
         
         return (true, null, balance);
     }

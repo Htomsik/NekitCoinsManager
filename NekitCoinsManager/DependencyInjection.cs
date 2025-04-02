@@ -2,6 +2,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
+using NekitCoinsManager.Core.Repositories;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Core.Services.AppSettingsService;
 using NekitCoinsManager.Services;
@@ -15,6 +16,13 @@ public static class DependencyInjection
     {
         // Регистрируем DbContext - используем Scoped для лучшей производительности и отслеживания изменений
         services.AddDbContext<AppDbContext>(ServiceLifetime.Scoped);
+        
+        // Регистрация репозиториев
+        services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserAuthTokenRepository, UserAuthTokenRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IUserBalanceRepository, UserBalanceRepository>();
         
         // Регистрируем инфраструктурные сервисы
         services.AddTransient<IMapper, Mapper>();

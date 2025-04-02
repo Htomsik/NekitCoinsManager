@@ -5,33 +5,39 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class TransactionService : ITransactionService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _dbContext; // Оставляем для транзакций БД
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly IUserBalanceService _userBalanceService;
     private readonly ICurrencyConversionService _currencyConversionService;
     private readonly List<ITransactionObserver> _observers = new();
 
     public TransactionService(
-        AppDbContext dbContext, 
+        AppDbContext dbContext,
+        ITransactionRepository transactionRepository,
+        IUserRepository userRepository,
+        ICurrencyRepository currencyRepository,
         IUserBalanceService userBalanceService,
         ICurrencyConversionService currencyConversionService)
     {
         _dbContext = dbContext;
+        _transactionRepository = transactionRepository;
+        _userRepository = userRepository;
+        _currencyRepository = currencyRepository;
         _userBalanceService = userBalanceService;
         _currencyConversionService = currencyConversionService;
     }
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
     {
-        // С включенной ленивой загрузкой нам не нужно явно использовать Include,
-        // так как EF загрузит связанные сущности автоматически при обращении к ним
-        return await _dbContext.Transactions
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
+        return await _transactionRepository.GetAllAsync();
     }
 
     /// <summary>
@@ -58,20 +64,20 @@ public class TransactionService : ITransactionService
         }
 
         // Проверяем существование пользователей и валюты в базе данных
-        var fromUserExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.FromUserId);
-        if (!fromUserExists)
+        var fromUser = await _userRepository.GetByIdAsync(transaction.FromUserId);
+        if (fromUser == null)
         {
             return (false, $"Отправитель с ID {transaction.FromUserId} не найден");
         }
 
-        var toUserExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.ToUserId);
-        if (!toUserExists)
+        var toUser = await _userRepository.GetByIdAsync(transaction.ToUserId);
+        if (toUser == null)
         {
             return (false, $"Получатель с ID {transaction.ToUserId} не найден");
         }
 
-        var currencyExists = await _dbContext.Currencies.AnyAsync(c => c.Id == transaction.CurrencyId);
-        if (!currencyExists)
+        var currency = await _currencyRepository.GetByIdAsync(transaction.CurrencyId);
+        if (currency == null)
         {
             return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
         }
@@ -110,14 +116,14 @@ public class TransactionService : ITransactionService
         }
 
         // Проверяем существование пользователя и валюты
-        var userExists = await _dbContext.Users.AnyAsync(u => u.Id == transaction.ToUserId);
-        if (!userExists)
+        var user = await _userRepository.GetByIdAsync(transaction.ToUserId);
+        if (user == null)
         {
             return (false, $"Пользователь с ID {transaction.ToUserId} не найден");
         }
 
-        var currencyExists = await _dbContext.Currencies.AnyAsync(c => c.Id == transaction.CurrencyId);
-        if (!currencyExists)
+        var currency = await _currencyRepository.GetByIdAsync(transaction.CurrencyId);
+        if (currency == null)
         {
             return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
         }
@@ -153,9 +159,7 @@ public class TransactionService : ITransactionService
             return (false, error ?? "Ошибка при переводе средств");
         }
 
-        _dbContext.Transactions.Add(transaction);
-        await _dbContext.SaveChangesAsync();
-
+        await _transactionRepository.AddAsync(transaction);
         NotifyObservers();
         return (true, null);
     }
@@ -175,10 +179,10 @@ public class TransactionService : ITransactionService
         }
 
         // Получаем банковский аккаунт для использования как источник пополнения
-        var (bankAccount, bankError) = await GetBankAccountAsync();
+        var bankAccount = await _userRepository.GetBankAccountAsync();
         if (bankAccount == null)
         {
-            return (false, bankError ?? "Не удалось найти банковский аккаунт для пополнения");
+            return (false, "Не удалось найти банковский аккаунт для пополнения");
         }
 
         // Устанавливаем свойства для транзакции депозита
@@ -214,9 +218,8 @@ public class TransactionService : ITransactionService
         balance!.Amount += transaction.Amount;
         balance.LastUpdateTime = DateTime.UtcNow;
         
-        // Сохраняем транзакцию и обновляем баланс
-        _dbContext.Transactions.Add(transaction);
-        await _dbContext.SaveChangesAsync();
+        // Сохраняем транзакцию
+        await _transactionRepository.AddAsync(transaction);
 
         NotifyObservers();
         return (true, null);
@@ -228,9 +231,7 @@ public class TransactionService : ITransactionService
     /// <returns>Банковский аккаунт или null, если не найден</returns>
     private async Task<(User? user, string? error)> GetBankAccountAsync()
     {
-        var bankAccount = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.IsBankAccount);
-
+        var bankAccount = await _userRepository.GetBankAccountAsync();
         if (bankAccount == null)
         {
             return (null, "Ошибка: банковский аккаунт не найден");
@@ -245,18 +246,20 @@ public class TransactionService : ITransactionService
     /// <returns>Список валют или пустой список, если валюты не найдены</returns>
     private async Task<(List<Currency> currencies, string? error)> GetWelcomeBonusCurrenciesAsync()
     {
+        // Получаем все активные валюты
+        var allActiveCurrencies = await _currencyRepository.GetActiveCurrenciesAsync();
+        
         // Получаем валюты, начисляемые при регистрации
-        var defaultCurrencies = await _dbContext.Currencies
-            .Where(c => c.IsActive && c.IsDefaultForNewUsers)
-            .ToListAsync();
+        var defaultCurrencies = allActiveCurrencies
+            .Where(c => c.IsDefaultForNewUsers)
+            .ToList();
         
         if (!defaultCurrencies.Any())
         {
             // Если нет валют с признаком IsDefaultForNewUsers, используем валюту с самым низким курсом
-            var lowestRateCurrency = await _dbContext.Currencies
-                .Where(c => c.IsActive)
+            var lowestRateCurrency = allActiveCurrencies
                 .OrderBy(c => c.ExchangeRate)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
                 
             if (lowestRateCurrency != null)
             {
@@ -280,7 +283,7 @@ public class TransactionService : ITransactionService
     public async Task<(bool success, string? error)> GrantWelcomeBonusAsync(int userId)
     {
         // Получаем пользователя
-        var user = await _dbContext.Users.FindAsync(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             return (false, $"Пользователь с ID {userId} не найден");
@@ -353,21 +356,21 @@ public class TransactionService : ITransactionService
         }
         
         // Получаем пользователя
-        var user = await _dbContext.Users.FindAsync(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             return (false, $"Пользователь с ID {userId} не найден", null, null, null, null);
         }
         
         // Получаем исходную валюту
-        var fromCurrency = await _dbContext.Currencies.FindAsync(fromCurrencyId);
+        var fromCurrency = await _currencyRepository.GetByIdAsync(fromCurrencyId);
         if (fromCurrency == null)
         {
             return (false, $"Исходная валюта с ID {fromCurrencyId} не найдена", user, null, null, null);
         }
         
         // Получаем целевую валюту
-        var toCurrency = await _dbContext.Currencies.FindAsync(toCurrencyId);
+        var toCurrency = await _currencyRepository.GetByIdAsync(toCurrencyId);
         if (toCurrency == null)
         {
             return (false, $"Целевая валюта с ID {toCurrencyId} не найдена", user, fromCurrency, null, null);
@@ -463,8 +466,7 @@ public class TransactionService : ITransactionService
             };
             
             // Сначала добавляем транзакцию списания, чтобы получить ее ID
-            _dbContext.Transactions.Add(withdrawTransaction);
-            await _dbContext.SaveChangesAsync();
+            await _transactionRepository.AddAsync(withdrawTransaction);
             
             // 2. Зачисление целевой валюты
             var depositTransaction = new Transaction
@@ -480,7 +482,7 @@ public class TransactionService : ITransactionService
             };
             
             // Добавляем транзакцию зачисления
-            _dbContext.Transactions.Add(depositTransaction);
+            await _transactionRepository.AddAsync(depositTransaction);
             
             // Применяем комиссию, если она предусмотрена (примерная логика)
             decimal feePercentage = 0.01m; // 1% комиссия
@@ -505,10 +507,8 @@ public class TransactionService : ITransactionService
                 fromBalance!.Amount -= feeAmount;
                 
                 // Добавляем транзакцию комиссии
-                _dbContext.Transactions.Add(feeTransaction);
+                await _transactionRepository.AddAsync(feeTransaction);
             }
-            
-            await _dbContext.SaveChangesAsync();
             
             // Фиксируем транзакцию в БД
             await transaction.CommitAsync();

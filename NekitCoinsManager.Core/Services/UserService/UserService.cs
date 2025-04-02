@@ -5,40 +5,42 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class UserService : IUserService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IUserRepository _userRepository;
+    private readonly ITransactionRepository _transactionRepository;
     private readonly IPasswordHasherService _passwordHasherService;
     private readonly ITransactionService _transactionService;
 
     public UserService(
-        AppDbContext dbContext, 
+        IUserRepository userRepository,
+        ITransactionRepository transactionRepository,
         IPasswordHasherService passwordHasherService,
         ITransactionService transactionService)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
+        _transactionRepository = transactionRepository;
         _passwordHasherService = passwordHasherService;
         _transactionService = transactionService;
     }
 
     public async Task<IEnumerable<User>> GetUsersAsync()
     {
-        return await _dbContext.Users.ToListAsync();
+        return await _userRepository.GetAllAsync();
     }
 
     public async Task<User?> GetUserByUsernameAsync(string username)
     {
-        return await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username.Equals(username));
+        return await _userRepository.GetByUsernameAsync(username);
     }
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
-        return await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
+        return await _userRepository.GetByIdAsync(userId);
     }
 
     public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)
@@ -58,8 +60,9 @@ public class UserService : IUserService
             return (false, "Пароли не совпадают");
         }
 
-        var existingUser = await GetUserByUsernameAsync(username);
-        if (existingUser != null)
+        // Проверяем уникальность имени пользователя
+        var isUsernameUnique = await _userRepository.IsUsernameUniqueAsync(username);
+        if (!isUsernameUnique)
         {
             return (false, "Пользователь с таким именем уже существует");
         }
@@ -71,14 +74,15 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
-        _dbContext.Users.Add(user);
-        await _dbContext.SaveChangesAsync();
+        // Добавляем пользователя
+        await _userRepository.AddAsync(user);
 
+        // Выдаем приветственный бонус
         var (bonusSuccess, bonusError) = await _transactionService.GrantWelcomeBonusAsync(user.Id);
         if (!bonusSuccess)
         {
-            _dbContext.Users.Remove(user);
-            await _dbContext.SaveChangesAsync();
+            // Если не удалось выдать бонус, удаляем пользователя
+            await _userRepository.DeleteAsync(user);
             return (false, bonusError);
         }
 
@@ -87,11 +91,7 @@ public class UserService : IUserService
 
     public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
-        var user = await _dbContext.Users
-            .Include(u => u.SentTransactions)
-            .Include(u => u.ReceivedTransactions)
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             return (false, "Пользователь не найден");
@@ -102,14 +102,16 @@ public class UserService : IUserService
             return (false, "Невозможно удалить системный банковский аккаунт");
         }
 
-        if (user.SentTransactions.Any() || user.ReceivedTransactions.Any())
+        // Проверяем наличие транзакций у пользователя
+        var sentTransactions = await _transactionRepository.GetUserSentTransactionsAsync(userId);
+        var receivedTransactions = await _transactionRepository.GetUserReceivedTransactionsAsync(userId);
+        
+        if (sentTransactions.Any() || receivedTransactions.Any())
         {
             return (false, "Невозможно удалить пользователя с историей транзакций");
         }
 
-        _dbContext.Users.Remove(user);
-        await _dbContext.SaveChangesAsync();
-        
+        await _userRepository.DeleteAsync(user);
         return (true, null);
     }
 } 

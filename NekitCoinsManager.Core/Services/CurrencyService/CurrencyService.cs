@@ -1,40 +1,39 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class CurrencyService : ICurrencyService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly ICurrencyRepository _currencyRepository;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IUserBalanceRepository _userBalanceRepository;
 
-    public CurrencyService(AppDbContext dbContext)
+    public CurrencyService(
+        ICurrencyRepository currencyRepository,
+        ITransactionRepository transactionRepository,
+        IUserBalanceRepository userBalanceRepository)
     {
-        _dbContext = dbContext;
+        _currencyRepository = currencyRepository;
+        _transactionRepository = transactionRepository;
+        _userBalanceRepository = userBalanceRepository;
     }
 
     public async Task<IEnumerable<Currency>> GetCurrenciesAsync()
     {
-        return await _dbContext.Currencies
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.Name)
-            .ToListAsync();
+        return await _currencyRepository.GetActiveCurrenciesAsync();
     }
 
     public async Task<Currency?> GetCurrencyByIdAsync(int id)
     {
-        return await _dbContext.Currencies
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
+        var currency = await _currencyRepository.GetByIdAsync(id);
+        return currency?.IsActive == true ? currency : null;
     }
 
     public async Task<Currency?> GetCurrencyByCodeAsync(string code)
     {
-        return await _dbContext.Currencies
-            .FirstOrDefaultAsync(c => c.Code.Equals(code) && c.IsActive);
+        var currency = await _currencyRepository.GetByCodeAsync(code);
+        return currency?.IsActive == true ? currency : null;
     }
 
     public async Task<(bool success, string? error)> AddCurrencyAsync(Currency currency)
@@ -54,8 +53,8 @@ public class CurrencyService : ICurrencyService
             return (false, "Символ валюты не может быть пустым");
         }
 
-        var existingCurrency = await GetCurrencyByCodeAsync(currency.Code);
-        if (existingCurrency != null)
+        var isUnique = await _currencyRepository.IsCodeUniqueAsync(currency.Code);
+        if (!isUnique)
         {
             return (false, "Валюта с таким кодом уже существует");
         }
@@ -63,9 +62,7 @@ public class CurrencyService : ICurrencyService
         currency.LastUpdateTime = DateTime.UtcNow;
         currency.IsActive = true;
 
-        _dbContext.Currencies.Add(currency);
-        await _dbContext.SaveChangesAsync();
-
+        await _currencyRepository.AddAsync(currency);
         return (true, null);
     }
 
@@ -89,7 +86,7 @@ public class CurrencyService : ICurrencyService
 
         existingCurrency.LastUpdateTime = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
+        await _currencyRepository.UpdateAsync(existingCurrency);
         return (true, null);
     }
 
@@ -102,25 +99,20 @@ public class CurrencyService : ICurrencyService
         }
 
         // Проверяем наличие транзакций с этой валютой
-        var hasTransactions = await _dbContext.Transactions
-            .AnyAsync(t => t.CurrencyId == id);
+        var hasTransactions = await _transactionRepository.HasTransactionsWithCurrencyAsync(id);
         if (hasTransactions)
         {
             return (false, "Невозможно удалить валюту, так как с ней есть связанные транзакции");
         }
 
         // Проверяем наличие балансов пользователей в этой валюте
-        var hasBalances = await _dbContext.UserBalances
-            .AnyAsync(b => b.CurrencyId == id);
+        var hasBalances = await _userBalanceRepository.HasBalancesWithCurrencyAsync(id);
         if (hasBalances)
         {
-            return (false, "Невозможно удалить валюту, так как есть пользователи с балансом в этой валюте");
+            return (false, "Невозможно удалить валюту, так как у пользователей есть балансы в этой валюте");
         }
 
-        currency.IsActive = false;
-        currency.LastUpdateTime = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync();
+        await _currencyRepository.DeleteAsync(currency);
         return (true, null);
     }
 
@@ -140,7 +132,7 @@ public class CurrencyService : ICurrencyService
         currency.ExchangeRate = newRate;
         currency.LastUpdateTime = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
+        await _currencyRepository.UpdateAsync(currency);
         return (true, null);
     }
 } 
