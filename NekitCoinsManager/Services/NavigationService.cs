@@ -1,27 +1,29 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager.Services;
+
+
 
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
     private ViewType _previousViewType = ViewType.TransactionTransfer;
+    private readonly List<INavigationObserver> _observers = new();
     private IViewModel _currentView;
-
     public IViewModel CurrentView
     {
         get => _currentView;
         private set
         {
-            if (_currentView != value)
-            {
-                _currentView = value;
-                CurrentViewChanged?.Invoke(this, _currentView);
-            }
+            if (_currentView == value) return;
+            _currentView = value;
+            NotifyObservers();
         }
     }
 
@@ -84,5 +86,18 @@ public class NavigationService : INavigationService
     {
         // Возвращаемся к предыдущему экрану
         NavigateTo(_previousViewType);
+    }
+
+    public void Subscribe(INavigationObserver observer)
+    {
+        _observers.Add(observer);
+    }
+    
+    private void NotifyObservers()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.OnViewChanged(CurrentView);
+        }
     }
 } 

@@ -1,8 +1,18 @@
 using System;
 using System.Threading.Tasks;
+using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager.Services;
+
+
+/// <summary>
+///     Обсервер для отслеживания изменения текущего представления
+/// </summary>
+public interface INavigationObserver
+{
+    public void OnViewChanged(IViewModel viewModel);
+}
 
 /// <summary>
 /// Сервис, который отвечает за навигацию между представлениями в приложении
@@ -14,11 +24,6 @@ public interface INavigationService
     /// </summary>
     IViewModel CurrentView { get; }
     
-    /// <summary>
-    /// Событие, возникающее при изменении текущего представления
-    /// </summary>
-    event EventHandler<IViewModel> CurrentViewChanged;
-
     /// <summary>
     /// Навигация к указанному типу представления
     /// </summary>
@@ -33,4 +38,9 @@ public interface INavigationService
     /// Возвращение к предыдущему представлению
     /// </summary>
     void NavigateBack();
+    
+    /// <summary>
+    /// Подписка на обновления
+    /// </summary>
+    void Subscribe(INavigationObserver observer);
 } 

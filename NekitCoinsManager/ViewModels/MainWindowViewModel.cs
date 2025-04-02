@@ -6,7 +6,7 @@ using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
+public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver, INavigationObserver
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthService _authService;
@@ -37,7 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
         _navigationService = navigationService;
         
         // Подписываемся на изменение текущего представления
-        _navigationService.CurrentViewChanged += OnCurrentViewChanged;
+        _navigationService.Subscribe(this);
         
         // Текущее представление будет установлено через событие CurrentViewChanged
         
@@ -46,11 +46,7 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
         // Пытаемся восстановить сессию
         TryRestoreSessionAsync();
     }
-    
-    private void OnCurrentViewChanged(object sender, IViewModel viewModel)
-    {
-        CurrentView = viewModel;
-    }
+
     
     private async void TryRestoreSessionAsync()
     {
@@ -75,5 +71,10 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver
         
         // Уведомляем UI об изменении состояния авторизации
         OnPropertyChanged(nameof(IsAuthenticated));
+    }
+    
+    public void OnViewChanged(IViewModel value)
+    {
+        CurrentView = value;
     }
 }
