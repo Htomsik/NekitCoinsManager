@@ -10,15 +10,18 @@ public class MoneyOperationsManager : IMoneyOperationsManager
     private readonly MoneyTransferOperationService _transferOperationServiceService;
     private readonly MoneyDepositOperationService _depositOperationService;
     private readonly MoneyConversionOperationService _conversionOperationService;
+    private readonly MoneyWelcomeBonusOperationService _welcomeBonusOperationService;
 
     public MoneyOperationsManager(
         MoneyTransferOperationService transferOperationServiceService,
         MoneyDepositOperationService depositOperationService,
-        MoneyConversionOperationService conversionOperationService)
+        MoneyConversionOperationService conversionOperationService,
+        MoneyWelcomeBonusOperationService welcomeBonusOperationService)
     {
         _transferOperationServiceService = transferOperationServiceService;
         _depositOperationService = depositOperationService;
         _conversionOperationService = conversionOperationService;
+        _welcomeBonusOperationService = welcomeBonusOperationService;
     }
 
     /// <summary>
@@ -43,5 +46,13 @@ public class MoneyOperationsManager : IMoneyOperationsManager
     public async Task<MoneyOperationResult> ConvertAsync(ConversionDto conversionData)
     {
         return await _conversionOperationService.ExecuteAsync(conversionData);
+    }
+
+    /// <summary>
+    /// Выдает приветственный бонус новому пользователю
+    /// </summary>
+    public async Task<MoneyOperationResult> GrantWelcomeBonusAsync(WelcomeBonusDto welcomeBonusData)
+    {
+        return await _welcomeBonusOperationService.ExecuteAsync(welcomeBonusData);
     }
 } 

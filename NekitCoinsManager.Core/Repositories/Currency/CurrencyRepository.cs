@@ -25,6 +25,14 @@ public class CurrencyRepository : BaseRepository<Currency>, ICurrencyRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Currency>> GetWelcomeBonusCurrenciesAsync()
+    {
+        return await DbSet
+            .Where(c => c.IsActive && c.IsDefaultForNewUsers)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+    }
+
     public async Task<bool> IsCodeUniqueAsync(string code, int? excludeId = null)
     {
         return !await DbSet

@@ -9,4 +9,5 @@ public interface ICurrencyRepository : IRepository<Currency>
     Task<bool> IsCodeUniqueAsync(string code, int? excludeId = null);
     Task<(bool isValid, ErrorCode? error)> ValidateExchangeRateAsync(decimal rate);
     Task<(bool canDelete, ErrorCode? error)> CanDeleteAsync(int currencyId, ITransactionRepository transactionRepository, IUserBalanceRepository userBalanceRepository);
+    Task<IEnumerable<Currency>> GetWelcomeBonusCurrenciesAsync();
 } 

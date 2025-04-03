@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<MoneyTransferOperationService>();
         services.AddScoped<MoneyDepositOperationService>();
         services.AddScoped<MoneyConversionOperationService>();
+        services.AddScoped<MoneyWelcomeBonusOperationService>();
         services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
 
         // Регистрируем сервис навигации

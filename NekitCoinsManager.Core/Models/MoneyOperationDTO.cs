@@ -58,3 +58,14 @@ public class ConversionDto : MoneyOperationDto
     public int TargetCurrencyId { get; set; }
 }
 
+/// <summary>
+/// DTO для операции выдачи приветственного бонуса
+/// </summary>
+public class WelcomeBonusDto : MoneyOperationDto
+{
+    /// <summary>
+    /// ID нового пользователя, который получит бонус
+    /// </summary>
+    public int NewUserId { get; set; }
+}
+

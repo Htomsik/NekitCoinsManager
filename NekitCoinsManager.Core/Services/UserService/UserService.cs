@@ -14,15 +14,18 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly ITransactionRepository _transactionRepository;
     private readonly IPasswordHasherService _passwordHasherService;
+    private readonly IMoneyOperationsManager _moneyOperationsManager;
 
     public UserService(
         IUserRepository userRepository,
         ITransactionRepository transactionRepository,
-        IPasswordHasherService passwordHasherService)
+        IPasswordHasherService passwordHasherService,
+        IMoneyOperationsManager moneyOperationsManager)
     {
         _userRepository = userRepository;
         _transactionRepository = transactionRepository;
         _passwordHasherService = passwordHasherService;
+        _moneyOperationsManager = moneyOperationsManager;
     }
 
     public async Task<IEnumerable<User>> GetUsersAsync()
@@ -96,6 +99,20 @@ public class UserService : IUserService
 
         // Добавляем пользователя
         await _userRepository.AddAsync(user);
+
+        // Начисляем приветственный бонус
+        var welcomeBonusResult = await _moneyOperationsManager.GrantWelcomeBonusAsync(new WelcomeBonusDto
+        {
+            NewUserId = user.Id,
+            Comment = $"Приветственный бонус для пользователя {user.Username}"
+        });
+
+        if (!welcomeBonusResult.Success)
+        {
+            // Логируем ошибку, но не отменяем регистрацию пользователя
+            // TODO: Добавить логирование ошибки
+            return (true, "Пользователь зарегистрирован, но не удалось начислить приветственный бонус");
+        }
         
         return (true, null);
     }
