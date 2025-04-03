@@ -60,11 +60,18 @@ public class UserService : IUserService
             return (false, "Пароли не совпадают");
         }
 
-        // Проверяем уникальность имени пользователя
-        var isUsernameUnique = await _userRepository.IsUsernameUniqueAsync(username);
-        if (!isUsernameUnique)
+        // Валидируем пароль
+        var (isPasswordValid, passwordError) = await _userRepository.ValidatePasswordAsync(password);
+        if (!isPasswordValid)
         {
-            return (false, "Пользователь с таким именем уже существует");
+            string userError = passwordError switch
+            {
+                ErrorCode.UserPasswordTooShort => "Пароль должен содержать не менее 6 символов",
+                ErrorCode.UserPasswordTooLong => "Пароль слишком длинный",
+                ErrorCode.UserPasswordNotComplex => "Пароль должен содержать заглавные, строчные буквы и цифры",
+                _ => "Некорректный пароль"
+            };
+            return (false, userError);
         }
 
         var user = new User
@@ -73,6 +80,22 @@ public class UserService : IUserService
             PasswordHash = _passwordHasherService.HashPassword(password),
             CreatedAt = DateTime.UtcNow
         };
+
+        // Валидируем пользователя перед созданием
+        var (isUserValid, validationError) = await _userRepository.ValidateCreateAsync(user);
+        if (!isUserValid)
+        {
+            string error = validationError switch
+            {
+                ErrorCode.UserUsernameEmpty => "Имя пользователя не может быть пустым",
+                ErrorCode.UserUsernameTooShort => "Имя пользователя должно содержать не менее 3 символов",
+                ErrorCode.UserUsernameTooLong => "Имя пользователя слишком длинное",
+                ErrorCode.UserUsernameInvalidCharacters => "Имя пользователя может содержать только буквы, цифры и символ подчеркивания",
+                ErrorCode.UserUsernameAlreadyExists => "Пользователь с таким именем уже существует",
+                _ => "Ошибка при создании пользователя"
+            };
+            return (false, error);
+        }
 
         // Добавляем пользователя
         await _userRepository.AddAsync(user);
@@ -91,27 +114,25 @@ public class UserService : IUserService
 
     public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
+        // Валидируем удаление пользователя
+        var (canDelete, deleteError) = await _userRepository.ValidateDeleteAsync(userId);
+        if (!canDelete)
+        {
+            // Преобразуем технические коды ошибок в понятные пользователю сообщения
+            string userError = deleteError switch
+            {
+                ErrorCode.CommonEntityNotFound => "Пользователь не найден",
+                ErrorCode.UserNotFound => "Пользователь не найден",
+                ErrorCode.UserCannotDeleteBankAccount => "Нельзя удалить банковский аккаунт",
+                ErrorCode.UserHasBalances => "Пользователь имеет балансы, сначала необходимо их удалить",
+                _ => "Ошибка при удалении пользователя"
+            };
+            return (false, userError);
+        }
+
         var user = await _userRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            return (false, "Пользователь не найден");
-        }
+        await _userRepository.DeleteAsync(user!);
         
-        if (user.IsBankAccount)
-        {
-            return (false, "Невозможно удалить системный банковский аккаунт");
-        }
-
-        // Проверяем наличие транзакций у пользователя
-        var sentTransactions = await _transactionRepository.GetUserSentTransactionsAsync(userId);
-        var receivedTransactions = await _transactionRepository.GetUserReceivedTransactionsAsync(userId);
-        
-        if (sentTransactions.Any() || receivedTransactions.Any())
-        {
-            return (false, "Невозможно удалить пользователя с историей транзакций");
-        }
-
-        await _userRepository.DeleteAsync(user);
         return (true, null);
     }
 } 

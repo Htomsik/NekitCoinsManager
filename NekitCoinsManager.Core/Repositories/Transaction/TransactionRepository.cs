@@ -5,135 +5,120 @@ using NekitCoinsManager.Core.Models;
 
 namespace NekitCoinsManager.Core.Repositories;
 
-public class TransactionRepository : ITransactionRepository
+public class TransactionRepository : BaseRepository<Transaction>, ITransactionRepository
 {
-    private readonly AppDbContext _dbContext;
-
-    public TransactionRepository(AppDbContext dbContext)
+    public TransactionRepository(AppDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<Transaction>> GetAllAsync()
+    public override async Task<IEnumerable<Transaction>> GetAllAsync()
     {
-        return await _dbContext.Transactions
+        return await DbSet
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }
 
-    public async Task<Transaction?> GetByIdAsync(int id)
+    public override async Task<Transaction?> GetByIdAsync(int id)
     {
-        return await _dbContext.Transactions
+        return await DbSet
+            .Include(t => t.Currency)
+            .Include(t => t.FromUser)
+            .Include(t => t.ToUser)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public async Task<Transaction> AddAsync(Transaction entity)
+    public override async Task<IEnumerable<Transaction>> FindAsync(Expression<Func<Transaction, bool>> predicate)
     {
-        await _dbContext.Transactions.AddAsync(entity);
-        await _dbContext.SaveChangesAsync();
-        return entity;
-    }
-
-    public async Task UpdateAsync(Transaction entity)
-    {
-        _dbContext.Entry(entity).State = EntityState.Modified;
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(Transaction entity)
-    {
-        _dbContext.Transactions.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> FindAsync(Expression<Func<Transaction, bool>> predicate)
-    {
-        return await _dbContext.Transactions
+        return await DbSet
             .Where(predicate)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }
 
-    public async Task<bool> ExistsAsync(Expression<Func<Transaction, bool>> predicate)
-    {
-        return await _dbContext.Transactions.AnyAsync(predicate);
-    }
-
-    public async Task<IEnumerable<Transaction>> GetUserTransactionsAsync(int userId)
-    {
-        return await _dbContext.Transactions
-            .Where(t => t.FromUserId == userId || t.ToUserId == userId)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> GetUserSentTransactionsAsync(int userId)
-    {
-        return await _dbContext.Transactions
-            .Where(t => t.FromUserId == userId)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> GetUserReceivedTransactionsAsync(int userId)
-    {
-        return await _dbContext.Transactions
-            .Where(t => t.ToUserId == userId)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> GetRelatedTransactionsAsync(int transactionId)
-    {
-        var transaction = await GetByIdAsync(transactionId);
-        if (transaction == null)
-            return Enumerable.Empty<Transaction>();
-
-        var relatedTransactions = new List<Transaction>();
-        
-        // Загружаем связанные транзакции только при необходимости
-        if (transaction.ParentTransactionId.HasValue)
-        {
-            var parentTransaction = await _dbContext.Transactions
-                .FirstOrDefaultAsync(t => t.Id == transaction.ParentTransactionId);
-            if (parentTransaction != null)
-            {
-                relatedTransactions.Add(parentTransaction);
-            }
-        }
-
-        var childTransactions = await _dbContext.Transactions
-            .Where(t => t.ParentTransactionId == transactionId)
-            .ToListAsync();
-        relatedTransactions.AddRange(childTransactions);
-
-        return relatedTransactions;
-    }
-
     public async Task<bool> HasTransactionsWithCurrencyAsync(int currencyId)
     {
-        return await _dbContext.Transactions
+        return await DbSet
             .AnyAsync(t => t.CurrencyId == currencyId);
     }
+    
+   
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate)
+    // Реализация методов валидации
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateEntityAsync(Transaction entity)
     {
-        return await _dbContext.Transactions
-            .Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
+        // Проверка обязательных полей
+        if (entity.FromUserId <= 0)
+            return (false, ErrorCode.TransactionFromUserIdInvalid);
+
+        if (entity.ToUserId <= 0)
+            return (false, ErrorCode.TransactionToUserIdInvalid);
+
+        if (entity.CurrencyId <= 0)
+            return (false, ErrorCode.TransactionCurrencyIdInvalid);
+
+        if (entity.Amount <= 0)
+            return (false, ErrorCode.TransactionAmountMustBePositive);
+
+        // Проверка допустимости типа транзакции
+        if (!Enum.IsDefined(typeof(TransactionType), entity.Type))
+            return (false, ErrorCode.TransactionInvalidType);
+
+        // Проверка, что пользователь не переводит деньги самому себе (кроме конвертации)
+        if (entity.FromUserId == entity.ToUserId && entity.Type != TransactionType.Conversion)
+            return (false, ErrorCode.TransactionSelfTransactionNotAllowed);
+
+        // Валидация для депозита
+        if (entity.Type == TransactionType.Deposit && entity.FromUserId != 1) // Предполагается, что банк имеет ID=1
+            return (false, ErrorCode.TransactionDepositFromNonBank);
+
+        return (true, null);
     }
 
-    public async Task<decimal> GetUserBalanceInCurrencyAsync(int userId, int currencyId)
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateCreateAsync(Transaction entity)
     {
-        var received = await _dbContext.Transactions
-            .Where(t => t.ToUserId == userId && t.CurrencyId == currencyId)
-            .SumAsync(t => t.Amount);
+        // Базовая валидация сущности
+        var baseValidation = await ValidateEntityAsync(entity);
+        if (!baseValidation.isValid)
+            return baseValidation;
 
-        var sent = await _dbContext.Transactions
-            .Where(t => t.FromUserId == userId && t.CurrencyId == currencyId)
-            .SumAsync(t => t.Amount);
+        // Проверка родительской транзакции, если указана
+        if (entity.ParentTransactionId.HasValue)
+        {
+            var parentExists = await ExistsByIdAsync(entity.ParentTransactionId.Value);
+            if (!parentExists)
+                return (false, ErrorCode.TransactionParentNotFound);
+        }
 
-        return received - sent;
+        return (true, null);
+    }
+
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateUpdateAsync(Transaction entity)
+    {
+        // Проверка существования транзакции
+        var existingTransaction = await GetByIdAsync(entity.Id);
+        if (existingTransaction == null)
+            return (false, ErrorCode.TransactionNotFound);
+
+        // Транзакции обычно не должны изменяться после создания
+        // Но если нужно разрешить изменение комментария, это можно сделать здесь
+        return (false, ErrorCode.TransactionCannotBeModified);
+    }
+
+    public override async Task<(bool canDelete, ErrorCode? error)> ValidateDeleteAsync(int id)
+    {
+        // Базовая проверка существования
+        var baseValidation = await base.ValidateDeleteAsync(id);
+        if (!baseValidation.canDelete)
+            return baseValidation;
+
+        // Проверка наличия дочерних транзакций
+        var transaction = await GetByIdAsync(id);
+        var hasChildTransactions = await DbSet.AnyAsync(t => t.ParentTransactionId == id);
+        
+        if (hasChildTransactions)
+            return (false, ErrorCode.TransactionHasChildTransactions);
+
+        // Транзакции обычно не удаляются в финансовых системах
+        return (false, ErrorCode.TransactionCannotBeDeleted);
     }
 } 

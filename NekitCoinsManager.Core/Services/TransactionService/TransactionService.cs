@@ -17,6 +17,7 @@ public class TransactionService : ITransactionService
     private readonly ICurrencyRepository _currencyRepository;
     private readonly IUserBalanceService _userBalanceService;
     private readonly ICurrencyConversionService _currencyConversionService;
+    private readonly IUserBalanceRepository _userBalanceRepository;
     private readonly List<ITransactionObserver> _observers = new();
 
     public TransactionService(
@@ -25,7 +26,8 @@ public class TransactionService : ITransactionService
         IUserRepository userRepository,
         ICurrencyRepository currencyRepository,
         IUserBalanceService userBalanceService,
-        ICurrencyConversionService currencyConversionService)
+        ICurrencyConversionService currencyConversionService,
+        IUserBalanceRepository userBalanceRepository)
     {
         _dbContext = dbContext;
         _transactionRepository = transactionRepository;
@@ -33,6 +35,7 @@ public class TransactionService : ITransactionService
         _currencyRepository = currencyRepository;
         _userBalanceService = userBalanceService;
         _currencyConversionService = currencyConversionService;
+        _userBalanceRepository = userBalanceRepository;
     }
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
@@ -41,7 +44,7 @@ public class TransactionService : ITransactionService
     }
 
     /// <summary>
-    /// Проверяет валидность транзакции
+    /// Проверяет валидность транзакции перевода
     /// </summary>
     /// <param name="transaction">Транзакция для проверки</param>
     /// <returns>Результат проверки и сообщение об ошибке</returns>
@@ -87,8 +90,18 @@ public class TransactionService : ITransactionService
             return (false, "Нельзя переводить монеты самому себе");
         }
 
-        // Проверка суммы перевода и баланса выполняется в UserBalanceService,
-        // поэтому здесь эти проверки не дублируем
+        // Проверка достаточности средств у отправителя, если это не банковский аккаунт для депозита
+        if (transaction.Type != TransactionType.Deposit)
+        {
+            // Проверяем баланс пользователя с помощью нашего метода
+            var (balanceValid, balanceError) = await ValidateUserBalanceAsync(
+                transaction.FromUserId, transaction.CurrencyId, transaction.Amount);
+            
+            if (!balanceValid)
+            {
+                return (false, balanceError);
+            }
+        }
 
         return (true, null);
     }
@@ -524,6 +537,29 @@ public class TransactionService : ITransactionService
             await transaction.RollbackAsync();
             return (false, $"Ошибка при конвертации валюты: {ex.Message}", null);
         }
+    }
+
+    /// <summary>
+    /// Проверяет, достаточно ли у пользователя средств для перевода
+    /// </summary>
+    private async Task<(bool isValid, string? errorMessage)> ValidateUserBalanceAsync(int userId, int currencyId, decimal amount)
+    {
+        // Проверяем баланс пользователя через репозиторий балансов
+        var (isValid, error) = await _userBalanceRepository.ValidateBalanceOperationAsync(userId, currencyId, amount);
+        
+        if (!isValid)
+        {
+            // Преобразуем технический код ошибки в понятное пользователю сообщение
+            string userError = error switch
+            {
+                ErrorCode.TransactionInsufficientFunds => "Недостаточно средств на счете",
+                _ => "Ошибка при проверке баланса пользователя"
+            };
+            
+            return (false, userError);
+        }
+        
+        return (true, null);
     }
 
     public void Subscribe(ITransactionObserver observer)

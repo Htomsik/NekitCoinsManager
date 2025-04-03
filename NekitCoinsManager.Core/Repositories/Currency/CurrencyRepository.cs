@@ -5,77 +5,123 @@ using NekitCoinsManager.Core.Models;
 
 namespace NekitCoinsManager.Core.Repositories;
 
-public class CurrencyRepository : ICurrencyRepository
+public class CurrencyRepository : BaseRepository<Currency>, ICurrencyRepository
 {
-    private readonly AppDbContext _dbContext;
-
-    public CurrencyRepository(AppDbContext dbContext)
+    public CurrencyRepository(AppDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<Models.Currency>> GetAllAsync()
+    public async Task<Currency?> GetByCodeAsync(string code)
     {
-        return await _dbContext.Currencies.ToListAsync();
-    }
-
-    public async Task<Models.Currency?> GetByIdAsync(int id)
-    {
-        return await _dbContext.Currencies.FindAsync(id);
-    }
-
-    public async Task<Models.Currency> AddAsync(Models.Currency entity)
-    {
-        await _dbContext.Currencies.AddAsync(entity);
-        await _dbContext.SaveChangesAsync();
-        return entity;
-    }
-
-    public async Task UpdateAsync(Models.Currency entity)
-    {
-        _dbContext.Entry(entity).State = EntityState.Modified;
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(Models.Currency entity)
-    {
-        _dbContext.Currencies.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<Models.Currency>> FindAsync(Expression<Func<Models.Currency, bool>> predicate)
-    {
-        return await _dbContext.Currencies.Where(predicate).ToListAsync();
-    }
-
-    public async Task<bool> ExistsAsync(Expression<Func<Models.Currency, bool>> predicate)
-    {
-        return await _dbContext.Currencies.AnyAsync(predicate);
-    }
-
-    public async Task<Models.Currency?> GetByCodeAsync(string code)
-    {
-        return await _dbContext.Currencies
+        return await DbSet
             .FirstOrDefaultAsync(c => c.Code.Equals(code));
     }
 
-    public async Task<IEnumerable<Models.Currency>> GetActiveCurrenciesAsync()
+    public async Task<IEnumerable<Currency>> GetActiveCurrenciesAsync()
     {
-        return await _dbContext.Currencies
+        return await DbSet
             .Where(c => c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync();
     }
 
-    public async Task<Models.Currency?> GetDefaultCurrencyAsync()
-    {
-        return await _dbContext.Currencies
-            .FirstOrDefaultAsync(c => c.IsDefaultForNewUsers);
-    }
-
     public async Task<bool> IsCodeUniqueAsync(string code, int? excludeId = null)
     {
-        return !await _dbContext.Currencies
+        return !await DbSet
             .AnyAsync(c => c.Code.Equals(code) && (!excludeId.HasValue || c.Id != excludeId.Value));
+    }
+
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateEntityAsync(Currency currency)
+    {
+        // Валидация обязательных полей
+        if (string.IsNullOrWhiteSpace(currency.Name))
+            return (false, ErrorCode.CurrencyNameEmpty);
+
+        if (string.IsNullOrWhiteSpace(currency.Code))
+            return (false, ErrorCode.CurrencyCodeEmpty);
+
+        if (string.IsNullOrWhiteSpace(currency.Symbol))
+            return (false, ErrorCode.CurrencySymbolEmpty);
+
+        return (true, null);
+    }
+
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateCreateAsync(Currency currency)
+    {
+        // Сначала выполняем базовую валидацию
+        var baseValidation = await ValidateEntityAsync(currency);
+        if (!baseValidation.isValid)
+            return baseValidation;
+
+        // Проверка уникальности кода
+        var isUnique = await IsCodeUniqueAsync(currency.Code, currency.Id);
+        if (!isUnique)
+            return (false, ErrorCode.CurrencyCodeNotUnique);
+
+        return (true, null);
+    }
+
+    public override async Task<(bool isValid, ErrorCode? error)> ValidateUpdateAsync(Currency currency)
+    {
+        // Проверка существования валюты
+        var existingCurrency = await GetByIdAsync(currency.Id);
+        if (existingCurrency == null)
+            return (false, ErrorCode.CurrencyNotFound);
+
+        // Проверка активности валюты
+        if (existingCurrency.IsActive == false)
+            return (false, ErrorCode.CurrencyInactive);
+
+        // Проверка полей, которые могут быть обновлены
+        if (!string.IsNullOrWhiteSpace(currency.Name) && currency.Name.Length > 50)
+            return (false, ErrorCode.CurrencyNameTooLong);
+
+        if (!string.IsNullOrWhiteSpace(currency.Symbol) && currency.Symbol.Length > 10)
+            return (false, ErrorCode.CurrencySymbolTooLong);
+
+        return (true, null);
+    }
+
+    public async Task<(bool isValid, ErrorCode? error)> ValidateExchangeRateAsync(decimal rate)
+    {
+        if (rate <= 0)
+            return (false, ErrorCode.CurrencyRateMustBePositive);
+
+        if (rate > 1000000) // Разумное ограничение для предотвращения ошибок
+            return (false, ErrorCode.CurrencyRateTooHigh);
+
+        return (true, null);
+    }
+
+    public override async Task<(bool canDelete, ErrorCode? error)> ValidateDeleteAsync(int id)
+    {
+        // Проверка существования валюты из базового метода
+        var baseValidation = await base.ValidateDeleteAsync(id);
+        if (!baseValidation.canDelete)
+            return baseValidation;
+
+        return (true, null);
+    }
+
+    public async Task<(bool canDelete, ErrorCode? error)> CanDeleteAsync(int currencyId, 
+        ITransactionRepository transactionRepository, 
+        IUserBalanceRepository userBalanceRepository)
+    {
+        // Проверка существования валюты
+        var baseValidation = await ValidateDeleteAsync(currencyId);
+        if (!baseValidation.canDelete)
+            return baseValidation;
+
+        // Проверка наличия связанных транзакций
+        var hasTransactions = await transactionRepository.HasTransactionsWithCurrencyAsync(currencyId);
+        if (hasTransactions)
+            return (false, ErrorCode.CurrencyHasTransactions);
+
+        // Проверка наличия связанных балансов пользователей
+        var hasBalances = await userBalanceRepository.HasBalancesWithCurrencyAsync(currencyId);
+        if (hasBalances)
+            return (false, ErrorCode.CurrencyHasBalances);
+
+        return (true, null);
     }
 } 

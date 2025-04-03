@@ -30,32 +30,53 @@ public class AuthTokenService : IAuthTokenService
             IsActive = true
         };
 
+        // Валидируем новый токен перед созданием
+        var (isValid, validationError) = await _tokenRepository.ValidateCreateAsync(token);
+        if (!isValid)
+        {
+            // В случае ошибки валидации генерируем новый токен
+            // (это маловероятно, но может произойти в случае коллизии токенов)
+            if (validationError == ErrorCode.AuthTokenAlreadyExists)
+            {
+                token.Token = GenerateSecureToken();
+                // Повторная проверка
+                (isValid, validationError) = await _tokenRepository.ValidateCreateAsync(token);
+                if (!isValid)
+                {
+                    throw new InvalidOperationException($"Не удалось создать токен: {validationError}");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Не удалось создать токен: {validationError}");
+            }
+        }
+
         await _tokenRepository.AddAsync(token);
         return token;
     }
 
     public async Task<UserAuthToken?> ValidateTokenAsync(string token, string hardwareId)
     {
-        var authToken = await _tokenRepository.GetByTokenAsync(token);
-
-        if (authToken == null || !authToken.IsActive)
+        // Используем новый метод валидации из репозитория
+        var (isValid, validationError) = await _tokenRepository.ValidateTokenAsync(token, hardwareId);
+        if (!isValid)
         {
+            // Если токен невалидный и это из-за истечения срока, обновим его статус
+            if (validationError == ErrorCode.AuthTokenExpired)
+            {
+                var authToken = await _tokenRepository.GetByTokenAsync(token);
+                if (authToken != null)
+                {
+                    authToken.IsActive = false;
+                    await _tokenRepository.UpdateAsync(authToken);
+                }
+            }
             return null;
         }
 
-        if (authToken.HardwareId != hardwareId)
-        {
-            return null;
-        }
-
-        if (authToken.ExpiresAt < DateTime.UtcNow)
-        {
-            authToken.IsActive = false;
-            await _tokenRepository.UpdateAsync(authToken);
-            return null;
-        }
-
-        return authToken;
+        // Токен валидный, возвращаем его
+        return await _tokenRepository.GetByTokenAsync(token);
     }
 
     public async Task DeactivateTokenAsync(int tokenId)
@@ -64,6 +85,14 @@ public class AuthTokenService : IAuthTokenService
         if (token != null)
         {
             token.IsActive = false;
+            
+            // Валидируем обновление
+            var (isValid, validationError) = await _tokenRepository.ValidateUpdateAsync(token);
+            if (!isValid)
+            {
+                throw new InvalidOperationException($"Не удалось деактивировать токен: {validationError}");
+            }
+            
             await _tokenRepository.UpdateAsync(token);
         }
     }

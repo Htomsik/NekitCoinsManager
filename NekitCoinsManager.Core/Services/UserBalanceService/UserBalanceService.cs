@@ -46,6 +46,20 @@ public class UserBalanceService : IUserBalanceService
         balance.Amount = amount;
         balance.LastUpdateTime = DateTime.UtcNow;
 
+        // Валидируем обновление баланса
+        var (isValid, validationError) = await _userBalanceRepository.ValidateUpdateAsync(balance);
+        if (!isValid)
+        {
+            // Преобразуем технические коды ошибок в понятные пользователю сообщения
+            string userError = validationError switch
+            {
+                ErrorCode.BalanceNotFound => "Баланс не найден",
+                ErrorCode.BalanceAmountNegative => "Сумма не может быть отрицательной",
+                _ => "Ошибка при обновлении баланса"
+            };
+            return (false, userError);
+        }
+
         await _userBalanceRepository.UpdateAsync(balance);
         return (true, null);
     }
@@ -64,13 +78,6 @@ public class UserBalanceService : IUserBalanceService
             return (false, "Валюта не найдена");
         }
 
-        // Проверяем, существует ли уже баланс для этой валюты у пользователя
-        var existingBalance = await _userBalanceRepository.GetUserBalanceAsync(userId, currencyId);
-        if (existingBalance != null)
-        {
-            return (false, "Баланс для данной валюты уже существует");
-        }
-
         var newBalance = new UserBalance
         {
             UserId = userId,
@@ -78,6 +85,22 @@ public class UserBalanceService : IUserBalanceService
             Amount = amount,
             LastUpdateTime = DateTime.UtcNow
         };
+
+        // Используем новый метод валидации при создании
+        var (isValid, validationError) = await _userBalanceRepository.ValidateCreateAsync(newBalance);
+        if (!isValid)
+        {
+            // Преобразуем технические коды ошибок в понятные пользователю сообщения
+            string userError = validationError switch
+            {
+                ErrorCode.BalanceUserIdInvalid => "Неверный идентификатор пользователя",
+                ErrorCode.TransactionCurrencyIdInvalid => "Неверный идентификатор валюты",
+                ErrorCode.BalanceAmountNegative => "Сумма не может быть отрицательной",
+                ErrorCode.BalanceAlreadyExists => "Баланс для данной валюты уже существует",
+                _ => "Ошибка при создании баланса"
+            };
+            return (false, userError);
+        }
 
         await _userBalanceRepository.AddAsync(newBalance);
         return (true, null);
@@ -93,22 +116,25 @@ public class UserBalanceService : IUserBalanceService
     private async Task<(bool canTransfer, UserBalance? fromBalance, string? error)> ValidateTransferAsync(
         int fromUserId, int currencyId, decimal amount)
     {
-        if (amount <= 0)
+        // Используем новый метод валидации операций с балансом
+        var (isValid, validationError) = await _userBalanceRepository.ValidateBalanceOperationAsync(
+            fromUserId, currencyId, amount, true);
+
+        if (!isValid)
         {
-            return (false, null, "Сумма перевода должна быть больше нуля");
+            // Преобразуем технические коды ошибок в понятные пользователю сообщения
+            string userError = validationError switch
+            {
+                ErrorCode.TransactionAmountMustBePositive => "Сумма перевода должна быть больше нуля",
+                ErrorCode.BalanceNotFound => "У отправителя нет баланса в данной валюте",
+                ErrorCode.TransactionInsufficientFunds => "Недостаточно средств для перевода",
+                _ => "Ошибка при проверке возможности перевода"
+            };
+            return (false, null, userError);
         }
 
+        // Получаем баланс отправителя для дальнейших операций
         var fromBalance = await _userBalanceRepository.GetUserBalanceAsync(fromUserId, currencyId);
-        if (fromBalance == null)
-        {
-            return (false, null, "У отправителя нет баланса в данной валюте");
-        }
-
-        if (fromBalance.Amount < amount)
-        {
-            return (false, null, "Недостаточно средств для перевода");
-        }
-
         return (true, fromBalance, null);
     }
 

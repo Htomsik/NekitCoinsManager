@@ -10,4 +10,8 @@ public interface IUserBalanceRepository : IRepository<UserBalance>
     Task<bool> HasEnoughBalanceAsync(int userId, int currencyId, decimal amount);
     Task<IEnumerable<UserBalance>> GetBalancesByCurrencyAsync(int currencyId);
     Task<bool> HasBalancesWithCurrencyAsync(int currencyId);
+    
+    // Специфический метод валидации операций с балансом
+    Task<(bool isValid, ErrorCode? error)> ValidateBalanceOperationAsync(
+        int userId, int currencyId, decimal amount, bool requirePositiveAmount = true);
 } 
