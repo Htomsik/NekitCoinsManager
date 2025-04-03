@@ -13,11 +13,12 @@ namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionConversionViewModel : ViewModelBase
 {
-    private readonly ITransactionService _transactionService;
+    private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
     private readonly ICurrencyService _currencyService;
     private readonly ICurrencyConversionService _currencyConversionService;
+    private readonly IMapper _mapper;
 
     /// <summary>
     /// Словарь валют: ключ - ID, значение - модель отображения валюты
@@ -66,17 +67,19 @@ public partial class TransactionConversionViewModel : ViewModelBase
     }
 
     public TransactionConversionViewModel(
-        ITransactionService transactionService,
+        IMoneyOperationsManager moneyOperationsManager,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyService currencyService,
-        ICurrencyConversionService currencyConversionService)
+        ICurrencyConversionService currencyConversionService,
+        IMapper mapper)
     {
-        _transactionService = transactionService;
+        _moneyOperationsManager = moneyOperationsManager;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
         _currencyService = currencyService;
         _currencyConversionService = currencyConversionService;
+        _mapper = mapper;
 
         // Инициализируем данные
         Initialize();
@@ -226,21 +229,48 @@ public partial class TransactionConversionViewModel : ViewModelBase
         
         try
         {
-            var (success, error, convertedAmount) = await _transactionService.ConvertCurrencyAsync(
-                CurrentUser!.Id,
-                FromCurrencyId,
-                ToCurrencyId,
-                amountValue);
+            // Создаем кортеж с параметрами для маппинга в ConversionDto
+            var conversionParams = (
+                userId: CurrentUser!.Id,
+                fromCurrencyId: FromCurrencyId,
+                toCurrencyId: ToCurrencyId,
+                amount: amountValue
+            );
+            
+            // Используем маппер для создания ConversionDto
+            var conversionDto = _mapper.Map<ConversionDto>(conversionParams);
+            
+            // Используем MoneyOperationsManager для конвертации
+            var result = await _moneyOperationsManager.ConvertAsync(conversionDto);
                 
-            if (!success)
+            if (!result.Success)
             {
-                _notificationService.ShowError(error ?? "Произошла ошибка при конвертации");
+                _notificationService.ShowError(result.Error ?? "Произошла ошибка при конвертации");
                 return;
+            }
+            
+            // Получаем сконвертированную сумму из результата операции, если она доступна
+            decimal? convertedAmount = null;
+            if (result.Data is decimal decimalAmount)
+            {
+                convertedAmount = decimalAmount;
+            }
+            else if (result.Data is object dataObj && dataObj.GetType().GetProperty("ConvertedAmount")?.GetValue(dataObj) is decimal convertedDecimal)
+            {
+                convertedAmount = convertedDecimal;
             }
 
             // Очищаем форму после успешной конвертации
             ResetForm();
-            _notificationService.ShowSuccess($"Конвертация выполнена успешно. Получено: {convertedAmount} {CurrenciesDictionary[ToCurrencyId].Symbol}");
+            
+            // Формируем сообщение об успешной конвертации
+            string message = "Конвертация выполнена успешно";
+            if (convertedAmount.HasValue)
+            {
+                message += $". Получено: {convertedAmount.Value} {CurrenciesDictionary[ToCurrencyId].Symbol}";
+            }
+            
+            _notificationService.ShowSuccess(message);
         }
         catch (System.Exception)
         {

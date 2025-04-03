@@ -12,7 +12,7 @@ namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionDepositViewModel : ViewModelBase
 {
-    private readonly ITransactionService _transactionService;
+    private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
     private readonly ICurrencyService _currencyService;
@@ -31,13 +31,13 @@ public partial class TransactionDepositViewModel : ViewModelBase
     private User? _currentUser;
 
     public TransactionDepositViewModel(
-        ITransactionService transactionService,
+        IMoneyOperationsManager moneyOperationsManager,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyService currencyService,
         IMapper mapper)
     {
-        _transactionService = transactionService;
+        _moneyOperationsManager = moneyOperationsManager;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
         _currencyService = currencyService;
@@ -113,14 +113,15 @@ public partial class TransactionDepositViewModel : ViewModelBase
             return;
         }
         
-        // Преобразуем UI-модель в модель данных для сервиса
-        var transaction = _mapper.Map<Transaction>(TransactionForm);
+        // Используем маппер для создания DepositDto из TransactionFormModel
+        var depositDto = _mapper.Map<DepositDto>(TransactionForm);
         
-        var (success, error) = await _transactionService.DepositCoinsAsync(transaction);
+        // Используем MoneyOperationsManager
+        var result = await _moneyOperationsManager.DepositAsync(depositDto);
         
-        if (!success)
+        if (!result.Success)
         {
-            _notificationService.ShowError(error ?? "Произошла ошибка при пополнении баланса");
+            _notificationService.ShowError(result.Error ?? "Произошла ошибка при пополнении баланса");
             return;
         }
 

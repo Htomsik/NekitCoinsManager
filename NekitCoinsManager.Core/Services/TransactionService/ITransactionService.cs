@@ -9,32 +9,38 @@ public interface ITransactionObserver
     void OnTransactionsChanged();
 }
 
+/// <summary>
+/// Сервис для работы с транзакциями
+/// </summary>
 public interface ITransactionService
 {
+    /// <summary>
+    /// Получает все транзакции
+    /// </summary>
     Task<IEnumerable<Transaction>> GetTransactionsAsync();
-    Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction);
-    Task<(bool success, string? error)> GrantWelcomeBonusAsync(int userId);
     
     /// <summary>
-    /// Пополняет баланс пользователя (депозит)
+    /// Получает транзакцию по идентификатору
     /// </summary>
-    /// <param name="transaction">Транзакция для пополнения баланса</param>
-    /// <returns>Результат операции и сообщение об ошибке</returns>
-    Task<(bool success, string? error)> DepositCoinsAsync(Transaction transaction);
+    Task<Transaction?> GetTransactionByIdAsync(int id);
     
     /// <summary>
-    /// Конвертирует средства пользователя из одной валюты в другую
+    /// Добавляет новую транзакцию
     /// </summary>
-    /// <param name="userId">ID пользователя</param>
-    /// <param name="fromCurrencyId">ID исходной валюты</param>
-    /// <param name="toCurrencyId">ID целевой валюты</param>
-    /// <param name="amount">Сумма для конвертации в исходной валюте</param>
-    /// <returns>Результат операции, сообщение об ошибке и сконвертированная сумма</returns>
-    Task<(bool success, string? error, decimal? convertedAmount)> ConvertCurrencyAsync(
-        int userId, 
-        int fromCurrencyId, 
-        int toCurrencyId, 
-        decimal amount);
+    Task<(bool success, string? error)> AddTransactionAsync(Transaction transaction);
     
+    /// <summary>
+    /// Валидирует транзакцию
+    /// </summary>
+    Task<(bool isValid, string? errorMessage)> ValidateTransactionAsync(Transaction transaction);
+    
+    /// <summary>
+    /// Подписаться на обновление транзакций
+    /// </summary>
     void Subscribe(ITransactionObserver observer);
+    
+    /// <summary>
+    /// Уведомить наблюдателей о изменении транзакций
+    /// </summary>
+    void NotifyObservers();
 } 

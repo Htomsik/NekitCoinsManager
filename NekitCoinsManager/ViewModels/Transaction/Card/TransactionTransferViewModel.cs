@@ -13,7 +13,7 @@ namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionTransferViewModel : ViewModelBase
 {
-    private readonly ITransactionService _transactionService;
+    private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
@@ -39,14 +39,14 @@ public partial class TransactionTransferViewModel : ViewModelBase
     private User? _currentUser;
 
     public TransactionTransferViewModel(
-        ITransactionService transactionService, 
+        IMoneyOperationsManager moneyOperationsManager, 
         IUserService userService,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyService currencyService,
         IMapper mapper)
     {
-        _transactionService = transactionService;
+        _moneyOperationsManager = moneyOperationsManager;
         _userService = userService;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
@@ -134,14 +134,15 @@ public partial class TransactionTransferViewModel : ViewModelBase
             return;
         }
         
-        // Преобразуем UI-модель в модель данных для сервиса
-        var transaction = _mapper.Map<Transaction>(TransactionForm);
+        // Используем маппер для создания TransferDto из TransactionFormModel
+        var transferDto = _mapper.Map<TransferDto>(TransactionForm);
         
-        var (success, error) = await _transactionService.TransferCoinsAsync(transaction);
+        // Используем MoneyOperationsManager
+        var result = await _moneyOperationsManager.TransferAsync(transferDto);
         
-        if (!success)
+        if (!result.Success)
         {
-            _notificationService.ShowError(error ?? "Произошла ошибка при переводе");
+            _notificationService.ShowError(result.Error ?? "Произошла ошибка при переводе");
             return;
         }
 

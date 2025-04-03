@@ -14,18 +14,15 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly ITransactionRepository _transactionRepository;
     private readonly IPasswordHasherService _passwordHasherService;
-    private readonly ITransactionService _transactionService;
 
     public UserService(
         IUserRepository userRepository,
         ITransactionRepository transactionRepository,
-        IPasswordHasherService passwordHasherService,
-        ITransactionService transactionService)
+        IPasswordHasherService passwordHasherService)
     {
         _userRepository = userRepository;
         _transactionRepository = transactionRepository;
         _passwordHasherService = passwordHasherService;
-        _transactionService = transactionService;
     }
 
     public async Task<IEnumerable<User>> GetUsersAsync()
@@ -99,16 +96,7 @@ public class UserService : IUserService
 
         // Добавляем пользователя
         await _userRepository.AddAsync(user);
-
-        // Выдаем приветственный бонус
-        var (bonusSuccess, bonusError) = await _transactionService.GrantWelcomeBonusAsync(user.Id);
-        if (!bonusSuccess)
-        {
-            // Если не удалось выдать бонус, удаляем пользователя
-            await _userRepository.DeleteAsync(user);
-            return (false, bonusError);
-        }
-
+        
         return (true, null);
     }
 

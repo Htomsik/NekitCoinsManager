@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +43,13 @@ public static class DependencyInjection
         services.AddTransient<IUserSettingsService, UserFileSettingsService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
+        services.AddScoped<IDbTransactionService, DbTransactionService>();
+        
+        // Регистрируем сервисы для операций с деньгами
+        services.AddScoped<MoneyTransferOperationService>();
+        services.AddScoped<MoneyDepositOperationService>();
+        services.AddScoped<MoneyConversionOperationService>();
+        services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
 
         // Регистрируем сервис навигации
         services.AddSingleton<INavigationService, NavigationService>();

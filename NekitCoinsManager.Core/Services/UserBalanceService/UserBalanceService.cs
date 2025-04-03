@@ -237,4 +237,96 @@ public class UserBalanceService : IUserBalanceService
         
         return (true, null, balance);
     }
+
+    /// <summary>
+    /// Проверяет, достаточно ли у пользователя средств для операции
+    /// </summary>
+    /// <param name="userId">ID пользователя</param>
+    /// <param name="currencyId">ID валюты</param>
+    /// <param name="amount">Сумма операции</param>
+    /// <returns>Результат проверки и сообщение об ошибке</returns>
+    public async Task<(bool isValid, string? errorMessage)> ValidateUserBalanceAsync(int userId, int currencyId, decimal amount)
+    {
+        // Проверяем баланс пользователя через репозиторий балансов
+        var (isValid, error) = await _userBalanceRepository.ValidateBalanceOperationAsync(userId, currencyId, amount);
+        
+        if (!isValid)
+        {
+            // Преобразуем технический код ошибки в понятное пользователю сообщение
+            string userError = error switch
+            {
+                ErrorCode.TransactionInsufficientFunds => "Недостаточно средств на счете",
+                ErrorCode.BalanceNotFound => "У пользователя нет баланса в указанной валюте",
+                _ => "Ошибка при проверке баланса пользователя"
+            };
+            
+            return (false, userError);
+        }
+        
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Переводит указанную сумму с одного баланса на другой
+    /// </summary>
+    /// <param name="fromUserId">Идентификатор пользователя-отправителя</param>
+    /// <param name="fromCurrencyId">Идентификатор валюты списания</param>
+    /// <param name="toUserId">Идентификатор пользователя-получателя</param>
+    /// <param name="toCurrencyId">Идентификатор валюты зачисления</param>
+    /// <param name="amount">Сумма для списания</param>
+    /// <param name="amountToAdd">Сумма для зачисления (если отличается от amount)</param>
+    /// <returns>Результат операции и сообщение об ошибке</returns>
+    public async Task<(bool success, string? error)> TransferAmountBetweenBalancesAsync(
+        int fromUserId,
+        int fromCurrencyId,
+        int toUserId,
+        int toCurrencyId,
+        decimal amount,
+        decimal? amountToAdd = null)
+    {
+        // Получаем баланс отправителя
+        var (fromBalanceSuccess, fromBalanceError, fromBalance) = await GetOrCreateBalanceAsync(fromUserId, fromCurrencyId);
+        if (!fromBalanceSuccess || fromBalance == null)
+        {
+            return (false, fromBalanceError ?? $"Не удалось получить баланс пользователя с ID {fromUserId} в валюте с ID {fromCurrencyId}");
+        }
+        
+        // Получаем баланс получателя
+        var (toBalanceSuccess, toBalanceError, toBalance) = await GetOrCreateBalanceAsync(toUserId, toCurrencyId);
+        if (!toBalanceSuccess || toBalance == null)
+        {
+            return (false, toBalanceError ?? $"Не удалось получить баланс пользователя с ID {toUserId} в валюте с ID {toCurrencyId}");
+        }
+        
+        // Проверяем, является ли отправитель банком и достаточно ли у него средств
+        var fromUser = await _userRepository.GetByIdAsync(fromUserId);
+        if (fromUser?.IsBankAccount == true && fromBalance.Amount < amount)
+        {
+            return (false, $"Банк не имеет достаточно средств в валюте для выполнения транзакции");
+        }
+        
+        // Проверяем, что у отправителя достаточно средств
+        if (fromBalance.Amount < amount)
+        {
+            return (false, "Недостаточно средств для перевода");
+        }
+        
+        // Определяем сумму для зачисления
+        decimal actualAmountToAdd = amountToAdd ?? amount;
+        
+        // Обновляем балансы
+        fromBalance.Amount -= amount;
+        toBalance.Amount += actualAmountToAdd;
+        
+        // Устанавливаем время последнего обновления
+        var currentTime = DateTime.UtcNow;
+        fromBalance.LastUpdateTime = currentTime;
+        toBalance.LastUpdateTime = currentTime;
+        
+        // Сохраняем изменения
+        await _userBalanceRepository.UpdateAsync(fromBalance);
+        await _userBalanceRepository.UpdateAsync(toBalance);
+        
+        return (true, null);
+    }
 } 

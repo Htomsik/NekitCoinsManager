@@ -21,5 +21,10 @@ namespace NekitCoinsManager.Core.Models
         /// Количество валюты, начисляемое при регистрации
         /// </summary>
         public decimal DefaultAmount { get; set; }
+        
+        /// <summary>
+        /// Процент комиссии при конвертации из этой валюты
+        /// </summary>
+        public decimal ConversionFeePercentage { get; set; } = 0.01m; // 1% по умолчанию
     }
 } 
