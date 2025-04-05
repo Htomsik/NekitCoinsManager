@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using NekitCoinsManager.Core.Models;
 
 namespace NekitCoinsManager.Models;
 

@@ -1,7 +1,10 @@
+using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Models;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Services;
 
 public class UserFileSettingsService : IUserSettingsService
 {

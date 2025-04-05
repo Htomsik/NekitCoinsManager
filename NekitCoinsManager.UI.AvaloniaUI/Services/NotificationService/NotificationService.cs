@@ -1,7 +1,7 @@
 using System;
-using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Models;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Services;
 
 public class NotificationService : INotificationService
 {

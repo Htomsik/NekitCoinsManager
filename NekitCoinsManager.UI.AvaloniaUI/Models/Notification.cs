@@ -1,6 +1,6 @@
 using System;
 
-namespace NekitCoinsManager.Core.Models;
+namespace NekitCoinsManager.Models;
 
 public class Notification
 {

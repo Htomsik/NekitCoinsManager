@@ -1,4 +1,4 @@
-namespace NekitCoinsManager.ViewModels;
+namespace NekitCoinsManager.Models;
 
 /// <summary>
 /// Типы представлений в системе, сгруппированные по категориям

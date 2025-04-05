@@ -1,6 +1,7 @@
-using NekitCoinsManager.Core.Models;
+using System.Threading.Tasks;
+using NekitCoinsManager.Models;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Services;
 
 public interface IUserSettingsService
 {

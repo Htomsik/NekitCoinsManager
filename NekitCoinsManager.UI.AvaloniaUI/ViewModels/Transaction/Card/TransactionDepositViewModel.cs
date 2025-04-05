@@ -7,6 +7,7 @@ using MapsterMapper;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

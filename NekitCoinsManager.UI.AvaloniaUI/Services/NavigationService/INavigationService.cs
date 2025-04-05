@@ -1,6 +1,5 @@
-using System;
 using System.Threading.Tasks;
-using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Models;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager.Services;

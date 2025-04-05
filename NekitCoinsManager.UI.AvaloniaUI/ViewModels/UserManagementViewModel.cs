@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;

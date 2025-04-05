@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 
 namespace NekitCoinsManager.Core.Data;

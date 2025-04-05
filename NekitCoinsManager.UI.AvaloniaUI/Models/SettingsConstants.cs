@@ -1,6 +1,8 @@
+using System;
+using System.IO;
 using System.Text.Json;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Models;
 
 /// <summary>
 /// Константы для работы с настройками приложения

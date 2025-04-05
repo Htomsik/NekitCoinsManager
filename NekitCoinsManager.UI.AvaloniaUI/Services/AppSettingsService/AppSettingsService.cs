@@ -1,7 +1,11 @@
+using System;
+using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Models;
 
-namespace NekitCoinsManager.Core.Services.AppSettingsService;
+namespace NekitCoinsManager.Services;
 
 public class AppSettingsService : IAppSettingsService
 {

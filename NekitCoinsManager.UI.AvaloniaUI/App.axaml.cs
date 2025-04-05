@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 using NekitCoinsManager.Core.Data;
-using NekitCoinsManager.Core.Services.AppSettingsService;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Services;
 using NekitCoinsManager.ViewModels;
 using NekitCoinsManager.Views;
 

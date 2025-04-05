@@ -1,6 +1,7 @@
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
 
-namespace NekitCoinsManager.Core.Services.AppSettingsService;
+namespace NekitCoinsManager.Services;
 
 public interface IAppSettingsService
 {

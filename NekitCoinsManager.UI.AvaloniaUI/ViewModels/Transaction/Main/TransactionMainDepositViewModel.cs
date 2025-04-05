@@ -1,4 +1,4 @@
-using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

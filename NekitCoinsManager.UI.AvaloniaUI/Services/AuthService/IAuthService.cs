@@ -1,4 +1,6 @@
-namespace NekitCoinsManager.Core.Services;
+using System.Threading.Tasks;
+
+namespace NekitCoinsManager.Services;
 
 public interface IAuthService
 {

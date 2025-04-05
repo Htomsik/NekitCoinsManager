@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Models;
 
 namespace NekitCoinsManager.Converters;
 

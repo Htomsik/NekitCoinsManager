@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.ViewModels;
 

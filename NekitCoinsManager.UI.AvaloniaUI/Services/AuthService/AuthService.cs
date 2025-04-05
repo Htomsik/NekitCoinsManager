@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services.AppSettingsService;
+using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Models;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Services;
 
 public class AuthService : IAuthService
 {

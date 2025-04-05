@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Models;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager.Services;

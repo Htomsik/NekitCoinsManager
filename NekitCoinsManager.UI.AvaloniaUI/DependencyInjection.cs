@@ -1,12 +1,8 @@
-using System;
-using System.Linq;
-using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Repositories;
 using NekitCoinsManager.Core.Services;
-using NekitCoinsManager.Core.Services.AppSettingsService;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.ViewModels;
 
