@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager", "NekitCoinsManager\NekitCoinsManager.csproj", "{C37971F0-6D58-4A4D-9E59-785B761C9C96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.UI.AvaloniaUI", "NekitCoinsManager.UI.AvaloniaUI\NekitCoinsManager.UI.AvaloniaUI.csproj", "{C37971F0-6D58-4A4D-9E59-785B761C9C96}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.Core", "NekitCoinsManager.Core\NekitCoinsManager.Core.csproj", "{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}"
 EndProject
