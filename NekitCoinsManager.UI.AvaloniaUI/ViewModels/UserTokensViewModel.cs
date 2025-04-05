@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class UserTokensViewModel : ViewModelBase
 {
-    private readonly IAuthTokenService _authTokenService;
+    private readonly IAuthTokenServiceClient _authTokenServiceClient;
     private readonly INotificationService _notificationService;
     private readonly INavigationService _navigationService;
     
@@ -18,14 +19,14 @@ public partial class UserTokensViewModel : ViewModelBase
     private User? _user;
     
     [ObservableProperty]
-    private ObservableCollection<UserAuthToken> _tokens = new();
+    private ObservableCollection<UserAuthTokenDto> _tokens = new();
     
     public UserTokensViewModel(
-        IAuthTokenService authTokenService,
+        IAuthTokenServiceClient authTokenServiceClient,
         INotificationService notificationService,
         INavigationService navigationService)
     {
-        _authTokenService = authTokenService;
+        _authTokenServiceClient = authTokenServiceClient;
         _notificationService = notificationService;
         _navigationService = navigationService;
     }
@@ -41,7 +42,7 @@ public partial class UserTokensViewModel : ViewModelBase
         if (User == null) return;
         
         Tokens.Clear();
-        var tokens = await _authTokenService.GetUserTokensAsync(User.Id);
+        var tokens = await _authTokenServiceClient.GetUserTokensAsync(User.Id);
         
         foreach (var token in tokens)
         {
@@ -50,7 +51,7 @@ public partial class UserTokensViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private async Task DeactivateToken(UserAuthToken? token)
+    private async Task DeactivateToken(UserAuthTokenDto? token)
     {
         if (token == null)
         {
@@ -58,7 +59,7 @@ public partial class UserTokensViewModel : ViewModelBase
             return;
         }
         
-        await _authTokenService.DeactivateTokenAsync(token.Id);
+        await _authTokenServiceClient.DeactivateTokenAsync(token.Id);
         _notificationService.ShowSuccess("Токен деактивирован");
         
         // Обновляем список токенов

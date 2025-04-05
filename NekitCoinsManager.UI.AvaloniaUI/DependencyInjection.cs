@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Repositories;
 using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.HttpClients;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.HttpClient;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager;
@@ -27,6 +29,9 @@ public static class DependencyInjection
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        
+        // Регистрируем клиенты сервисов
+        services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
         
         // Регистрируем бизнес-сервисы
         services.AddScoped<IAuthService, AuthService>();

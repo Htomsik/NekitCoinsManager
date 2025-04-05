@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -70,5 +70,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NekitCoinsManager.Core\NekitCoinsManager.Core.csproj" />
+      <ProjectReference Include="..\NekitCoinsManager.Shared\NekitCoinsManager.Shared.csproj" />
     </ItemGroup>
 </Project>
