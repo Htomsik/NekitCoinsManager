@@ -30,11 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         
-        // Регистрируем клиенты сервисов
-        services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
-        
         // Регистрируем бизнес-сервисы
-        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuthTokenService, AuthTokenService>();
         services.AddTransient<IHardwareInfoService, HardwareInfoService>();
         services.AddScoped<IUserService, UserService>();
@@ -45,6 +41,14 @@ public static class DependencyInjection
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         services.AddScoped<IDbTransactionService, DbTransactionService>();
+        
+        // Регистрируем клиенты сервисов
+        services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
+        services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
+        services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
+        
+        // Регистрируем AuthService после клиентов, так как он теперь зависит от них
+        services.AddScoped<IAuthService, AuthService>();
         
         // Регистрируем сервисы для операций с деньгами
         services.AddScoped<MoneyTransferOperationService>();

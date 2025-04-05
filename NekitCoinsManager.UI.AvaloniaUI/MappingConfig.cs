@@ -1,7 +1,10 @@
+using System;
 using Mapster;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Models;
+using NekitCoinsManager.Shared.DTO;
 
-namespace NekitCoinsManager.Models;
+namespace NekitCoinsManager;
 
 /// <summary>
 /// Конфигурация маппинга для Mapster
@@ -16,7 +19,7 @@ public static class MappingConfig
         // Настройка маппинга TransactionFormModel -> Transaction
         TypeAdapterConfig<TransactionFormModel, Transaction>
             .NewConfig()
-            .Map(dest => dest.CreatedAt, _ => System.DateTime.UtcNow)
+            .Map(dest => dest.CreatedAt, _ => DateTime.UtcNow)
             .Map(dest => dest.Type, _ => TransactionType.Transfer);
 
         // Настройка маппинга TransactionFormModel -> TransferDto
@@ -31,12 +34,12 @@ public static class MappingConfig
             .Map(dest => dest.UserId, src => src.ToUserId);
             
         // Настройка маппинга для ConversionDto
-        TypeAdapterConfig<(int userId, int fromCurrencyId, int toCurrencyId, decimal amount), ConversionDto>
+        TypeAdapterConfig<(decimal amount, Currency fromCurrency, Currency toCurrency, User fromUser, User toUser), ConversionDto>
             .NewConfig()
-            .Map(dest => dest.UserId, src => src.userId)
-            .Map(dest => dest.CurrencyId, src => src.fromCurrencyId)
-            .Map(dest => dest.TargetCurrencyId, src => src.toCurrencyId)
-            .Map(dest => dest.Amount, src => src.amount);
+            .Map(dest => dest.Amount, src => src.amount)
+            .Map(dest => dest.CurrencyId, src => src.fromCurrency.Id)
+            .Map(dest => dest.TargetCurrencyId, src => src.toCurrency.Id)
+            .Map(dest => dest.UserId, src => src.fromUser.Id);
 
         // Настройка обратного маппинга Transaction -> TransactionFormModel
         TypeAdapterConfig<Transaction, TransactionFormModel>
@@ -45,7 +48,16 @@ public static class MappingConfig
         // Настройка маппинга Transaction -> TransactionDisplayModel с рекурсивной обработкой дочерних транзакций
         TypeAdapterConfig<Transaction, TransactionDisplayModel>
             .NewConfig()
-            .MaxDepth(3) // Ограничиваем глубину рекурсии
-            .PreserveReference(true); // Сохраняем ссылки для предотвращения зацикливания
+            .MaxDepth(3) 
+            .PreserveReference(true); // Для рекурсивного разрешения связанных транзакций
+
+        // Настройка маппинга TransactionType -> TransactionTypeDto
+        TypeAdapterConfig<TransactionType, TransactionTypeDto>
+            .NewConfig()
+            .MapToConstructor(true);
+            
+        TypeAdapterConfig<TransactionTypeDto, TransactionType>
+            .NewConfig()
+            .MapToConstructor(true);
     }
 } 

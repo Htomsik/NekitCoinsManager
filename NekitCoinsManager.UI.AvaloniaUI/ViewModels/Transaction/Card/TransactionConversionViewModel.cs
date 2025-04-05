@@ -8,6 +8,7 @@ using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
 
 namespace NekitCoinsManager.ViewModels;
 
@@ -39,7 +40,7 @@ public partial class TransactionConversionViewModel : ViewModelBase
     private decimal _convertedAmount;
 
     [ObservableProperty]
-    private User? _currentUser;
+    private UserDto? _currentUser;
 
     /// <summary>
     /// Символ валюты назначения

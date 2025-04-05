@@ -8,13 +8,15 @@ using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionTransferViewModel : ViewModelBase
 {
     private readonly IMoneyOperationsManager _moneyOperationsManager;
-    private readonly IUserService _userService;
+    private readonly IUserServiceClient _userServiceClient;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
     private readonly ICurrencyService _currencyService;
@@ -36,18 +38,18 @@ public partial class TransactionTransferViewModel : ViewModelBase
     private TransactionFormModel _transactionForm = new();
 
     [ObservableProperty]
-    private User? _currentUser;
+    private UserDto? _currentUser;
 
     public TransactionTransferViewModel(
         IMoneyOperationsManager moneyOperationsManager, 
-        IUserService userService,
+        IUserServiceClient userServiceClient,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyService currencyService,
         IMapper mapper)
     {
         _moneyOperationsManager = moneyOperationsManager;
-        _userService = userService;
+        _userServiceClient = userServiceClient;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
         _currencyService = currencyService;
@@ -69,10 +71,10 @@ public partial class TransactionTransferViewModel : ViewModelBase
 
     private async void LoadUsersAsync()
     {
-        var allUsers = await _userService.GetUsersAsync();
+        var allUserDtos = await _userServiceClient.GetUsersAsync();
         
         // Исключаем текущего пользователя из списка получателей и преобразуем в словарь
-        UsersDictionary = allUsers
+        UsersDictionary = allUserDtos
             .Where(u => u.Id != CurrentUser?.Id)
             .ToDictionary(u => u.Id, u => u.Username);
     }

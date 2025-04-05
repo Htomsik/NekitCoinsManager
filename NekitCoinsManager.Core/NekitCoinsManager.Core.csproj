@@ -14,5 +14,4 @@
         <PackageReference Include="EntityFramework" Version="6.5.1" />
         <PackageReference Include="System.Management" Version="9.0.3" />
     </ItemGroup>
-
 </Project>

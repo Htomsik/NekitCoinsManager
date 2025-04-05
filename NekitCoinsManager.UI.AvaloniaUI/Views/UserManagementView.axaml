@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NekitCoinsManager.ViewModels"
              xmlns:converters="using:NekitCoinsManager.Converters"
-             xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
+             xmlns:dto="using:NekitCoinsManager.Shared.DTO"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
              x:Class="NekitCoinsManager.Views.UserManagementView"
              x:DataType="vm:UserManagementViewModel">
@@ -23,7 +23,7 @@
             <ItemsControl Grid.Row="1" ItemsSource="{Binding Users}"
                          Classes="user-list">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="models:User">
+                    <DataTemplate x:DataType="dto:UserDto">
                         <Border Classes="card user-card">
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                 <!-- Аватар пользователя -->
@@ -41,14 +41,10 @@
                                     <ItemsControl ItemsSource="{Binding Balances}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <TextBlock Classes="balance">
-                                                    <TextBlock.Text>
-                                                        <MultiBinding StringFormat="{}{0} {1}">
-                                                            <Binding Path="Amount"/>
-                                                            <Binding Path="Currency.Symbol"/>
-                                                        </MultiBinding>
-                                                    </TextBlock.Text>
-                                                </TextBlock>
+                                                <Grid ColumnDefinitions="Auto,Auto" Margin="0,2,0,0">
+                                                    <TextBlock Grid.Column="0" Text="{Binding Amount}" Classes="balance"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Currency.Symbol}" Margin="5,0,0,0" Classes="balance"/>
+                                                </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>

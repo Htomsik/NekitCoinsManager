@@ -2,10 +2,10 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
@@ -14,29 +14,29 @@ public partial class UserCardViewModel : ViewModelBase
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthService _authService;
     private readonly INotificationService _notificationService;
-    private readonly IUserBalanceService _userBalanceService;
+    private readonly IUserBalanceServiceClient _userBalanceServiceClient;
     private readonly INavigationService _navigationService;
     
     [ObservableProperty]
-    private User? _currentUser;
+    private UserDto? _currentUser;
     
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<UserBalance> _balances = new();
+    private ObservableCollection<UserBalanceDto> _balances = new();
 
     public UserCardViewModel(
         ICurrentUserService currentUserService, 
         IAuthService authService,
         INotificationService notificationService,
-        IUserBalanceService userBalanceService,
+        IUserBalanceServiceClient userBalanceServiceClient,
         INavigationService navigationService)
     {
         _currentUserService = currentUserService;
         _authService = authService;
         _notificationService = notificationService;
-        _userBalanceService = userBalanceService;
+        _userBalanceServiceClient = userBalanceServiceClient;
         _navigationService = navigationService;
         LoadCurrentUser();
         LoadBalancesAsync();
@@ -51,11 +51,12 @@ public partial class UserCardViewModel : ViewModelBase
     {
         if (CurrentUser == null) return;
 
-        var balances = await _userBalanceService.GetUserBalancesAsync(CurrentUser.Id);
+        var balanceDtos = await _userBalanceServiceClient.GetUserBalancesAsync(CurrentUser.Id);
         Balances.Clear();
-        foreach (var balance in balances)
+        
+        foreach (var balanceDto in balanceDtos)
         {
-            Balances.Add(balance);
+            Balances.Add(balanceDto);
         }
     }
 

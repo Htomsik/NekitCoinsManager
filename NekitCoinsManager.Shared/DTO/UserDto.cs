@@ -27,4 +27,9 @@ public class UserDto
     /// Признак того, что аккаунт является системным банковским аккаунтом
     /// </summary>
     public bool IsBankAccount { get; set; }
+    
+    /// <summary>
+    /// Балансы пользователя
+    /// </summary>
+    public List<UserBalanceDto>? Balances { get; set; }
 } 

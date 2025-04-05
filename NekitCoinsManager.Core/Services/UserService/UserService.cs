@@ -119,25 +119,45 @@ public class UserService : IUserService
 
     public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
-        // Валидируем удаление пользователя
-        var (canDelete, deleteError) = await _userRepository.ValidateDeleteAsync(userId);
-        if (!canDelete)
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
         {
-            // Преобразуем технические коды ошибок в понятные пользователю сообщения
-            string userError = deleteError switch
-            {
-                ErrorCode.CommonEntityNotFound => "Пользователь не найден",
-                ErrorCode.UserNotFound => "Пользователь не найден",
-                ErrorCode.UserCannotDeleteBankAccount => "Нельзя удалить банковский аккаунт",
-                ErrorCode.UserHasBalances => "Пользователь имеет балансы, сначала необходимо их удалить",
-                _ => "Ошибка при удалении пользователя"
-            };
-            return (false, userError);
+            return (false, "Пользователь не найден");
         }
 
-        var user = await _userRepository.GetByIdAsync(userId);
-        await _userRepository.DeleteAsync(user!);
-        
+        var transactions = await _transactionRepository.FindAsync(t => t.FromUserId == userId || t.ToUserId == userId);
+        if (transactions.Any())
+        {
+            return (false, "Невозможно удалить пользователя с историей транзакций");
+        }
+
+        await _userRepository.DeleteAsync(user);
+        return (true, null);
+    }
+
+    public async Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, "Имя пользователя не может быть пустым");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return (false, "Пароль не может быть пустым");
+        }
+
+        var user = await _userRepository.GetByUsernameAsync(username);
+        if (user == null)
+        {
+            return (false, "Неверное имя пользователя или пароль");
+        }
+
+        if (!_passwordHasherService.VerifyPassword(password, user.PasswordHash))
+        {
+            return (false, "Неверное имя пользователя или пароль");
+        }
+
         return (true, null);
     }
 } 

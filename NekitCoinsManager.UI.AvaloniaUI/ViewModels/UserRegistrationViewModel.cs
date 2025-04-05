@@ -1,14 +1,14 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class UserRegistrationViewModel : ViewModelBase
 {
-    private readonly IUserService _userService;
+    private readonly IUserServiceClient _userServiceClient;
     private readonly INotificationService _notificationService;
     
     [ObservableProperty]
@@ -23,20 +23,20 @@ public partial class UserRegistrationViewModel : ViewModelBase
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
-    public UserRegistrationViewModel(IUserService userService, INotificationService notificationService)
+    public UserRegistrationViewModel(IUserServiceClient userServiceClient, INotificationService notificationService)
     {
-        _userService = userService;
+        _userServiceClient = userServiceClient;
         _notificationService = notificationService;
     }
 
     [RelayCommand]
     private async Task Register()
     {
-        var (success, error) = await _userService.AddUserAsync(Username, Password, ConfirmPassword);
+        var result = await _userServiceClient.AddUserAsync(Username, Password, ConfirmPassword);
         
-        if (!success)
+        if (!result.Success)
         {
-            _notificationService.ShowError(error ?? "Произошла ошибка при регистрации");
+            _notificationService.ShowError(result.Error ?? "Произошла ошибка при регистрации");
             return;
         }
 

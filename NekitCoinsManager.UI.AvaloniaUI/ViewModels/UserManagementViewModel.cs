@@ -1,59 +1,71 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
+using MapsterMapper;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class UserManagementViewModel : ViewModelBase
 {
-    private readonly IUserService _userService;
+    private readonly IUserServiceClient _userServiceClient;
     private readonly INotificationService _notificationService;
-    private readonly IUserBalanceService _userBalanceService;
+    private readonly IUserBalanceServiceClient _userBalanceServiceClient;
     private readonly INavigationService _navigationService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IMapper _mapper;
     
     [ObservableProperty]
-    private ObservableCollection<User> _users = new();
+    private ObservableCollection<UserDto> _users = new();
+    
+    [ObservableProperty]
+    private Dictionary<int, List<UserBalanceDto>> _userBalances = new();
     
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
     public UserManagementViewModel(
-        IUserService userService,
+        IUserServiceClient userServiceClient,
         INotificationService notificationService,
-        IUserBalanceService userBalanceService,
-        INavigationService navigationService)
+        IUserBalanceServiceClient userBalanceServiceClient,
+        INavigationService navigationService,
+        ICurrentUserService currentUserService,
+        IMapper mapper)
     {
-        _userService = userService;
+        _userServiceClient = userServiceClient;
         _notificationService = notificationService;
-        _userBalanceService = userBalanceService;
+        _userBalanceServiceClient = userBalanceServiceClient;
         _navigationService = navigationService;
+        _currentUserService = currentUserService;
+        _mapper = mapper;
         LoadUsers();
     }
 
     private async void LoadUsers()
     {
-        var users = await _userService.GetUsersAsync();
+        var userDtos = await _userServiceClient.GetUsersAsync();
         Users.Clear();
+        UserBalances.Clear();
         
-        foreach (var user in users)
+        foreach (var userDto in userDtos)
         {
-            var balances = await _userBalanceService.GetUserBalancesAsync(user.Id);
-            user.Balances.Clear();
-            foreach (var balance in balances)
-            {
-                user.Balances.Add(balance);
-            }
-            Users.Add(user);
+            // Загружаем балансы через клиент
+            var balanceDtos = await _userBalanceServiceClient.GetUserBalancesAsync(userDto.Id);
+            userDto.Balances = balanceDtos.ToList();
+            
+            UserBalances[userDto.Id] = balanceDtos.ToList();
+            Users.Add(userDto);
         }
     }
 
     [RelayCommand]
-    private async Task DeleteUser(User? user)
+    private async Task DeleteUser(UserDto? user)
     {
         if (user == null)
         {
@@ -61,11 +73,11 @@ public partial class UserManagementViewModel : ViewModelBase
             return;
         }
 
-        var (success, error) = await _userService.DeleteUserAsync(user.Id);
+        var result = await _userServiceClient.DeleteUserAsync(user.Id);
         
-        if (!success)
+        if (!result.Success)
         {
-            _notificationService.ShowError(error ?? "Произошла ошибка при удалении пользователя");
+            _notificationService.ShowError(result.Error ?? "Произошла ошибка при удалении пользователя");
             return;
         }
 
@@ -74,7 +86,7 @@ public partial class UserManagementViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private async Task ViewUserTokens(User? user)
+    private async Task ViewUserTokens(UserDto? user)
     {
         if (user == null)
         {

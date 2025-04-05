@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Shared.DTO;
 
 namespace NekitCoinsManager.Services;
 
@@ -8,7 +8,7 @@ public class CurrentUserService : ICurrentUserService
 {
     private readonly List<ICurrentUserObserver> _observers = new();
     private readonly IUserSettingsService _userSettingsService;
-    private User? _currentUser;
+    private UserDto? _currentUser;
     private UserSettings _settings = new();
 
     public CurrentUserService(IUserSettingsService userSettingsService)
@@ -16,10 +16,10 @@ public class CurrentUserService : ICurrentUserService
         _userSettingsService = userSettingsService;
     }
 
-    public User? CurrentUser => _currentUser;
+    public UserDto? CurrentUser => _currentUser;
     public UserSettings Settings => _settings;
 
-    public async void SetCurrentUser(User? user)
+    public async void SetCurrentUser(UserDto? user)
     {
         _currentUser = user;
         if (user == null)

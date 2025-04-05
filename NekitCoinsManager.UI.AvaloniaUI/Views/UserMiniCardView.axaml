@@ -32,14 +32,10 @@
                 <ItemsControl ItemsSource="{Binding Balances}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Classes="balance" FontSize="12">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0} {1}">
-                                        <Binding Path="Amount"/>
-                                        <Binding Path="Currency.Symbol"/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
+                            <Grid ColumnDefinitions="Auto,Auto" Margin="0,2,0,0">
+                                <TextBlock Grid.Column="0" Text="{Binding Amount}" Classes="balance" FontSize="12"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Currency.Symbol}" Margin="5,0,0,0" Classes="balance" FontSize="12"/>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

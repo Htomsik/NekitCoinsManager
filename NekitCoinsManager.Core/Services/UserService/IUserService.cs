@@ -9,4 +9,5 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(int userId);
     Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
     Task<(bool success, string? error)> DeleteUserAsync(int userId);
+    Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password);
 } 

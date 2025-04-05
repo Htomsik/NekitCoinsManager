@@ -1,5 +1,5 @@
-using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Shared.DTO;
 
 namespace NekitCoinsManager.Services;
 
@@ -10,9 +10,9 @@ public interface ICurrentUserObserver
 
 public interface ICurrentUserService
 {
-    User? CurrentUser { get; }
+    UserDto? CurrentUser { get; }
     UserSettings Settings { get; }
-    void SetCurrentUser(User? user);
+    void SetCurrentUser(UserDto? user);
     void Subscribe(ICurrentUserObserver observer);
     void UpdateSettings(UserSettings settings);
     void ResetSettings();
