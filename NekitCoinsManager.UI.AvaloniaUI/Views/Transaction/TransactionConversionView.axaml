@@ -19,13 +19,12 @@
                 <StackPanel Classes="form-group">
                     <TextBlock Text="Из валюты" Classes="form-label" />
                     <ComboBox Classes="transfer-input" 
-                              SelectedValueBinding="{Binding Key}"
-                              SelectedValue="{Binding FromCurrencyId}"
-                              ItemsSource="{Binding CurrenciesDictionary}"
+                              SelectedItem="{Binding DisplayModel.FromCurrency}"
+                              ItemsSource="{Binding DisplayModel.CurrenciesDictionary.Values}"
                               HorizontalAlignment="Stretch">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Value.Name}" />
+                                <TextBlock Text="{Binding Name}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
@@ -34,7 +33,7 @@
                 <!-- Сумма для конвертации -->
                 <StackPanel Classes="form-group">
                     <TextBlock Text="Сумма" Classes="form-label" />
-                    <TextBox Text="{Binding Amount}"
+                    <TextBox Text="{Binding DisplayModel.Amount}"
                              Classes="transfer-input"
                              HorizontalAlignment="Stretch"/>
                 </StackPanel>
@@ -43,13 +42,12 @@
                 <StackPanel Classes="form-group">
                     <TextBlock Text="В валюту" Classes="form-label" />
                     <ComboBox Classes="transfer-input" 
-                              SelectedValueBinding="{Binding Key}"
-                              SelectedValue="{Binding ToCurrencyId}"
-                              ItemsSource="{Binding CurrenciesDictionary}"
+                              SelectedItem="{Binding DisplayModel.ToCurrency}"
+                              ItemsSource="{Binding DisplayModel.CurrenciesDictionary.Values}"
                               HorizontalAlignment="Stretch">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Value.Name}" />
+                                <TextBlock Text="{Binding Name}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
@@ -63,7 +61,7 @@
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0} {1}">
                                 <Binding Path="ConvertedAmount" />
-                                <Binding Path="TargetCurrencySymbol" />
+                                <Binding Path="DisplayModel.ToCurrency.Symbol" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>

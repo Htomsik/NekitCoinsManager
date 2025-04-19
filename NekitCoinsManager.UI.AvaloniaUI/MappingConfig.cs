@@ -40,6 +40,14 @@ public static class MappingConfig
             .Map(dest => dest.CurrencyId, src => src.fromCurrency.Id)
             .Map(dest => dest.TargetCurrencyId, src => src.toCurrency.Id)
             .Map(dest => dest.UserId, src => src.fromUser.Id);
+        
+        // Настройка маппинга TransactionConversionDisplayModel -> ConversionDto
+        TypeAdapterConfig<TransactionConversionDisplayModel, ConversionDto>
+            .NewConfig()
+            .Map(dest => dest.Amount, src => src.Amount)
+            .Map(dest => dest.CurrencyId, src => src.FromCurrency.Id)
+            .Map(dest => dest.TargetCurrencyId, src => src.ToCurrency.Id)
+            .Map(dest => dest.UserId, src => src.UserId);
 
         // Настройка обратного маппинга Transaction -> TransactionFormModel
         TypeAdapterConfig<Transaction, TransactionFormModel>

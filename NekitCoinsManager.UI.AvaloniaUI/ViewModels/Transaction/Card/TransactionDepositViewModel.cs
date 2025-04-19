@@ -9,6 +9,7 @@ using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
@@ -17,7 +18,7 @@ public partial class TransactionDepositViewModel : ViewModelBase
     private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
-    private readonly ICurrencyService _currencyService;
+    private readonly ICurrencyServiceClient _currencyServiceClient;
     private readonly IMapper _mapper;
 
     /// <summary>
@@ -36,13 +37,13 @@ public partial class TransactionDepositViewModel : ViewModelBase
         IMoneyOperationsManager moneyOperationsManager,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
-        ICurrencyService currencyService,
+        ICurrencyServiceClient currencyServiceClient,
         IMapper mapper)
     {
         _moneyOperationsManager = moneyOperationsManager;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
-        _currencyService = currencyService;
+        _currencyServiceClient = currencyServiceClient;
         _mapper = mapper;
 
         // Инициализируем данные
@@ -60,7 +61,7 @@ public partial class TransactionDepositViewModel : ViewModelBase
 
     private async void LoadCurrenciesAsync()
     {
-        var currencies = await _currencyService.GetCurrenciesAsync();
+        var currencies = await _currencyServiceClient.GetCurrenciesAsync();
         
         // Преобразуем список валют в словарь
         CurrenciesDictionary = currencies.ToDictionary(c => c.Id, c => c.Name);

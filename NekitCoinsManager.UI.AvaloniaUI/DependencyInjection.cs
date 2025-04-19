@@ -46,6 +46,8 @@ public static class DependencyInjection
         services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
         services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
+        services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
+        services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();
         
         // Регистрируем AuthService после клиентов, так как он теперь зависит от них
         services.AddScoped<IAuthService, AuthService>();

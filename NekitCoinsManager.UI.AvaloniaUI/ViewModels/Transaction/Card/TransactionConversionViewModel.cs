@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,7 +7,7 @@ using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
-using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
@@ -17,73 +16,50 @@ public partial class TransactionConversionViewModel : ViewModelBase
     private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
-    private readonly ICurrencyService _currencyService;
-    private readonly ICurrencyConversionService _currencyConversionService;
+    private readonly ICurrencyServiceClient _currencyServiceClient;
+    private readonly ICurrencyConversionServiceClient _currencyConversionServiceClient;
     private readonly IMapper _mapper;
 
     /// <summary>
-    /// Словарь валют: ключ - ID, значение - модель отображения валюты
+    /// Модель отображения данных конвертации
     /// </summary>
     [ObservableProperty]
-    private Dictionary<int, CurrencyDisplayModel> _currenciesDictionary = new();
-
-    [ObservableProperty]
-    private string _amount = string.Empty;
-
-    [ObservableProperty]
-    private int _fromCurrencyId;
-
-    [ObservableProperty]
-    private int _toCurrencyId;
-
-    [ObservableProperty]
-    private decimal _convertedAmount;
-
-    [ObservableProperty]
-    private UserDto? _currentUser;
+    private TransactionConversionDisplayModel _displayModel = new();
 
     /// <summary>
-    /// Символ валюты назначения
+    /// Результат конвертации
     /// </summary>
-    public string TargetCurrencySymbol => 
-        CurrenciesDictionary.TryGetValue(ToCurrencyId, out var currency) ? currency.Symbol : string.Empty;
-        
-    // Обновляем символ валюты при изменении выбранной валюты и запускаем расчет
-    partial void OnToCurrencyIdChanged(int value)
-    {
-        OnPropertyChanged(nameof(TargetCurrencySymbol));
-        CalculateConversionAsync();
-    }
-    
-    // Запускаем расчет при изменении исходной валюты
-    partial void OnFromCurrencyIdChanged(int value)
-    {
-        CalculateConversionAsync();
-    }
-    
-    // Запускаем расчет при изменении суммы
-    partial void OnAmountChanged(string value)
-    {
-        CalculateConversionAsync();
-    }
+    [ObservableProperty]
+    private decimal _convertedAmount;
 
     public TransactionConversionViewModel(
         IMoneyOperationsManager moneyOperationsManager,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
-        ICurrencyService currencyService,
-        ICurrencyConversionService currencyConversionService,
+        ICurrencyServiceClient currencyServiceClient,
+        ICurrencyConversionServiceClient currencyConversionServiceClient,
         IMapper mapper)
     {
         _moneyOperationsManager = moneyOperationsManager;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
-        _currencyService = currencyService;
-        _currencyConversionService = currencyConversionService;
+        _currencyServiceClient = currencyServiceClient;
+        _currencyConversionServiceClient = currencyConversionServiceClient;
         _mapper = mapper;
 
         // Инициализируем данные
         Initialize();
+        
+        // Подписываемся на изменения свойств модели отображения
+        DisplayModel.PropertyChanged += (sender, e) => {
+            // Если изменилась сумма, валюты или другие свойства - пересчитываем конвертацию
+            if (e.PropertyName == nameof(DisplayModel.Amount) || 
+                e.PropertyName == nameof(DisplayModel.FromCurrency) ||
+                e.PropertyName == nameof(DisplayModel.ToCurrency))
+            {
+                CalculateConversionAsync();
+            }
+        };
     }
 
     /// <summary>
@@ -97,10 +73,10 @@ public partial class TransactionConversionViewModel : ViewModelBase
 
     private async void LoadCurrenciesAsync()
     {
-        var currencies = await _currencyService.GetCurrenciesAsync();
+        var currencies = await _currencyServiceClient.GetCurrenciesAsync();
         
-        // Преобразуем список валют в словарь с дополнительной информацией
-        CurrenciesDictionary = currencies.ToDictionary(
+        // Создаем словарь валют
+        var currenciesDictionary = currencies.ToDictionary(
             c => c.Id, 
             c => new CurrencyDisplayModel 
             { 
@@ -110,65 +86,29 @@ public partial class TransactionConversionViewModel : ViewModelBase
                 Symbol = c.Symbol 
             });
         
-        // Если есть валюты, выберем первую по умолчанию для обоих полей
-        if (CurrenciesDictionary.Any())
+        // Устанавливаем в модель отображения
+        DisplayModel.CurrenciesDictionary = currenciesDictionary;
+        
+        // Если есть валюты, выберем первую по умолчанию для поля FromCurrency и вторую для ToCurrency
+        if (currenciesDictionary.Any())
         {
-            var firstCurrency = CurrenciesDictionary.First().Key;
-            var secondCurrency = CurrenciesDictionary.Count > 1 
-                ? CurrenciesDictionary.Skip(1).First().Key 
+            var firstCurrency = currenciesDictionary.First().Value;
+            var secondCurrency = currenciesDictionary.Count > 1 
+                ? currenciesDictionary.Skip(1).First().Value 
                 : firstCurrency;
                 
-            FromCurrencyId = firstCurrency;
-            ToCurrencyId = secondCurrency;
+            DisplayModel.FromCurrency = firstCurrency;
+            DisplayModel.ToCurrency = secondCurrency;
         }
     }
 
     private void LoadCurrentUser()
     {
-        CurrentUser = _currentUserService.CurrentUser;
-    }
-
-    /// <summary>
-    /// Проверяет необходимые UI-условия перед отправкой формы
-    /// </summary>
-    private (bool isValid, string? errorMessage, decimal amount) ValidateFormUI(bool showErrors = false)
-    {
-        if (CurrentUser == null)
+        var currentUser = _currentUserService.CurrentUser;
+        if (currentUser != null)
         {
-            if (showErrors) _notificationService.ShowError("Необходимо авторизоваться");
-            return (false, "Необходимо авторизоваться", 0);
+            DisplayModel.UserId = currentUser.Id;
         }
-
-        if (FromCurrencyId <= 0)
-        {
-            if (showErrors) _notificationService.ShowError("Выберите исходную валюту");
-            return (false, "Выберите исходную валюту", 0);
-        }
-
-        if (ToCurrencyId <= 0)
-        {
-            if (showErrors) _notificationService.ShowError("Выберите целевую валюту");
-            return (false, "Выберите целевую валюту", 0);
-        }
-            
-        if (FromCurrencyId == ToCurrencyId)
-        {
-            if (showErrors) _notificationService.ShowError("Выберите разные валюты для конвертации");
-            return (false, "Выберите разные валюты для конвертации", 0);
-        }
-
-        if (string.IsNullOrEmpty(Amount))
-        {
-            return (false, "Введите сумму", 0);
-        }
-
-        if (!decimal.TryParse(Amount.Replace(',', '.'), out decimal amountValue) || amountValue <= 0)
-        {
-            if (showErrors) _notificationService.ShowError("Сумма должна быть больше нуля");
-            return (false, "Сумма должна быть больше нуля", 0);
-        }
-
-        return (true, null, amountValue);
     }
 
     /// <summary>
@@ -176,7 +116,7 @@ public partial class TransactionConversionViewModel : ViewModelBase
     /// </summary>
     private void ResetForm()
     {
-        Amount = string.Empty;
+        DisplayModel.Reset();
         ConvertedAmount = 0;
     }
 
@@ -185,17 +125,9 @@ public partial class TransactionConversionViewModel : ViewModelBase
     /// </summary>
     private async void CalculateConversionAsync()
     {
-        // Проверяем валидность формы без показа ошибок
-        var (isValid, _, amountValue) = ValidateFormUI();
+        // Проверяем валидность данных модели
+        var (isValid, _) = DisplayModel.Validate();
         if (!isValid)
-        {
-            ConvertedAmount = 0;
-            return;
-        }
-        
-        // Получаем валюты
-        if (!CurrenciesDictionary.TryGetValue(FromCurrencyId, out var fromCurrency) ||
-            !CurrenciesDictionary.TryGetValue(ToCurrencyId, out var toCurrency))
         {
             ConvertedAmount = 0;
             return;
@@ -204,10 +136,10 @@ public partial class TransactionConversionViewModel : ViewModelBase
         try
         {
             // Получаем предварительный расчет
-            decimal convertedAmount = await _currencyConversionService.ConvertAsync(
-                amountValue, 
-                fromCurrency.Code, 
-                toCurrency.Code);
+            decimal convertedAmount = await _currencyConversionServiceClient.ConvertAsync(
+                DisplayModel.Amount, 
+                DisplayModel.FromCurrency.Code, 
+                DisplayModel.ToCurrency.Code);
                 
             ConvertedAmount = convertedAmount;
         }
@@ -221,25 +153,18 @@ public partial class TransactionConversionViewModel : ViewModelBase
     [RelayCommand]
     private async Task Convert()
     {
-        // Проверяем валидность формы с показом ошибок
-        var (isValid, _, amountValue) = ValidateFormUI(true);
+        // Проверяем валидность данных модели
+        var (isValid, errorMessage) = DisplayModel.Validate();
         if (!isValid)
         {
+            _notificationService.ShowError(errorMessage ?? "Проверьте данные");
             return;
         }
         
         try
         {
-            // Создаем кортеж с параметрами для маппинга в ConversionDto
-            var conversionParams = (
-                userId: CurrentUser!.Id,
-                fromCurrencyId: FromCurrencyId,
-                toCurrencyId: ToCurrencyId,
-                amount: amountValue
-            );
-            
             // Используем маппер для создания ConversionDto
-            var conversionDto = _mapper.Map<ConversionDto>(conversionParams);
+            var conversionDto = _mapper.Map<ConversionDto>(DisplayModel);
             
             // Используем MoneyOperationsManager для конвертации
             var result = await _moneyOperationsManager.ConvertAsync(conversionDto);
@@ -251,6 +176,7 @@ public partial class TransactionConversionViewModel : ViewModelBase
             }
             
             // Получаем сконвертированную сумму из результата операции, если она доступна
+            // TODO подумать как от этого избавиться
             decimal? convertedAmount = null;
             if (result.Data is decimal decimalAmount)
             {
@@ -268,7 +194,7 @@ public partial class TransactionConversionViewModel : ViewModelBase
             string message = "Конвертация выполнена успешно";
             if (convertedAmount.HasValue)
             {
-                message += $". Получено: {convertedAmount.Value} {CurrenciesDictionary[ToCurrencyId].Symbol}";
+                message += $". Получено: {convertedAmount.Value} {DisplayModel.ToCurrency.Symbol}";
             }
             
             _notificationService.ShowSuccess(message);

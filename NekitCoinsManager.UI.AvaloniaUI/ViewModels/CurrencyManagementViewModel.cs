@@ -3,19 +3,19 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class CurrencyManagementViewModel : ViewModelBase
 {
-    private readonly ICurrencyService _currencyService;
+    private readonly ICurrencyServiceClient _currencyServiceClient;
     private readonly INotificationService _notificationService;
 
     [ObservableProperty]
-    private ObservableCollection<Currency> _currencies = new();
+    private ObservableCollection<CurrencyDto> _currencies = new();
 
     [ObservableProperty]
     private string _newCurrencyName = string.Empty;
@@ -36,13 +36,13 @@ public partial class CurrencyManagementViewModel : ViewModelBase
     private decimal _newCurrencyDefaultAmount = 100.0m;
 
     [ObservableProperty]
-    private Currency? _selectedCurrency;
+    private CurrencyDto? _selectedCurrency;
 
     public CurrencyManagementViewModel(
-        ICurrencyService currencyService,
+        ICurrencyServiceClient currencyServiceClient,
         INotificationService notificationService)
     {
-        _currencyService = currencyService;
+        _currencyServiceClient = currencyServiceClient;
         _notificationService = notificationService;
         LoadCurrenciesAsync().ConfigureAwait(false);
     }
@@ -51,7 +51,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
     {
         try
         {
-            var currencies = await _currencyService.GetCurrenciesAsync();
+            var currencies = await _currencyServiceClient.GetCurrenciesAsync();
             Currencies.Clear();
             foreach (var currency in currencies)
             {
@@ -68,7 +68,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddCurrencyAsync()
     {
-        var currency = new Currency
+        var currency = new CurrencyDto
         {
             Name = NewCurrencyName,
             Code = NewCurrencyCode,
@@ -80,8 +80,8 @@ public partial class CurrencyManagementViewModel : ViewModelBase
             LastUpdateTime = DateTime.UtcNow
         };
 
-        var (success, error) = await _currencyService.AddCurrencyAsync(currency);
-        if (success)
+        var result = await _currencyServiceClient.AddCurrencyAsync(currency);
+        if (result.Success)
         {
             _notificationService.ShowSuccess("Валюта успешно добавлена");
             await LoadCurrenciesAsync();
@@ -89,7 +89,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         }
         else
         {
-            _notificationService.ShowError(error ?? "Неизвестная ошибка");
+            _notificationService.ShowError(result.Error ?? "Неизвестная ошибка");
         }
     }
 
@@ -102,8 +102,8 @@ public partial class CurrencyManagementViewModel : ViewModelBase
             return;
         }
 
-        var (success, error) = await _currencyService.DeleteCurrencyAsync(SelectedCurrency.Id);
-        if (success)
+        var result = await _currencyServiceClient.DeleteCurrencyAsync(SelectedCurrency.Id);
+        if (result.Success)
         {
             _notificationService.ShowSuccess("Валюта успешно удалена");
             await LoadCurrenciesAsync();
@@ -111,7 +111,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         }
         else
         {
-            _notificationService.ShowError(error ?? "Неизвестная ошибка");
+            _notificationService.ShowError(result.Error ?? "Неизвестная ошибка");
         }
     }
 
