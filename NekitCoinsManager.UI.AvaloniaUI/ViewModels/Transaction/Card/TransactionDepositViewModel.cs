@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionDepositViewModel : ViewModelBase
 {
-    private readonly IMoneyOperationsManager _moneyOperationsManager;
+    private readonly IMoneyOperationsServiceClient _moneyOperationsServiceClient;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
     private readonly ICurrencyServiceClient _currencyServiceClient;
@@ -34,13 +33,13 @@ public partial class TransactionDepositViewModel : ViewModelBase
     private UserDto? _currentUser;
 
     public TransactionDepositViewModel(
-        IMoneyOperationsManager moneyOperationsManager,
+        IMoneyOperationsServiceClient moneyOperationsServiceClient,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyServiceClient currencyServiceClient,
         IMapper mapper)
     {
-        _moneyOperationsManager = moneyOperationsManager;
+        _moneyOperationsServiceClient = moneyOperationsServiceClient;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
         _currencyServiceClient = currencyServiceClient;
@@ -117,10 +116,10 @@ public partial class TransactionDepositViewModel : ViewModelBase
         }
         
         // Используем маппер для создания DepositDto из TransactionFormModel
-        var depositDto = _mapper.Map<DepositOperation>(TransactionForm);
+        var depositDto = _mapper.Map<DepositDto>(TransactionForm);
         
-        // Используем MoneyOperationsManager
-        var result = await _moneyOperationsManager.DepositAsync(depositDto);
+        // Используем MoneyOperationsServiceClient
+        var result = await _moneyOperationsServiceClient.DepositAsync(depositDto);
         
         if (!result.Success)
         {

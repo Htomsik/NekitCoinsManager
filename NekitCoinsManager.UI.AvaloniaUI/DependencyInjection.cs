@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
         services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
         services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();
+        services.AddScoped<IMoneyOperationsServiceClient, MoneyOperationsServiceLocalClient>();
         
         // Регистрируем AuthService после клиентов, так как он теперь зависит от них
         services.AddScoped<IAuthService, AuthService>();
@@ -58,7 +59,7 @@ public static class DependencyInjection
         services.AddScoped<MoneyConversionOperationService>();
         services.AddScoped<MoneyWelcomeBonusOperationService>();
         services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
-
+        
         // Регистрируем сервис навигации
         services.AddSingleton<INavigationService, NavigationService>();
         

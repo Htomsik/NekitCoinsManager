@@ -3,17 +3,16 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionConversionViewModel : ViewModelBase
 {
-    private readonly IMoneyOperationsManager _moneyOperationsManager;
+    private readonly IMoneyOperationsServiceClient _moneyOperationsServiceClient;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
     private readonly ICurrencyServiceClient _currencyServiceClient;
@@ -33,14 +32,14 @@ public partial class TransactionConversionViewModel : ViewModelBase
     private decimal _convertedAmount;
 
     public TransactionConversionViewModel(
-        IMoneyOperationsManager moneyOperationsManager,
+        IMoneyOperationsServiceClient moneyOperationsServiceClient,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyServiceClient currencyServiceClient,
         ICurrencyConversionServiceClient currencyConversionServiceClient,
         IMapper mapper)
     {
-        _moneyOperationsManager = moneyOperationsManager;
+        _moneyOperationsServiceClient = moneyOperationsServiceClient;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
         _currencyServiceClient = currencyServiceClient;
@@ -164,10 +163,10 @@ public partial class TransactionConversionViewModel : ViewModelBase
         try
         {
             // Используем маппер для создания ConversionDto
-            var conversionDto = _mapper.Map<ConversionOperation>(DisplayModel);
+            var conversionDto = _mapper.Map<ConversionDto>(DisplayModel);
             
-            // Используем MoneyOperationsManager для конвертации
-            var result = await _moneyOperationsManager.ConvertAsync(conversionDto);
+            // Используем MoneyOperationsServiceClient для конвертации
+            var result = await _moneyOperationsServiceClient.ConvertAsync(conversionDto);
                 
             if (!result.Success)
             {

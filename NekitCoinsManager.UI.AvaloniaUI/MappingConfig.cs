@@ -24,17 +24,28 @@ public static class MappingConfig
             .Map(dest => dest.Type, _ => TransactionType.Transfer);
 
         // Настройка маппинга TransactionFormModel -> TransferDto
-        TypeAdapterConfig<TransactionFormModel, TransferOperation>
+        TypeAdapterConfig<TransactionFormModel, TransferDto>
             .NewConfig()
             .Map(dest => dest.UserId, src => src.FromUserId)
             .Map(dest => dest.RecipientId, src => src.ToUserId);
             
         // Настройка маппинга TransactionFormModel -> DepositDto
+        TypeAdapterConfig<TransactionFormModel, DepositDto>
+            .NewConfig()
+            .Map(dest => dest.UserId, src => src.ToUserId);
+
+        // Настройка маппинга TransactionFormModel -> TransferOperation (для обратной совместимости)
+        TypeAdapterConfig<TransactionFormModel, TransferOperation>
+            .NewConfig()
+            .Map(dest => dest.UserId, src => src.FromUserId)
+            .Map(dest => dest.RecipientId, src => src.ToUserId);
+            
+        // Настройка маппинга TransactionFormModel -> DepositOperation (для обратной совместимости)
         TypeAdapterConfig<TransactionFormModel, DepositOperation>
             .NewConfig()
             .Map(dest => dest.UserId, src => src.ToUserId);
             
-        // Настройка маппинга для ConversionDto
+        // Настройка маппинга для ConversionDto (для обратной совместимости)
         TypeAdapterConfig<(decimal amount, Currency fromCurrency, Currency toCurrency, User fromUser, User toUser), ConversionOperation>
             .NewConfig()
             .Map(dest => dest.Amount, src => src.amount)
@@ -42,6 +53,12 @@ public static class MappingConfig
             .Map(dest => dest.TargetCurrencyId, src => src.toCurrency.Id)
             .Map(dest => dest.UserId, src => src.fromUser.Id);
         
+        // Настройка маппинга TransactionConversionDisplayModel -> ConversionOperation (для обратной совместимости)
+        TypeAdapterConfig<TransactionConversionDisplayModel, ConversionOperation>
+            .NewConfig()
+            .Map(dest => dest.CurrencyId, src => src.FromCurrency.Id)
+            .Map(dest => dest.TargetCurrencyId, src => src.ToCurrency.Id);
+
         // Настройка маппинга TransactionConversionDisplayModel -> ConversionDto
         TypeAdapterConfig<TransactionConversionDisplayModel, ConversionDto>
             .NewConfig()
@@ -49,22 +66,16 @@ public static class MappingConfig
             .Map(dest => dest.TargetCurrencyId, src => src.ToCurrency.Id);
 
         // Настройка маппинга для DTO операций на модели операций
-        TypeAdapterConfig<TransferDto, TransferOperation>
-            .NewConfig();
-            
-        TypeAdapterConfig<DepositDto, DepositOperation>
-            .NewConfig();
-            
-        TypeAdapterConfig<ConversionDto, ConversionOperation>
-            .NewConfig();
+        TypeAdapterConfig<TransferDto, TransferOperation>.NewConfig();
+        TypeAdapterConfig<DepositDto, DepositOperation>.NewConfig();
+        TypeAdapterConfig<ConversionDto, ConversionOperation>.NewConfig();
             
         TypeAdapterConfig<WelcomeBonusDto, WelcomeBonusOperation>
             .NewConfig()
             .Map(dest => dest.NewUserId, src => src.UserId);
 
         // Настройка обратного маппинга Transaction -> TransactionFormModel
-        TypeAdapterConfig<Transaction, TransactionFormModel>
-            .NewConfig();
+        TypeAdapterConfig<Transaction, TransactionFormModel>.NewConfig();
             
         // Настройка маппинга Transaction -> TransactionDisplayModel с рекурсивной обработкой дочерних транзакций
         TypeAdapterConfig<Transaction, TransactionDisplayModel>
@@ -82,7 +93,6 @@ public static class MappingConfig
             .MapToConstructor(true);
             
         // Настройка маппинга MoneyOperationResult -> OperationResultDto
-        TypeAdapterConfig<MoneyOperationResult, MoneyOperationResultDto>
-            .NewConfig();
+        TypeAdapterConfig<MoneyOperationResult, MoneyOperationResultDto>.NewConfig();
     }
 } 

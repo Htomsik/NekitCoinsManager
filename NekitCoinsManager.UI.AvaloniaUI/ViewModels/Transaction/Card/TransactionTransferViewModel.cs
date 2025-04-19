@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
 public partial class TransactionTransferViewModel : ViewModelBase
 {
-    private readonly IMoneyOperationsManager _moneyOperationsManager;
+    private readonly IMoneyOperationsServiceClient _moneyOperationsServiceClient;
     private readonly IUserServiceClient _userServiceClient;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationService _notificationService;
@@ -41,14 +40,14 @@ public partial class TransactionTransferViewModel : ViewModelBase
     private UserDto? _currentUser;
 
     public TransactionTransferViewModel(
-        IMoneyOperationsManager moneyOperationsManager, 
+        IMoneyOperationsServiceClient moneyOperationsServiceClient, 
         IUserServiceClient userServiceClient,
         ICurrentUserService currentUserService,
         INotificationService notificationService,
         ICurrencyServiceClient currencyServiceClient,
         IMapper mapper)
     {
-        _moneyOperationsManager = moneyOperationsManager;
+        _moneyOperationsServiceClient = moneyOperationsServiceClient;
         _userServiceClient = userServiceClient;
         _currentUserService = currentUserService;
         _notificationService = notificationService;
@@ -137,10 +136,10 @@ public partial class TransactionTransferViewModel : ViewModelBase
         }
         
         // Используем маппер для создания TransferDto из TransactionFormModel
-        var transferDto = _mapper.Map<TransferOperation>(TransactionForm);
+        var transferDto = _mapper.Map<TransferDto>(TransactionForm);
         
-        // Используем MoneyOperationsManager
-        var result = await _moneyOperationsManager.TransferAsync(transferDto);
+        // Используем MoneyOperationsServiceClient
+        var result = await _moneyOperationsServiceClient.TransferAsync(transferDto);
         
         if (!result.Success)
         {
