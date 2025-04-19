@@ -1,8 +1,6 @@
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
-using NekitCoinsManager.Core.Data;
-using NekitCoinsManager.Core.Repositories;
-using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Core;
 using NekitCoinsManager.HttpClients;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.HttpClient;
@@ -14,63 +12,29 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // Регистрируем DbContext - используем Scoped для лучшей производительности и отслеживания изменений
-        services.AddDbContext<AppDbContext>(ServiceLifetime.Scoped);
+        // Добавляем сервисы ядра (В будующем уедут на API)
+        services.AddCoreServices();
         
-        // Регистрация репозиториев
-        services.AddScoped<ICurrencyRepository, CurrencyRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserAuthTokenRepository, UserAuthTokenRepository>();
-        services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IUserBalanceRepository, UserBalanceRepository>();
-        
-        // Регистрируем инфраструктурные сервисы
+        // Регистрируем сервисы
         services.AddTransient<IMapper, Mapper>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
-        
-        // Регистрируем бизнес-сервисы
-        services.AddScoped<IAuthTokenService, AuthTokenService>();
-        services.AddTransient<IHardwareInfoService, HardwareInfoService>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-        services.AddScoped<ICurrencyService, CurrencyService>();
-        services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddTransient<IUserSettingsService, UserFileSettingsService>();
-        services.AddScoped<ITransactionService, TransactionService>();
-        services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
-        services.AddScoped<IDbTransactionService, DbTransactionService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddSingleton<INavigationService, NavigationService>();
         
-        // Регистрируем клиенты сервисов
+        // Регистрируем API сервисы
         services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
         services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
         services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
         services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();
         services.AddScoped<IMoneyOperationsServiceClient, MoneyOperationsServiceLocalClient>();
+        services.AddScoped<ITransactionServiceClient, TransactionServiceLocalClient>();
         
-        // Регистрируем AuthService после клиентов, так как он теперь зависит от них
-        services.AddScoped<IAuthService, AuthService>();
-        
-        // Регистрируем сервисы для операций с деньгами
-        services.AddScoped<MoneyTransferOperationService>();
-        services.AddScoped<MoneyDepositOperationService>();
-        services.AddScoped<MoneyConversionOperationService>();
-        services.AddScoped<MoneyWelcomeBonusOperationService>();
-        services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
-        
-        // Регистрируем сервис навигации
-        services.AddSingleton<INavigationService, NavigationService>();
-        
-        // Регистрируем общие компоненты интерфейса
-        services.AddSingleton<NotificationViewModel>();
-        services.AddTransient<UserMiniCardViewModel>();
-        
-        // Регистрируем основную вьюмодель окна
+        // Регистрируем вьюмодели
         services.AddSingleton<MainWindowViewModel>();
-
-        // Регистрируем вьюмодели экранов
         services.AddTransient<UserLoginViewModel>();
         services.AddTransient<UserRegistrationViewModel>();
         services.AddTransient<UserManagementViewModel>();
@@ -78,6 +42,8 @@ public static class DependencyInjection
         services.AddTransient<TransactionTransferViewModel>();
         services.AddTransient<TransactionDepositViewModel>();
         services.AddTransient<TransactionConversionViewModel>();
+        services.AddSingleton<NotificationViewModel>();
+        services.AddTransient<UserMiniCardViewModel>();
         
         // Регистрируем конкретные реализации TransactionViewModel
         services.AddTransient<TransactionMainTransferViewModel>();
