@@ -6,7 +6,7 @@ namespace NekitCoinsManager.Core.Services;
 /// Базовый интерфейс для всех денежных операций
 /// </summary>
 /// <typeparam name="TDto">Тип DTO для операции</typeparam>
-public interface IMoneyOperationService<in TDto> where TDto : MoneyOperationDto
+public interface IMoneyOperationService<in TDto> where TDto : MoneyOperation
 {
     /// <summary>
     /// Выполняет денежную операцию

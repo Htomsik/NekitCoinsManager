@@ -51,7 +51,7 @@ public class AuthService : IAuthService
         
         // Проверяем пароль пользователя с помощью нового метода
         var verifyResult = await _userServiceClient.VerifyPasswordAsync(username, password);
-        if (!verifyResult.Success)
+        if (!verifyResult.success)
         {
             return (false, "Неверное имя пользователя или пароль");
         }

@@ -6,7 +6,7 @@ namespace NekitCoinsManager.Core.Services;
 /// <summary>
 /// Операция конвертации валюты
 /// </summary>
-public class MoneyConversionOperationService : BaseMoneyOperationService<ConversionDto>
+public class MoneyConversionOperationService : BaseMoneyOperationService<ConversionOperation>
 {
     private readonly ICurrencyConversionService _currencyConversionService;
 
@@ -25,7 +25,7 @@ public class MoneyConversionOperationService : BaseMoneyOperationService<Convers
     /// <summary>
     /// Выполняет операцию конвертации валюты
     /// </summary>
-    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(ConversionDto operationData)
+    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(ConversionOperation operationData)
     {
         // Получаем валюты для конвертации
         var fromCurrency = await CurrencyRepository.GetByIdAsync(operationData.CurrencyId);
@@ -184,7 +184,7 @@ public class MoneyConversionOperationService : BaseMoneyOperationService<Convers
     /// <summary>
     /// Валидирует данные операции конвертации
     /// </summary>
-    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(ConversionDto operationData)
+    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(ConversionOperation operationData)
     {
         // Выполняем базовую валидацию
         var (baseIsValid, baseErrorMessage) = await base.ValidateAsync(operationData);
@@ -221,7 +221,7 @@ public class MoneyConversionOperationService : BaseMoneyOperationService<Convers
     /// <summary>
     /// Создает транзакцию из DTO
     /// </summary>
-    protected override Task<Transaction> CreateTransactionAsync(ConversionDto operationData)
+    protected override Task<Transaction> CreateTransactionAsync(ConversionOperation operationData)
     {
         // Метод не используется напрямую, так как для конвертации создается несколько транзакций
         // Возвращаем null, так как реальные транзакции создаются в ExecuteOperationAsync

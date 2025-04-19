@@ -34,9 +34,9 @@ public partial class UserRegistrationViewModel : ViewModelBase
     {
         var result = await _userServiceClient.AddUserAsync(Username, Password, ConfirmPassword);
         
-        if (!result.Success)
+        if (!result.success)
         {
-            _notificationService.ShowError(result.Error ?? "Произошла ошибка при регистрации");
+            _notificationService.ShowError(result.error ?? "Произошла ошибка при регистрации");
             return;
         }
 

@@ -137,7 +137,7 @@ public partial class TransactionTransferViewModel : ViewModelBase
         }
         
         // Используем маппер для создания TransferDto из TransactionFormModel
-        var transferDto = _mapper.Map<TransferDto>(TransactionForm);
+        var transferDto = _mapper.Map<TransferOperation>(TransactionForm);
         
         // Используем MoneyOperationsManager
         var result = await _moneyOperationsManager.TransferAsync(transferDto);

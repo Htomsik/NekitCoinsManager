@@ -5,7 +5,7 @@ namespace NekitCoinsManager.Core.Models;
 /// <summary>
 /// Базовый DTO для финансовых операций
 /// </summary>
-public abstract class MoneyOperationDto
+public abstract class MoneyOperation
 {
     /// <summary>
     /// ID пользователя, который инициировал операцию
@@ -31,7 +31,7 @@ public abstract class MoneyOperationDto
 /// <summary>
 /// DTO для операции перевода денег между пользователями
 /// </summary>
-public class TransferDto : MoneyOperationDto
+public class TransferOperation : MoneyOperation
 {
     /// <summary>
     /// ID получателя перевода
@@ -42,7 +42,7 @@ public class TransferDto : MoneyOperationDto
 /// <summary>
 /// DTO для операции пополнения баланса
 /// </summary>
-public class DepositDto : MoneyOperationDto
+public class DepositOperation : MoneyOperation
 {
     // Для пополнения используем только базовые поля
 }
@@ -50,7 +50,7 @@ public class DepositDto : MoneyOperationDto
 /// <summary>
 /// DTO для операции конвертации валюты
 /// </summary>
-public class ConversionDto : MoneyOperationDto
+public class ConversionOperation : MoneyOperation
 {
     /// <summary>
     /// ID целевой валюты для конвертации
@@ -61,7 +61,7 @@ public class ConversionDto : MoneyOperationDto
 /// <summary>
 /// DTO для операции выдачи приветственного бонуса
 /// </summary>
-public class WelcomeBonusDto : MoneyOperationDto
+public class WelcomeBonusOperation : MoneyOperation
 {
     /// <summary>
     /// ID нового пользователя, который получит бонус

@@ -81,7 +81,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         };
 
         var result = await _currencyServiceClient.AddCurrencyAsync(currency);
-        if (result.Success)
+        if (result.success)
         {
             _notificationService.ShowSuccess("Валюта успешно добавлена");
             await LoadCurrenciesAsync();
@@ -89,7 +89,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         }
         else
         {
-            _notificationService.ShowError(result.Error ?? "Неизвестная ошибка");
+            _notificationService.ShowError(result.error ?? "Неизвестная ошибка");
         }
     }
 
@@ -103,7 +103,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         }
 
         var result = await _currencyServiceClient.DeleteCurrencyAsync(SelectedCurrency.Id);
-        if (result.Success)
+        if (result.success)
         {
             _notificationService.ShowSuccess("Валюта успешно удалена");
             await LoadCurrenciesAsync();
@@ -111,7 +111,7 @@ public partial class CurrencyManagementViewModel : ViewModelBase
         }
         else
         {
-            _notificationService.ShowError(result.Error ?? "Неизвестная ошибка");
+            _notificationService.ShowError(result.error ?? "Неизвестная ошибка");
         }
     }
 

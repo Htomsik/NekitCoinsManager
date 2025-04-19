@@ -6,7 +6,7 @@ namespace NekitCoinsManager.Core.Services;
 /// <summary>
 /// Операция перевода денег между пользователями
 /// </summary>
-public class MoneyTransferOperationService : BaseMoneyOperationService<TransferDto>
+public class MoneyTransferOperationService : BaseMoneyOperationService<TransferOperation>
 {
     public MoneyTransferOperationService(
         ITransactionService transactionService,
@@ -21,7 +21,7 @@ public class MoneyTransferOperationService : BaseMoneyOperationService<TransferD
     /// <summary>
     /// Выполняет операцию перевода денег
     /// </summary>
-    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(TransferDto operationData)
+    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(TransferOperation operationData)
     {
         // Создаем транзакцию из DTO
         var transaction = await CreateTransactionAsync(operationData);
@@ -62,7 +62,7 @@ public class MoneyTransferOperationService : BaseMoneyOperationService<TransferD
     /// <summary>
     /// Валидирует данные операции перевода
     /// </summary>
-    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(TransferDto operationData)
+    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(TransferOperation operationData)
     {
         // Выполняем базовую валидацию
         var (baseIsValid, baseErrorMessage) = await base.ValidateAsync(operationData);
@@ -96,7 +96,7 @@ public class MoneyTransferOperationService : BaseMoneyOperationService<TransferD
     /// <summary>
     /// Создает транзакцию из DTO
     /// </summary>
-    protected override Task<Transaction> CreateTransactionAsync(TransferDto operationData)
+    protected override Task<Transaction> CreateTransactionAsync(TransferOperation operationData)
     {
         var transaction = new Transaction
         {

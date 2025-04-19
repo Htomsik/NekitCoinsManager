@@ -49,40 +49,28 @@ public class CurrencyServiceLocalClient : ICurrencyServiceClient
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> AddCurrencyAsync(CurrencyDto currency)
+    public async Task<(bool success, string? error)> AddCurrencyAsync(CurrencyDto currency)
     {
         var currencyModel = _mapper.Map<NekitCoinsManager.Core.Models.Currency>(currency);
-        var (success, error) = await _currencyService.AddCurrencyAsync(currencyModel);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при добавлении валюты");
+        return await _currencyService.AddCurrencyAsync(currencyModel);
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> UpdateCurrencyAsync(CurrencyDto currency)
+    public async Task<(bool success, string? error)> UpdateCurrencyAsync(CurrencyDto currency)
     {
         var currencyModel = _mapper.Map<NekitCoinsManager.Core.Models.Currency>(currency);
-        var (success, error) = await _currencyService.UpdateCurrencyAsync(currencyModel);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при обновлении валюты");
+        return await _currencyService.UpdateCurrencyAsync(currencyModel);
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> DeleteCurrencyAsync(int id)
+    public async Task<(bool success, string? error)> DeleteCurrencyAsync(int id)
     {
-        var (success, error) = await _currencyService.DeleteCurrencyAsync(id);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при удалении валюты");
+        return await _currencyService.DeleteCurrencyAsync(id);
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> UpdateExchangeRateAsync(int currencyId, decimal newRate)
+    public async Task<(bool success, string? error)> UpdateExchangeRateAsync(int currencyId, decimal newRate)
     {
-        var (success, error) = await _currencyService.UpdateExchangeRateAsync(currencyId, newRate);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при обновлении обменного курса");
+        return await _currencyService.UpdateExchangeRateAsync(currencyId, newRate);
     }
 } 

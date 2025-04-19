@@ -35,21 +35,21 @@ public interface ICurrencyServiceClient
     /// </summary>
     /// <param name="currency">Данные валюты</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> AddCurrencyAsync(CurrencyDto currency);
+    Task<(bool success, string? error)> AddCurrencyAsync(CurrencyDto currency);
     
     /// <summary>
     /// Обновляет данные валюты
     /// </summary>
     /// <param name="currency">Обновленные данные валюты</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> UpdateCurrencyAsync(CurrencyDto currency);
+    Task<(bool success, string? error)> UpdateCurrencyAsync(CurrencyDto currency);
     
     /// <summary>
     /// Удаляет валюту
     /// </summary>
     /// <param name="id">Идентификатор валюты</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> DeleteCurrencyAsync(int id);
+    Task<(bool success, string? error)> DeleteCurrencyAsync(int id);
     
     /// <summary>
     /// Обновляет обменный курс валюты
@@ -57,5 +57,5 @@ public interface ICurrencyServiceClient
     /// <param name="currencyId">Идентификатор валюты</param>
     /// <param name="newRate">Новый обменный курс</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> UpdateExchangeRateAsync(int currencyId, decimal newRate);
+    Task<(bool success, string? error)> UpdateExchangeRateAsync(int currencyId, decimal newRate);
 } 

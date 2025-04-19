@@ -45,11 +45,8 @@ public class CurrencyConversionServiceLocalClient : ICurrencyConversionServiceCl
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate)
+    public async Task<(bool success, string? error)> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate)
     {
-        var (success, error) = await _currencyConversionService.UpdateExchangeRateAsync(fromCurrencyCode, toCurrencyCode, rate);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при обновлении обменного курса");
+        return await _currencyConversionService.UpdateExchangeRateAsync(fromCurrencyCode, toCurrencyCode, rate);
     }
 } 

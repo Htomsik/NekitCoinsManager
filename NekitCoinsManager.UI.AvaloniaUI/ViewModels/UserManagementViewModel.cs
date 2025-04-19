@@ -75,9 +75,9 @@ public partial class UserManagementViewModel : ViewModelBase
 
         var result = await _userServiceClient.DeleteUserAsync(user.Id);
         
-        if (!result.Success)
+        if (!result.success)
         {
-            _notificationService.ShowError(result.Error ?? "Произошла ошибка при удалении пользователя");
+            _notificationService.ShowError(result.error ?? "Произошла ошибка при удалении пользователя");
             return;
         }
 

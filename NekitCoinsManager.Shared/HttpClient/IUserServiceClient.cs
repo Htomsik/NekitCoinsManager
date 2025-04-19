@@ -37,14 +37,14 @@ public interface IUserServiceClient
     /// <param name="password">Пароль</param>
     /// <param name="confirmPassword">Подтверждение пароля</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> AddUserAsync(string username, string password, string confirmPassword);
+    Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
     
     /// <summary>
     /// Удаляет пользователя
     /// </summary>
     /// <param name="userId">Идентификатор пользователя</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> DeleteUserAsync(int userId);
+    Task<(bool success, string? error)> DeleteUserAsync(int userId);
     
     /// <summary>
     /// Проверяет пароль пользователя
@@ -52,5 +52,5 @@ public interface IUserServiceClient
     /// <param name="username">Имя пользователя</param>
     /// <param name="password">Пароль для проверки</param>
     /// <returns>Результат операции</returns>
-    Task<OperationResultDto> VerifyPasswordAsync(string username, string password);
+    Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password);
 } 

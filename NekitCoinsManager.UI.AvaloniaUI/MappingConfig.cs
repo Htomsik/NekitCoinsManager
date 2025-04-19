@@ -3,6 +3,7 @@ using Mapster;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.DTO.Operations;
 
 namespace NekitCoinsManager;
 
@@ -23,18 +24,18 @@ public static class MappingConfig
             .Map(dest => dest.Type, _ => TransactionType.Transfer);
 
         // Настройка маппинга TransactionFormModel -> TransferDto
-        TypeAdapterConfig<TransactionFormModel, TransferDto>
+        TypeAdapterConfig<TransactionFormModel, TransferOperation>
             .NewConfig()
             .Map(dest => dest.UserId, src => src.FromUserId)
             .Map(dest => dest.RecipientId, src => src.ToUserId);
             
         // Настройка маппинга TransactionFormModel -> DepositDto
-        TypeAdapterConfig<TransactionFormModel, DepositDto>
+        TypeAdapterConfig<TransactionFormModel, DepositOperation>
             .NewConfig()
             .Map(dest => dest.UserId, src => src.ToUserId);
             
         // Настройка маппинга для ConversionDto
-        TypeAdapterConfig<(decimal amount, Currency fromCurrency, Currency toCurrency, User fromUser, User toUser), ConversionDto>
+        TypeAdapterConfig<(decimal amount, Currency fromCurrency, Currency toCurrency, User fromUser, User toUser), ConversionOperation>
             .NewConfig()
             .Map(dest => dest.Amount, src => src.amount)
             .Map(dest => dest.CurrencyId, src => src.fromCurrency.Id)
@@ -44,10 +45,22 @@ public static class MappingConfig
         // Настройка маппинга TransactionConversionDisplayModel -> ConversionDto
         TypeAdapterConfig<TransactionConversionDisplayModel, ConversionDto>
             .NewConfig()
-            .Map(dest => dest.Amount, src => src.Amount)
             .Map(dest => dest.CurrencyId, src => src.FromCurrency.Id)
-            .Map(dest => dest.TargetCurrencyId, src => src.ToCurrency.Id)
-            .Map(dest => dest.UserId, src => src.UserId);
+            .Map(dest => dest.TargetCurrencyId, src => src.ToCurrency.Id);
+
+        // Настройка маппинга для DTO операций на модели операций
+        TypeAdapterConfig<TransferDto, TransferOperation>
+            .NewConfig();
+            
+        TypeAdapterConfig<DepositDto, DepositOperation>
+            .NewConfig();
+            
+        TypeAdapterConfig<ConversionDto, ConversionOperation>
+            .NewConfig();
+            
+        TypeAdapterConfig<WelcomeBonusDto, WelcomeBonusOperation>
+            .NewConfig()
+            .Map(dest => dest.NewUserId, src => src.UserId);
 
         // Настройка обратного маппинга Transaction -> TransactionFormModel
         TypeAdapterConfig<Transaction, TransactionFormModel>
@@ -67,5 +80,9 @@ public static class MappingConfig
         TypeAdapterConfig<TransactionTypeDto, TransactionType>
             .NewConfig()
             .MapToConstructor(true);
+            
+        // Настройка маппинга MoneyOperationResult -> OperationResultDto
+        TypeAdapterConfig<MoneyOperationResult, MoneyOperationResultDto>
+            .NewConfig();
     }
 } 

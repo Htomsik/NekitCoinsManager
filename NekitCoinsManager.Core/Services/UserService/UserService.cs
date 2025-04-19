@@ -101,7 +101,7 @@ public class UserService : IUserService
         await _userRepository.AddAsync(user);
 
         // Начисляем приветственный бонус
-        var welcomeBonusResult = await _moneyOperationsManager.GrantWelcomeBonusAsync(new WelcomeBonusDto
+        var welcomeBonusResult = await _moneyOperationsManager.GrantWelcomeBonusAsync(new WelcomeBonusOperation
         {
             NewUserId = user.Id,
             Comment = $"Приветственный бонус для пользователя {user.Username}"

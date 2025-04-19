@@ -39,5 +39,5 @@ public interface ICurrencyConversionServiceClient
     /// <param name="toCurrencyCode">Код целевой валюты</param>
     /// <param name="rate">Новый обменный курс</param>
     /// <returns>Результат операции (успех/ошибка)</returns>
-    Task<OperationResultDto> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate);
+    Task<(bool success, string? error)> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate);
 } 

@@ -117,7 +117,7 @@ public partial class TransactionDepositViewModel : ViewModelBase
         }
         
         // Используем маппер для создания DepositDto из TransactionFormModel
-        var depositDto = _mapper.Map<DepositDto>(TransactionForm);
+        var depositDto = _mapper.Map<DepositOperation>(TransactionForm);
         
         // Используем MoneyOperationsManager
         var result = await _moneyOperationsManager.DepositAsync(depositDto);

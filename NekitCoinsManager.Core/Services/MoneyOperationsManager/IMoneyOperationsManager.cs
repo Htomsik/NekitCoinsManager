@@ -10,28 +10,28 @@ public interface IMoneyOperationsManager
     /// <summary>
     /// Выполняет перевод денег между пользователями
     /// </summary>
-    /// <param name="transferData">Данные для перевода</param>
+    /// <param name="transferOperationData">Данные для перевода</param>
     /// <returns>Результат операции перевода</returns>
-    Task<MoneyOperationResult> TransferAsync(TransferDto transferData);
+    Task<MoneyOperationResult> TransferAsync(TransferOperation transferOperationData);
     
     /// <summary>
     /// Пополняет баланс пользователя (депозит)
     /// </summary>
-    /// <param name="depositData">Данные для пополнения</param>
+    /// <param name="depositOperationData">Данные для пополнения</param>
     /// <returns>Результат операции пополнения</returns>
-    Task<MoneyOperationResult> DepositAsync(DepositDto depositData);
+    Task<MoneyOperationResult> DepositAsync(DepositOperation depositOperationData);
     
     /// <summary>
     /// Конвертирует средства пользователя из одной валюты в другую
     /// </summary>
-    /// <param name="conversionData">Данные для конвертации</param>
+    /// <param name="conversionOperationData">Данные для конвертации</param>
     /// <returns>Результат операции конвертации</returns>
-    Task<MoneyOperationResult> ConvertAsync(ConversionDto conversionData);
+    Task<MoneyOperationResult> ConvertAsync(ConversionOperation conversionOperationData);
 
     /// <summary>
     /// Выдает приветственный бонус новому пользователю
     /// </summary>
-    /// <param name="welcomeBonusData">Данные для выдачи приветственного бонуса</param>
+    /// <param name="welcomeBonusOperationData">Данные для выдачи приветственного бонуса</param>
     /// <returns>Результат операции выдачи бонуса</returns>
-    Task<MoneyOperationResult> GrantWelcomeBonusAsync(WelcomeBonusDto welcomeBonusData);
+    Task<MoneyOperationResult> GrantWelcomeBonusAsync(WelcomeBonusOperation welcomeBonusOperationData);
 } 

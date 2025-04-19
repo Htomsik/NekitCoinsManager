@@ -6,7 +6,7 @@ namespace NekitCoinsManager.Core.Services;
 /// <summary>
 /// Операция пополнения баланса пользователя
 /// </summary>
-public class MoneyDepositOperationService : BaseMoneyOperationService<DepositDto>
+public class MoneyDepositOperationService : BaseMoneyOperationService<DepositOperation>
 {
     public MoneyDepositOperationService(
         ITransactionService transactionService,
@@ -21,7 +21,7 @@ public class MoneyDepositOperationService : BaseMoneyOperationService<DepositDto
     /// <summary>
     /// Выполняет операцию пополнения баланса
     /// </summary>
-    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(DepositDto operationData)
+    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(DepositOperation operationData)
     {
         // Создаем транзакцию из DTO
         var transaction = await CreateTransactionAsync(operationData);
@@ -61,7 +61,7 @@ public class MoneyDepositOperationService : BaseMoneyOperationService<DepositDto
     /// <summary>
     /// Валидирует данные операции пополнения
     /// </summary>
-    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(DepositDto operationData)
+    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(DepositOperation operationData)
     {
         // Выполняем базовую валидацию
         var (baseIsValid, baseErrorMessage) = await base.ValidateAsync(operationData);
@@ -78,7 +78,7 @@ public class MoneyDepositOperationService : BaseMoneyOperationService<DepositDto
     /// <summary>
     /// Создает транзакцию из DTO
     /// </summary>
-    protected override Task<Transaction> CreateTransactionAsync(DepositDto operationData)
+    protected override Task<Transaction> CreateTransactionAsync(DepositOperation operationData)
     {
         // Получаем банковский аккаунт для указания отправителя (или используем пользователя как отправителя)
         // В данном примере используем того же пользователя как отправителя

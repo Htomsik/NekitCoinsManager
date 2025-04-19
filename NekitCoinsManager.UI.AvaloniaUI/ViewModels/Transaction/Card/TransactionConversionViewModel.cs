@@ -164,7 +164,7 @@ public partial class TransactionConversionViewModel : ViewModelBase
         try
         {
             // Используем маппер для создания ConversionDto
-            var conversionDto = _mapper.Map<ConversionDto>(DisplayModel);
+            var conversionDto = _mapper.Map<ConversionOperation>(DisplayModel);
             
             // Используем MoneyOperationsManager для конвертации
             var result = await _moneyOperationsManager.ConvertAsync(conversionDto);

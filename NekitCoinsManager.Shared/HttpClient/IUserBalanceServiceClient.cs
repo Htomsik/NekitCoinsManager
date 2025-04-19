@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.DTO.Operations;
 
@@ -21,37 +23,37 @@ public interface IUserBalanceServiceClient
     /// <summary>
     /// Обновляет баланс пользователя
     /// </summary>
-    Task<OperationResultDto> UpdateBalanceAsync(int userId, int currencyId, decimal amount);
+    Task<(bool success, string? error)> UpdateBalanceAsync(int userId, int currencyId, decimal amount);
     
     /// <summary>
     /// Переводит средства между пользователями
     /// </summary>
-    Task<OperationResultDto> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount);
+    Task<(bool success, string? error)> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount);
     
     /// <summary>
     /// Проверяет и создает баланс для пользователя, если его нет
     /// </summary>
-    Task<OperationResultDto> EnsureUserHasBalanceAsync(int userId, int currencyId);
+    Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId);
     
     /// <summary>
     /// Создает новый баланс для пользователя
     /// </summary>
-    Task<OperationResultDto> CreateBalanceAsync(int userId, int currencyId, decimal amount);
+    Task<(bool success, string? error)> CreateBalanceAsync(int userId, int currencyId, decimal amount);
     
     /// <summary>
     /// Получает существующий или создает новый баланс для пользователя
     /// </summary>
-    Task<(OperationResultDto Result, UserBalanceDto? Balance)> GetOrCreateBalanceAsync(int userId, int currencyId, decimal initialAmount = 0);
+    Task<(bool success, string? error, UserBalanceDto? balance)> GetOrCreateBalanceAsync(int userId, int currencyId, decimal initialAmount = 0);
     
     /// <summary>
     /// Проверяет, доступна ли указанная сумма на балансе пользователя
     /// </summary>
-    Task<OperationResultDto> ValidateUserBalanceAsync(int userId, int currencyId, decimal amount);
+    Task<(bool isValid, string? errorMessage)> ValidateUserBalanceAsync(int userId, int currencyId, decimal amount);
     
     /// <summary>
     /// Переводит указанную сумму с одного баланса на другой
     /// </summary>
-    Task<OperationResultDto> TransferAmountBetweenBalancesAsync(
+    Task<(bool success, string? error)> TransferAmountBetweenBalancesAsync(
         int fromUserId,
         int fromCurrencyId,
         int toUserId,

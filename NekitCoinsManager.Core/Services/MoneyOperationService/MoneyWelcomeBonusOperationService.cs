@@ -6,7 +6,7 @@ namespace NekitCoinsManager.Core.Services;
 /// <summary>
 /// Операция выдачи приветственного бонуса новому пользователю
 /// </summary>
-public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<WelcomeBonusDto>
+public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<WelcomeBonusOperation>
 {
     public MoneyWelcomeBonusOperationService(
         ITransactionService transactionService,
@@ -21,7 +21,7 @@ public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<Welco
     /// <summary>
     /// Выполняет операцию выдачи приветственного бонуса
     /// </summary>
-    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(WelcomeBonusDto operationData)
+    protected override async Task<MoneyOperationResult> ExecuteOperationAsync(WelcomeBonusOperation operationData)
     {
         // Получаем банковский аккаунт
         var bankAccount = await UserRepository.GetBankAccountAsync();
@@ -44,7 +44,7 @@ public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<Welco
             decimal amount = currency.IsDefaultForNewUsers ? currency.DefaultAmount : 100;
 
             // Создаем транзакцию через базовый метод
-            var transaction = await CreateTransactionAsync(new WelcomeBonusDto
+            var transaction = await CreateTransactionAsync(new WelcomeBonusOperation
             {
                 UserId = bankAccount.Id,
                 NewUserId = operationData.NewUserId,
@@ -88,7 +88,7 @@ public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<Welco
     /// <summary>
     /// Валидирует данные операции выдачи приветственного бонуса
     /// </summary>
-    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(WelcomeBonusDto operationData)
+    public override async Task<(bool isValid, string? errorMessage)> ValidateAsync(WelcomeBonusOperation operationData)
     {
         // Проверяем нового пользователя
         if (operationData.NewUserId <= 0)
@@ -115,7 +115,7 @@ public class MoneyWelcomeBonusOperationService : BaseMoneyOperationService<Welco
     /// <summary>
     /// Создает транзакцию из DTO
     /// </summary>
-    protected override Task<Transaction> CreateTransactionAsync(WelcomeBonusDto operationData)
+    protected override Task<Transaction> CreateTransactionAsync(WelcomeBonusOperation operationData)
     {
         var transaction = new Transaction
         {

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MapsterMapper;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Shared.DTO;
-using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.HttpClients;
@@ -49,29 +48,20 @@ public class UserServiceLocalClient : IUserServiceClient
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> AddUserAsync(string username, string password, string confirmPassword)
+    public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)
     {
-        var (success, error) = await _userService.AddUserAsync(username, password, confirmPassword);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при создании пользователя");
+        return await _userService.AddUserAsync(username, password, confirmPassword);
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> DeleteUserAsync(int userId)
+    public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
-        var (success, error) = await _userService.DeleteUserAsync(userId);
-        return success 
-            ? OperationResultDto.CreateSuccess() 
-            : OperationResultDto.CreateError(error ?? "Ошибка при удалении пользователя");
+        return await _userService.DeleteUserAsync(userId);
     }
 
     /// <inheritdoc />
-    public async Task<OperationResultDto> VerifyPasswordAsync(string username, string password)
+    public async Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password)
     {
-        var (success, error) = await _userService.VerifyPasswordAsync(username, password);
-        return success
-            ? OperationResultDto.CreateSuccess()
-            : OperationResultDto.CreateError(error ?? "Ошибка при проверке пароля");
+        return await _userService.VerifyPasswordAsync(username, password);
     }
 } 

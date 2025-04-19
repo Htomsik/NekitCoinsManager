@@ -27,32 +27,32 @@ public class MoneyOperationsManager : IMoneyOperationsManager
     /// <summary>
     /// Выполняет перевод денег между пользователями
     /// </summary>
-    public async Task<MoneyOperationResult> TransferAsync(TransferDto transferData)
+    public async Task<MoneyOperationResult> TransferAsync(TransferOperation transferOperationData)
     {
-        return await _transferOperationServiceService.ExecuteAsync(transferData);
+        return await _transferOperationServiceService.ExecuteAsync(transferOperationData);
     }
 
     /// <summary>
     /// Пополняет баланс пользователя (депозит)
     /// </summary>
-    public async Task<MoneyOperationResult> DepositAsync(DepositDto depositData)
+    public async Task<MoneyOperationResult> DepositAsync(DepositOperation depositOperationData)
     {
-        return await _depositOperationService.ExecuteAsync(depositData);
+        return await _depositOperationService.ExecuteAsync(depositOperationData);
     }
 
     /// <summary>
     /// Конвертирует средства пользователя из одной валюты в другую
     /// </summary>
-    public async Task<MoneyOperationResult> ConvertAsync(ConversionDto conversionData)
+    public async Task<MoneyOperationResult> ConvertAsync(ConversionOperation conversionOperationData)
     {
-        return await _conversionOperationService.ExecuteAsync(conversionData);
+        return await _conversionOperationService.ExecuteAsync(conversionOperationData);
     }
 
     /// <summary>
     /// Выдает приветственный бонус новому пользователю
     /// </summary>
-    public async Task<MoneyOperationResult> GrantWelcomeBonusAsync(WelcomeBonusDto welcomeBonusData)
+    public async Task<MoneyOperationResult> GrantWelcomeBonusAsync(WelcomeBonusOperation welcomeBonusOperationData)
     {
-        return await _welcomeBonusOperationService.ExecuteAsync(welcomeBonusData);
+        return await _welcomeBonusOperationService.ExecuteAsync(welcomeBonusOperationData);
     }
 } 

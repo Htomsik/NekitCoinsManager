@@ -7,7 +7,7 @@ namespace NekitCoinsManager.Core.Services;
 /// Базовый абстрактный класс для операций с деньгами
 /// </summary>
 /// <typeparam name="TDto">Тип DTO для операции</typeparam>
-public abstract class BaseMoneyOperationService<TDto> : IMoneyOperationService<TDto> where TDto : MoneyOperationDto
+public abstract class BaseMoneyOperationService<TDto> : IMoneyOperationService<TDto> where TDto : MoneyOperation
 {
     protected readonly ITransactionService TransactionService;
     protected readonly IUserRepository UserRepository;
