@@ -3,16 +3,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MapsterMapper;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionObserver
+public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionObserverClient
 {
-    private readonly ITransactionService _transactionService;
+    private readonly ITransactionServiceClient _transactionServiceClient;
     
     private readonly IMapper _mapper;
 
@@ -28,17 +27,17 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
     [ObservableProperty]
     private UserDto? _secondUser;
 
-    public TransactionHistoryViewModel(ITransactionService transactionService, IMapper mapper)
+    public TransactionHistoryViewModel(ITransactionServiceClient transactionServiceClient, IMapper mapper)
     {
-        _transactionService = transactionService;
+        _transactionServiceClient = transactionServiceClient;
         _mapper = mapper;
-        _transactionService.Subscribe(this);
+        _transactionServiceClient.Subscribe(this);
         LoadTransactionsAsync();
     }
 
     private async void LoadTransactionsAsync()
     {
-        var allTransactions = await _transactionService.GetTransactionsAsync();
+        var allTransactions = await _transactionServiceClient.GetTransactionsAsync();
         
         if (!ShowAllTransactions && (FirstUser != null || SecondUser != null))
         {
@@ -56,7 +55,7 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
         Transactions = new ObservableCollection<TransactionDisplayModel>(transactionDisplayModels);
     }
 
-    private static bool IsUserInvolved(UserDto? user, Transaction transaction) =>
+    private static bool IsUserInvolved(UserDto? user, TransactionDto transaction) =>
         user == null || transaction.FromUserId == user.Id || transaction.ToUserId == user.Id;
 
     public void OnTransactionsChanged() => LoadTransactionsAsync();

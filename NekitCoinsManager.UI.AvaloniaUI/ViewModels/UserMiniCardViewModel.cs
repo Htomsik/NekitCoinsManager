@@ -11,11 +11,11 @@ using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver, ITransactionObserver
+public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver, ITransactionObserverClient
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserBalanceServiceClient _userBalanceServiceClient;
-    private readonly ITransactionService _transactionService;
+    private readonly ITransactionServiceClient _transactionServiceClient;
     private readonly IMapper _mapper;
     
     [ObservableProperty]
@@ -27,15 +27,15 @@ public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver
     public UserMiniCardViewModel(
         ICurrentUserService currentUserService,
         IUserBalanceServiceClient userBalanceServiceClient,
-        ITransactionService transactionService,
+        ITransactionServiceClient transactionServiceClient,
         IMapper mapper)
     {
         _currentUserService = currentUserService;
         _userBalanceServiceClient = userBalanceServiceClient;
-        _transactionService = transactionService;
+        _transactionServiceClient = transactionServiceClient;
         _mapper = mapper;
         _currentUserService.Subscribe(this);
-        _transactionService.Subscribe(this);
+        _transactionServiceClient.Subscribe(this);
         LoadCurrentUser();
         LoadBalancesAsync();
     }
