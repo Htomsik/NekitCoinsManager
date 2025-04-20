@@ -160,4 +160,30 @@ public class UserService : IUserService
 
         return (true, null);
     }
+
+    public async Task<(bool success, string? error, User? user)> AuthenticateUserAsync(string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, "Имя пользователя не может быть пустым", null);
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return (false, "Пароль не может быть пустым", null);
+        }
+
+        var user = await _userRepository.GetByUsernameAsync(username);
+        if (user == null)
+        {
+            return (false, "Неверное имя пользователя или пароль", null);
+        }
+
+        if (!_passwordHasherService.VerifyPassword(password, user.PasswordHash))
+        {
+            return (false, "Неверное имя пользователя или пароль", null);
+        }
+
+        return (true, null, user);
+    }
 } 

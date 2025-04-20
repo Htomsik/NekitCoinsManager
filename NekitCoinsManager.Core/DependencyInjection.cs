@@ -27,10 +27,9 @@ public static class DependencyInjection
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IUserBalanceRepository, UserBalanceRepository>();
         
-        // Регистрируем бизнес-сервисы
-        services.AddScoped<IAuthTokenService, AuthTokenService>();
-        services.AddScoped<IUserService, UserService>();
+        // Регистрируем базовые сервисы без зависимостей от других сервисов
         services.AddTransient<IPasswordHasherService, PasswordHasherService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddSingleton<ITransactionService, TransactionService>();
@@ -43,6 +42,9 @@ public static class DependencyInjection
         services.AddScoped<MoneyConversionOperationService>();
         services.AddScoped<MoneyWelcomeBonusOperationService>();
         services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
+        
+        // Сервисы с зависимостями от других сервисов регистрируем в последнюю очередь
+        services.AddScoped<IAuthTokenService, AuthTokenService>();
 
         return services;
     }

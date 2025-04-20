@@ -53,4 +53,12 @@ public interface IUserServiceClient
     /// <param name="password">Пароль для проверки</param>
     /// <returns>Результат операции</returns>
     Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password);
+    
+    /// <summary>
+    /// Аутентифицирует пользователя и возвращает его данные при успешной аутентификации
+    /// </summary>
+    /// <param name="username">Имя пользователя</param>
+    /// <param name="password">Пароль</param>
+    /// <returns>Результат операции и пользователь при успехе</returns>
+    Task<(bool success, string? error, UserDto? user)> AuthenticateUserAsync(string username, string password);
 } 

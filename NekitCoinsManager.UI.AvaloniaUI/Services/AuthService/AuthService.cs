@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
@@ -42,35 +43,28 @@ public class AuthService : IAuthService
             return (false, "Введите пароль");
         }
 
-        // Получаем пользователя по имени
-        var user = await _userServiceClient.GetUserByUsernameAsync(username);
-        if (user == null)
+        // Аутентифицируем пользователя по логшну + паролю
+        var authResult = await _userServiceClient.AuthenticateUserAsync(username, password);
+        if (!authResult.success || authResult.user == null)
         {
-            return (false, "Неверное имя пользователя или пароль");
-        }
-        
-        // Проверяем пароль пользователя с помощью нового метода
-        var verifyResult = await _userServiceClient.VerifyPasswordAsync(username, password);
-        if (!verifyResult.success)
-        {
-            return (false, "Неверное имя пользователя или пароль");
+            return (false, authResult.error ?? "Ошибка аутентификации");
         }
 
         // Получаем ID железа
         var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
 
         // Создаем токен авторизации
-        var tokenDto = await _authTokenServiceClient.CreateTokenAsync(user.Id, hardwareId);
+        var tokenDto = await _authTokenServiceClient.CreateTokenAsync(authResult.user.Id, hardwareId);
 
         // Сохраняем токен в настройках пользователя
         var settings = new UserSettings { AuthToken = tokenDto.Token };
-        await _userSettingsService.SaveSettingsAsync(user.Id, settings);
+        await _userSettingsService.SaveSettingsAsync(authResult.user.Id, settings);
 
         // Сохраняем ID пользователя в настройках приложения
-        _appSettingsService.Settings.LoggedInUserId = user.Id;
+        _appSettingsService.Settings.LoggedInUserId = authResult.user.Id;
         await _appSettingsService.SaveSettings();
 
-        _currentUserService.SetCurrentUser(user);
+        _currentUserService.SetCurrentUser(authResult.user);
         return (true, tokenDto.Token);
     }
 
@@ -82,29 +76,22 @@ public class AuthService : IAuthService
         }
 
         var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
-        var authTokenDto = await _authTokenServiceClient.ValidateTokenAsync(token, hardwareId);
+        var sessionResult = await _authTokenServiceClient.RestoreSessionAsync(token, hardwareId);
 
-        if (authTokenDto == null)
+        if (!sessionResult.success || sessionResult.user == null)
         {
-            return (false, "Недействительный токен");
-        }
-
-        // Получаем пользователя по id, потому что UserAuthTokenDto не содержит информацию о пользователе
-        var user = await _userServiceClient.GetUserByIdAsync(authTokenDto.UserId);
-        if (user == null)
-        {
-            return (false, "Пользователь не найден");
+            return (false, sessionResult.error ?? "Ошибка восстановления сессии");
         }
 
         // Обновляем ID пользователя в настройках приложения
-        _appSettingsService.Settings.LoggedInUserId = user.Id;
+        _appSettingsService.Settings.LoggedInUserId = sessionResult.user.Id;
         await _appSettingsService.SaveSettings();
 
-        _currentUserService.SetCurrentUser(user);
+        _currentUserService.SetCurrentUser(sessionResult.user);
         return (true, null);
     }
 
-    public async void Logout()
+    public async Task<(bool success, string? error)> LogoutAsync()
     {
         var currentUser = _currentUserService.CurrentUser;
         if (currentUser != null)
@@ -117,9 +104,10 @@ public class AuthService : IAuthService
         await _appSettingsService.SaveSettings();
 
         _currentUserService.SetCurrentUser(null);
+        return (true, null);
     }
 
-    public async Task<bool> TryRestoreSessionAsync()
+    public async Task<(bool success, string? error)> TryRestoreSessionAsync()
     {
         // Загружаем настройки приложения для обеспечения актуальности данных
         await _appSettingsService.LoadSettings();
@@ -128,17 +116,7 @@ public class AuthService : IAuthService
         int userId = _appSettingsService.Settings.LoggedInUserId;
         if (userId <= 0)
         {
-            return false;
-        }
-        
-        // Пробуем найти пользователя по ID
-        var user = await _userServiceClient.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            // Пользователь не найден в базе, сбрасываем настройки
-            _appSettingsService.Settings.LoggedInUserId = 0;
-            await _appSettingsService.SaveSettings();
-            return false;
+            return (false, "Отсутствует сохраненная сессия");
         }
         
         // Загружаем настройки пользователя, чтобы получить токен
@@ -148,19 +126,20 @@ public class AuthService : IAuthService
             // Токен не найден, сбрасываем настройки приложения
             _appSettingsService.Settings.LoggedInUserId = 0;
             await _appSettingsService.SaveSettings();
-            return false;
+            return (false, "Токен авторизации не найден");
         }
         
         // Восстанавливаем сессию с использованием токена
-        var (success, _) = await RestoreSessionAsync(userSettings.AuthToken);
+        var result = await RestoreSessionAsync(userSettings.AuthToken);
         
         // Если восстановление не удалось, сбрасываем настройки приложения
-        if (!success)
+        if (!result.success)
         {
             _appSettingsService.Settings.LoggedInUserId = 0;
             await _appSettingsService.SaveSettings();
+            return result; // Возвращаем сообщение об ошибке из RestoreSessionAsync
         }
         
-        return success;
+        return (true, null);
     }
 } 

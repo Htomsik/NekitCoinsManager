@@ -64,4 +64,12 @@ public class UserServiceLocalClient : IUserServiceClient
     {
         return await _userService.VerifyPasswordAsync(username, password);
     }
+
+    /// <inheritdoc />
+    public async Task<(bool success, string? error, UserDto? user)> AuthenticateUserAsync(string username, string password)
+    {
+        var result = await _userService.AuthenticateUserAsync(username, password);
+        var userDto = result.user != null ? _mapper.Map<UserDto>(result.user) : null;
+        return (result.success, result.error, userDto);
+    }
 } 

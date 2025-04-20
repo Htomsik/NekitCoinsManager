@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Repositories;
 
@@ -7,12 +10,14 @@ namespace NekitCoinsManager.Core.Services;
 public class AuthTokenService : IAuthTokenService
 {
     private readonly IUserAuthTokenRepository _tokenRepository;
+    private readonly IUserService _userService;
     private const int TokenLength = 64;
     private const int TokenExpirationDays = 30;
 
-    public AuthTokenService(IUserAuthTokenRepository tokenRepository)
+    public AuthTokenService(IUserAuthTokenRepository tokenRepository, IUserService userService)
     {
         _tokenRepository = tokenRepository;
+        _userService = userService;
     }
 
     public async Task<UserAuthToken> CreateTokenAsync(int userId, string hardwareId)
@@ -105,6 +110,30 @@ public class AuthTokenService : IAuthTokenService
     public async Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId)
     {
         return await _tokenRepository.GetUserTokensAsync(userId);
+    }
+
+    public async Task<(bool success, string? error, User? user)> RestoreSessionAsync(string token, string hardwareId)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return (false, "Токен не может быть пустым", null);
+        }
+
+        // Проверяем валидность токена
+        var authToken = await ValidateTokenAsync(token, hardwareId);
+        if (authToken == null)
+        {
+            return (false, "Недействительный токен", null);
+        }
+
+        // Получаем пользователя по id
+        var user = await _userService.GetUserByIdAsync(authToken.UserId);
+        if (user == null)
+        {
+            return (false, "Пользователь не найден", null);
+        }
+
+        return (true, null, user);
     }
 
     private string GenerateSecureToken()

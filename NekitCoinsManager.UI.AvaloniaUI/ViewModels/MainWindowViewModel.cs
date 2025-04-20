@@ -49,11 +49,21 @@ public partial class MainWindowViewModel : ViewModelBase, ICurrentUserObserver, 
     
     private async void TryRestoreSessionAsync()
     {
-        var success = await _authService.TryRestoreSessionAsync();
-        if (!success)
+        var result = await _authService.TryRestoreSessionAsync();
+        if (!result.success)
         {
             // Если не удалось восстановить сессию, показываем форму входа
             _navigationService.NavigateTo(ViewType.Login);
+            
+            // Если есть конкретная ошибка и это не просто отсутствие сохраненной сессии,
+            // можно отобразить ее пользователю
+            if (!string.IsNullOrEmpty(result.error) && 
+                !result.error.Contains("Отсутствует сохраненная сессия") && 
+                !result.error.Contains("Токен авторизации не найден"))
+            {
+                // Можно добавить отображение ошибки, если у вас есть сервис уведомлений
+                // _notificationService.ShowError($"Ошибка восстановления сессии: {result.error}");
+            }
         }
     }
     

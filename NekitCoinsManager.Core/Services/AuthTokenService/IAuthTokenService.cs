@@ -11,4 +11,5 @@ public interface IAuthTokenService
     Task DeactivateTokenAsync(int tokenId);
     Task DeactivateAllUserTokensAsync(int userId);
     Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId);
+    Task<(bool success, string? error, User? user)> RestoreSessionAsync(string token, string hardwareId);
 } 

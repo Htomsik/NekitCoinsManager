@@ -61,10 +61,17 @@ public partial class UserCardViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void Logout()
+    private async Task Logout()
     {
-        _authService.Logout();
-        _notificationService.ShowInfo("Выход выполнен успешно");
+        var result = await _authService.LogoutAsync();
+        if (result.success)
+        {
+            _notificationService.ShowInfo("Выход выполнен успешно");
+        }
+        else
+        {
+            _notificationService.ShowError($"Ошибка при выходе: {result.error}");
+        }
     }
     
     [RelayCommand]
