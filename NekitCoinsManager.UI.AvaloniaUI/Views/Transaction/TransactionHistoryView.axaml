@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
+             xmlns:mtype="using:NekitCoinsManager.Core.Models"
+             xmlns:localModels="using:NekitCoinsManager.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NekitCoinsManager.Views.TransactionHistoryView"
+             x:DataType="vm:TransactionHistoryViewModel">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- Конвертер для текста индикатора экспандера -->
+            <x:Boolean x:Key="True">True</x:Boolean>
+            <x:Boolean x:Key="False">False</x:Boolean>
+            
+            <DataTemplate x:Key="ExpanderContentTemplate" DataType="{x:Type localModels:TransactionDisplayModel}">
+                <ContentControl Content="{Binding}" 
+                              ContentTemplate="{StaticResource TransactionTemplate}"
+                              Margin="0,0,0,5"
+                              HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Stretch"/>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Border Classes="card">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Заголовок -->
+            <TextBlock Grid.Column="0" Text="История транзакций" Classes="header"/>
+            
+            <!-- Список транзакций -->
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Transactions}" Margin="0,5">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Panel Margin="0,0,0,10" HorizontalAlignment="Stretch">
+                                <!-- Транзакции с дочерними элементами -->
+                                <Expander Classes="transaction-expander"
+                                          IsVisible="{Binding HasChildTransactions}"
+                                          HorizontalAlignment="Stretch"
+                                          Tag="{Binding IsExpanded, RelativeSource={RelativeSource Self}}">
+                                    <Expander.Header>
+                                        <ContentControl Content="{Binding}" 
+                                                      ContentTemplate="{StaticResource TransactionTemplate}"
+                                                      HorizontalAlignment="Stretch"
+                                                      HorizontalContentAlignment="Stretch"
+                                                      Margin="0"/>
+                                    </Expander.Header>
+                                
+                                    <!-- Дочерние транзакции -->
+                                    <ItemsControl ItemsSource="{Binding ChildTransactions}" 
+                                                Margin="0,6,0,0"
+                                                HorizontalAlignment="Stretch">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <ContentControl Content="{Binding}" 
+                                                              ContentTemplate="{StaticResource TransactionTemplate}"
+                                                              Margin="0,0,0,5"
+                                                              HorizontalAlignment="Stretch"
+                                                              HorizontalContentAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
+                            
+                                <!-- Для транзакций без дочерних элементов отображаем обычный шаблон -->
+                                <ContentControl Content="{Binding}" 
+                                              ContentTemplate="{StaticResource TransactionTemplate}"
+                                              IsVisible="{Binding !HasChildTransactions}"
+                                              HorizontalAlignment="Stretch"
+                                              HorizontalContentAlignment="Stretch"/>
+                            </Panel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl> 

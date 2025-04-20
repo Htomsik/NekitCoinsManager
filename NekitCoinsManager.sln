@@ -1,8 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager", "NekitCoinsManager\NekitCoinsManager.csproj", "{C37971F0-6D58-4A4D-9E59-785B761C9C96}"
+#
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.UI.AvaloniaUI", "NekitCoinsManager.UI.AvaloniaUI\NekitCoinsManager.UI.AvaloniaUI.csproj", "{C37971F0-6D58-4A4D-9E59-785B761C9C96}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.Core", "NekitCoinsManager.Core\NekitCoinsManager.Core.csproj", "{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NekitCoinsManager.Shared", "NekitCoinsManager.Shared\NekitCoinsManager.Shared.csproj", "{F6E2960B-954F-48F0-85DA-8B09939F330A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +21,9 @@ Global
 		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A5F0F8B-1937-40EC-B5B7-732B21E4BDDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6E2960B-954F-48F0-85DA-8B09939F330A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6E2960B-954F-48F0-85DA-8B09939F330A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6E2960B-954F-48F0-85DA-8B09939F330A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6E2960B-954F-48F0-85DA-8B09939F330A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

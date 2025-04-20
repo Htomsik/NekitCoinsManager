@@ -5,86 +5,130 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NekitCoinsManager.Core.Data;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class TransactionService : ITransactionService
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IUserBalanceService _userBalanceService;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly List<ITransactionObserver> _observers = new();
 
-    public TransactionService(AppDbContext dbContext, IUserBalanceService userBalanceService)
+    public TransactionService(
+        ITransactionRepository transactionRepository,
+        IUserRepository userRepository,
+        ICurrencyRepository currencyRepository)
     {
-        _dbContext = dbContext;
-        _userBalanceService = userBalanceService;
+        _transactionRepository = transactionRepository;
+        _userRepository = userRepository;
+        _currencyRepository = currencyRepository;
     }
 
     public async Task<IEnumerable<Transaction>> GetTransactionsAsync()
     {
-        return await _dbContext.Transactions
-            .Include(t => t.FromUser)
-            .Include(t => t.ToUser)
-            .OrderByDescending(t => t.CreatedAt)
-            .ToListAsync();
+        return await _transactionRepository.GetAllAsync();
     }
 
-    public async Task<(bool success, string? error)> TransferCoinsAsync(Transaction transaction)
+    public async Task<Transaction?> GetTransactionByIdAsync(int id)
     {
-        if (transaction.FromUser == null || transaction.ToUser == null)
+        return await _transactionRepository.GetByIdAsync(id);
+    }
+
+    public async Task<(bool success, string? error)> AddTransactionAsync(Transaction transaction)
+    {
+        // Валидируем транзакцию
+        var (isValid, errorMessage) = await ValidateTransactionAsync(transaction);
+        if (!isValid)
         {
-            return (false, "Выберите отправителя и получателя");
+            return (false, errorMessage);
         }
 
-        // Заполняем недостающие данные
-        transaction.FromUserId = transaction.FromUser.Id;
-        transaction.ToUserId = transaction.ToUser.Id;
-        transaction.CurrencyId = transaction.Currency.Id;
+        // Устанавливаем время создания, если не задано
+        if (transaction.CreatedAt == default)
+        {
+            transaction.CreatedAt = DateTime.UtcNow;
+        }
+
+        await _transactionRepository.AddAsync(transaction);
+        NotifyObservers();
+        return (true, null);
+    }
+
+    public async Task<(bool isValid, string? errorMessage)> ValidateTransactionAsync(Transaction transaction)
+    {
+        // Для операции пополнения (депозита) не проверяем отправителя
+        bool isDeposit = transaction.Type == TransactionType.Deposit;
+
+        // Проверяем валидность ID пользователей и валюты
+        if (!isDeposit && transaction.FromUserId <= 0)
+        {
+            return (false, "Не указан отправитель перевода");
+        }
+
+        if (transaction.ToUserId <= 0)
+        {
+            return (false, "Не указан получатель перевода");
+        }
+
+        if (transaction.CurrencyId <= 0)
+        {
+            return (false, "Не указана валюта перевода");
+        }
 
         if (transaction.Amount <= 0)
         {
-            return (false, "Сумма перевода должна быть больше 0");
+            return (false, "Сумма перевода должна быть больше нуля");
         }
 
-        var fromUser = await _dbContext.Users.FindAsync(transaction.FromUserId);
-        var toUser = await _dbContext.Users.FindAsync(transaction.ToUserId);
-
-        if (fromUser == null || toUser == null)
+        // Проверяем существование пользователей и валюты в базе данных
+        if (!isDeposit)
         {
-            return (false, "Пользователь не найден");
+            var fromUser = await _userRepository.GetByIdAsync(transaction.FromUserId);
+            if (fromUser == null)
+            {
+                return (false, $"Отправитель с ID {transaction.FromUserId} не найден");
+            }
         }
 
-        if (fromUser.Id == toUser.Id)
+        var toUser = await _userRepository.GetByIdAsync(transaction.ToUserId);
+        if (toUser == null)
         {
-            return (false, "Нельзя переводить монеты самому себе");
+            return (false, $"Получатель с ID {transaction.ToUserId} не найден");
         }
 
-        // Проверяем баланс отправителя
-        var fromBalance = await _userBalanceService.GetUserBalanceAsync(fromUser.Id, transaction.CurrencyId);
-        if (fromBalance == null || fromBalance.Amount < transaction.Amount)
+        var currency = await _currencyRepository.GetByIdAsync(transaction.CurrencyId);
+        if (currency == null)
         {
-            return (false, "Недостаточно монет для перевода");
+            return (false, $"Валюта с ID {transaction.CurrencyId} не найдена");
         }
 
-        transaction.CreatedAt = DateTime.UtcNow;
-
-        // Выполняем перевод через UserBalanceService
-        var (success, error) = await _userBalanceService.TransferBalanceAsync(
-            fromUser.Id, 
-            toUser.Id, 
-            transaction.CurrencyId, 
-            transaction.Amount
-        );
-
-        if (!success)
+        // Проверяем тип транзакции
+        if (!Enum.IsDefined(typeof(TransactionType), transaction.Type))
         {
-            return (false, error ?? "Ошибка при переводе средств");
+            return (false, "Неверный тип транзакции");
         }
 
-        _dbContext.Transactions.Add(transaction);
-        await _dbContext.SaveChangesAsync();
+        // Специфические проверки для разных типов транзакций
+        switch (transaction.Type)
+        {
+            case TransactionType.Transfer:
+                if (transaction.FromUserId == transaction.ToUserId)
+                {
+                    return (false, "Нельзя переводить монеты самому себе");
+                }
+                break;
+                
+            case TransactionType.Deposit:
+                // Для депозита не проверяем отправителя
+                break;
+                
+            case TransactionType.Conversion:
+                // Для конвертации допускается перевод самому себе
+                break;
+        }
 
-        NotifyObservers();
         return (true, null);
     }
 
@@ -96,7 +140,7 @@ public class TransactionService : ITransactionService
         }
     }
 
-    private void NotifyObservers()
+    public void NotifyObservers()
     {
         foreach (var observer in _observers)
         {

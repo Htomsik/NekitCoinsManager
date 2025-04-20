@@ -1,0 +1,102 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
+                    xmlns:mtype="using:NekitCoinsManager.Core.Models"
+                    xmlns:localModels="using:NekitCoinsManager.Models">
+    
+    <!-- Единый шаблон для отображения транзакции -->
+    <DataTemplate x:Key="TransactionTemplate" DataType="{x:Type localModels:TransactionDisplayModel}">
+        <Border Classes="transaction-item" HorizontalAlignment="Stretch">
+            <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+                
+                <!-- Иконка транзакции -->
+                <Grid Grid.Column="0" Classes="transaction-icon-container">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
+                        <!-- Иконки типов транзакций -->
+                        <Grid>
+                            <PathIcon Classes="transaction-type-icon"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}"
+                                 Data="{StaticResource TransferIcon}"/>
+                            
+                            <PathIcon Classes="transaction-type-icon"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
+                                 Data="{StaticResource DepositIcon}"/>
+                                 
+                            <PathIcon Classes="transaction-type-icon"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Conversion}}"
+                                 Data="{StaticResource CurrencyConversionRegular}"/>
+                                 
+                            <PathIcon Classes="transaction-type-icon"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Fee}}"
+                                 Data="{StaticResource FeeIcon}"/>
+                        </Grid>
+                        
+                        <!-- Индикатор связанных транзакций (значок цепи) -->
+                        <PathIcon Classes="transaction-related-icon"
+                                 Data="{StaticResource LinkIcon}"
+                                 IsVisible="{Binding HasChildTransactions}">
+                            <PathIcon.Transitions>
+                                <Transitions>
+                                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
+                                </Transitions>
+                            </PathIcon.Transitions>
+                            <PathIcon.Styles>
+                                <Style Selector="PathIcon.transaction-related-icon:pointerover">
+                                    <Setter Property="RenderTransform" Value="scale(1.1)"/>
+                                    <Setter Property="Opacity" Value="1.0"/>
+                                </Style>
+                            </PathIcon.Styles>
+                        </PathIcon>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Информация о транзакции -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch">
+                        <!-- Перевод или Комиссия или Конвертация: показываем "Отправитель → Получатель" -->
+                        <Grid ColumnDefinitions="Auto,Auto,*" 
+                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
+                              HorizontalAlignment="Stretch">
+                            <TextBlock Grid.Column="0" Text="{Binding FromUser.Username}" Classes="transaction-users"/>
+                            <TextBlock Grid.Column="1" Text=" → " Margin="3,0"/>
+                            <TextBlock Grid.Column="2" Text="{Binding ToUser.Username}" Classes="transaction-users"/>
+                        </Grid>
+                        
+                        <!-- Депозит: показываем только получателя -->
+                        <Grid IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}">
+                            <TextBlock Text="{Binding ToUser.Username}" Classes="transaction-users"/>
+                        </Grid>
+                    </Grid>
+                    
+                    <!-- Комментарий к транзакции (если есть) -->
+                    <TextBlock Text="{Binding Comment}"
+                             IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                             Classes="transaction-comment"
+                             TextWrapping="Wrap"/>
+                    
+                    <!-- Дата транзакции -->
+                    <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd.MM.yyyy}}"
+                             Classes="transaction-date"/>
+                </StackPanel>
+                
+                <!-- Сумма транзакции и тип -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Classes="transaction-amount">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} {1}">
+                                <Binding Path="Amount"/>
+                                <Binding Path="Currency.Symbol"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    
+                    <!-- Тип транзакции -->
+                    <TextBlock Text="{Binding Type}" 
+                              Classes="transaction-type"
+                              HorizontalAlignment="Right"/>
+                </StackPanel>
+                
+            </Grid>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary> 

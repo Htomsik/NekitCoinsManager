@@ -1,0 +1,149 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- Стили для экспандера транзакций -->
+    <Style Selector="Expander.transaction-expander">
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Name="RootBorder" HorizontalAlignment="Stretch" ClipToBounds="True">
+                        <Grid RowDefinitions="Auto,*" HorizontalAlignment="Stretch">
+                            <Border Name="HeaderBorder" 
+                                    Background="{DynamicResource BackgroundSecondaryBrush}"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    CornerRadius="4"
+                                    ClipToBounds="True"
+                                    HorizontalAlignment="Stretch">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <ToggleButton Name="PART_ToggleButton"
+                                                IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                ClipToBounds="True"
+                                                Padding="0">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Name="ToggleBorder"
+                                                      Background="{TemplateBinding Background}" 
+                                                      BorderThickness="0" 
+                                                      CornerRadius="4"
+                                                      ClipToBounds="True">
+                                                    <ContentPresenter Name="PART_ContentPresenter"
+                                                                  Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                  HorizontalContentAlignment="Stretch"
+                                                                  VerticalContentAlignment="Center"
+                                                                  ClipToBounds="True" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                        <ContentPresenter Name="PART_HeaderPresenter"
+                                                        Content="{TemplateBinding Header}"
+                                                        HorizontalContentAlignment="Stretch"
+                                                        VerticalContentAlignment="Center"
+                                                        ClipToBounds="True"
+                                                        HorizontalAlignment="Stretch"
+                                                        Margin="0" />
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                            <Border Name="ContentBorder" Grid.Row="1" 
+                                   IsVisible="{TemplateBinding IsExpanded}"
+                                   HorizontalAlignment="Stretch">
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                HorizontalContentAlignment="Stretch"
+                                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                HorizontalAlignment="Stretch"
+                                                Margin="25,5,0,0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ContentPresenter#PART_ContentPresenter ItemsControl">
+        <Setter Property="BorderThickness" Value="1,0,0,0"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="Padding" Value="15,0,0,0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander:expanded /template/ Border#HeaderBorder">
+        <Setter Property="Background" Value="{DynamicResource BackgroundTertiaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ Border#HeaderBorder:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BackgroundTertiaryBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+    </Style>
+    
+    <!-- Стили для отключения анимации кнопки экспандера при нажатии и наведении -->
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pointerover">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pressed">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:checked">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton /template/ Border#ToggleBorder">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pointerover /template/ Border#ToggleBorder">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pressed /template/ Border#ToggleBorder">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pressed /template/ ContentPresenter">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="Opacity" Value="1"/>
+    </Style>
+    
+    <Style Selector="Expander.transaction-expander /template/ ToggleButton#PART_ToggleButton:pressed ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="RenderTransform" Value="none"/>
+        <Setter Property="Opacity" Value="1"/>
+    </Style>
+</Styles> 

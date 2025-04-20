@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:converters="using:NekitCoinsManager.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NekitCoinsManager.Views.UserTokensView"
+             x:DataType="vm:UserTokensViewModel">
+
+    <UserControl.Resources>
+        <converters:FirstLetterConverter x:Key="FirstLetterConverter"/>
+    </UserControl.Resources>
+
+    <Border Classes="card">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+            <!-- Заголовок с кнопкой назад -->
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                <Button Grid.Column="0"
+                        Command="{Binding GoBackCommand}"
+                        Classes="icon"
+                        Margin="0,0,8,0"
+                        ToolTip.Tip="Назад к списку пользователей">
+                    <PathIcon Data="{StaticResource TransferRegular}" RenderTransform="rotate(180deg)"/>
+                </Button>
+                <TextBlock Grid.Column="1" 
+                          Text="Токены авторизации пользователя" 
+                          Classes="header"/>
+            </Grid>
+
+            <!-- Информация о пользователе -->
+            <Border Grid.Row="1" Classes="user-card" Margin="0,10">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Grid.Column="0"
+                            Classes="user-avatar">
+                        <TextBlock Text="{Binding User.Username, Converter={StaticResource FirstLetterConverter}}"
+                                  Classes="avatar-letter"/>
+                    </Border>
+                    <TextBlock Grid.Column="1"
+                             Text="{Binding User.Username}"
+                             Classes="username"
+                             VerticalAlignment="Center"
+                             Margin="10,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- Список токенов -->
+            <DataGrid Grid.Row="2" 
+                     ItemsSource="{Binding Tokens}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     Margin="0,0,0,10">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Токен" 
+                                      Binding="{Binding Token}" 
+                                      Width="2*"/>
+                    <DataGridTextColumn Header="ID устройства" 
+                                      Binding="{Binding HardwareId}" 
+                                      Width="*"/>
+                    <DataGridTextColumn Header="Создан" 
+                                      Binding="{Binding CreatedAt, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}" 
+                                      Width="*"/>
+                    <DataGridTextColumn Header="Истекает" 
+                                      Binding="{Binding ExpiresAt, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}" 
+                                      Width="*"/>
+                    <DataGridCheckBoxColumn Header="Активен" 
+                                         Binding="{Binding IsActive}" 
+                                         Width="0.5*"/>
+                    <DataGridTemplateColumn Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding $parent[UserControl].((vm:UserTokensViewModel)DataContext).DeactivateTokenCommand}"
+                                       CommandParameter="{Binding}"
+                                       Classes="icon"
+                                       IsEnabled="{Binding IsActive}"
+                                       ToolTip.Tip="Деактивировать токен">
+                                    <PathIcon Data="{StaticResource DeleteRegular}"/>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</UserControl> 

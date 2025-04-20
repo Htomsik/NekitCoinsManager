@@ -1,0 +1,64 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using NekitCoinsManager.Shared.DTO;
+using NekitCoinsManager.Shared.DTO.Operations;
+
+namespace NekitCoinsManager.Shared.HttpClient;
+
+/// <summary>
+/// Клиентский интерфейс для работы с пользователями
+/// </summary>
+public interface IUserServiceClient
+{
+    /// <summary>
+    /// Получает список всех пользователей
+    /// </summary>
+    /// <returns>Список пользователей</returns>
+    Task<IEnumerable<UserDto>> GetUsersAsync();
+    
+    /// <summary>
+    /// Получает пользователя по имени пользователя
+    /// </summary>
+    /// <param name="username">Имя пользователя</param>
+    /// <returns>Пользователь или null, если не найден</returns>
+    Task<UserDto?> GetUserByUsernameAsync(string username);
+    
+    /// <summary>
+    /// Получает пользователя по идентификатору
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя</param>
+    /// <returns>Пользователь или null, если не найден</returns>
+    Task<UserDto?> GetUserByIdAsync(int userId);
+    
+    /// <summary>
+    /// Добавляет нового пользователя
+    /// </summary>
+    /// <param name="username">Имя пользователя</param>
+    /// <param name="password">Пароль</param>
+    /// <param name="confirmPassword">Подтверждение пароля</param>
+    /// <returns>Результат операции</returns>
+    Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
+    
+    /// <summary>
+    /// Удаляет пользователя
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя</param>
+    /// <returns>Результат операции</returns>
+    Task<(bool success, string? error)> DeleteUserAsync(int userId);
+    
+    /// <summary>
+    /// Проверяет пароль пользователя
+    /// </summary>
+    /// <param name="username">Имя пользователя</param>
+    /// <param name="password">Пароль для проверки</param>
+    /// <returns>Результат операции</returns>
+    Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password);
+    
+    /// <summary>
+    /// Аутентифицирует пользователя и возвращает его данные при успешной аутентификации
+    /// </summary>
+    /// <param name="username">Имя пользователя</param>
+    /// <param name="password">Пароль</param>
+    /// <returns>Результат операции и пользователь при успехе</returns>
+    Task<(bool success, string? error, UserDto? user)> AuthenticateUserAsync(string username, string password);
+} 

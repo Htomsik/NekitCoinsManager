@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             xmlns:converters="using:NekitCoinsManager.Converters"
+             xmlns:dto="using:NekitCoinsManager.Shared.DTO"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
+             x:Class="NekitCoinsManager.Views.UserManagementView"
+             x:DataType="vm:UserManagementViewModel">
+
+    <UserControl.Resources>
+        <converters:FirstLetterConverter x:Key="FirstLetterConverter"/>
+    </UserControl.Resources>
+
+    <Border Classes="card">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Заголовок -->
+            <TextBlock Grid.Column="0" Text="Управление пользователями" Classes="header"/>
+            
+            <!-- Список пользователей -->
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Users}"
+                         Classes="user-list">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="dto:UserDto">
+                        <Border Classes="card user-card">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                <!-- Аватар пользователя -->
+                                <Border Grid.Column="0"
+                                        Classes="user-avatar">
+                                    <TextBlock Text="{Binding Username, Converter={StaticResource FirstLetterConverter}}"
+                                              Classes="avatar-letter"/>
+                                </Border>
+                                
+                                <!-- Информация о пользователе -->
+                                <StackPanel Grid.Column="1" 
+                                          Classes="user-info">
+                                    <TextBlock Text="{Binding Username}"
+                                             Classes="username"/>
+                                    <ItemsControl ItemsSource="{Binding Balances}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="Auto,Auto" Margin="0,2,0,0">
+                                                    <TextBlock Grid.Column="0" Text="{Binding Amount}" Classes="balance"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Currency.Symbol}" Margin="5,0,0,0" Classes="balance"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                                
+                                <!-- Кнопка просмотра токенов -->
+                                <Button Grid.Column="2"
+                                       Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).ViewUserTokensCommand}"
+                                       CommandParameter="{Binding}"
+                                       Classes="icon"
+                                       Margin="4,0"
+                                       ToolTip.Tip="Просмотр токенов">
+                                    <PathIcon Data="{StaticResource SettingsRegular}"/>
+                                </Button>
+                                
+                                <!-- Кнопка удаления -->
+                                <Button Grid.Column="3"
+                                       Command="{Binding $parent[UserControl].((vm:UserManagementViewModel)DataContext).DeleteUserCommand}"
+                                       CommandParameter="{Binding}"
+                                       Classes="icon"
+                                       ToolTip.Tip="Удалить пользователя">
+                                    <PathIcon Data="{StaticResource DeleteRegular}"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Border>
+</UserControl> 

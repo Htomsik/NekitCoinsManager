@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NekitCoinsManager.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:CurrencyManagementViewModel"
+             x:Class="NekitCoinsManager.Views.CurrencyManagementView">
+    
+    <Grid ColumnDefinitions="400,*">
+        <!-- Форма добавления валюты -->
+        <Border Grid.Column="0" Classes="transfer-form">
+            <Grid RowDefinitions="Auto,*">
+                <!-- Заголовок -->
+                <TextBlock Grid.Row="0" Text="Добавление валюты" Classes="header"/>
+                
+                <!-- Форма добавления -->
+                <StackPanel Grid.Row="1" Spacing="16">
+                    <!-- Название -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Название" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencyName}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    
+                    <!-- Код -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Код" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencyCode}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    
+                    <!-- Символ -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Символ" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencySymbol}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    
+                    <!-- Курс обмена -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Курс обмена" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencyExchangeRate}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <!-- Начислять новым пользователям -->
+                    <StackPanel Classes="form-group">
+                        <CheckBox Content="Начислять новым пользователям"
+                                 IsChecked="{Binding NewCurrencyIsDefaultForNewUsers}"/>
+                    </StackPanel>
+                    
+                    <!-- Количество для новых пользователей -->
+                    <StackPanel Classes="form-group">
+                        <TextBlock Text="Начальная сумма" Classes="form-label"/>
+                        <TextBox Text="{Binding NewCurrencyDefaultAmount}"
+                                Classes="transfer-input"
+                                HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding NewCurrencyIsDefaultForNewUsers}"/>
+                    </StackPanel>
+
+                    <!-- Кнопка добавления -->
+                    <Button Content="Добавить валюту"
+                            Command="{Binding AddCurrencyCommand}"
+                            Classes="action"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Список валют -->
+        <Border Grid.Column="1" Classes="card" Margin="10,0,0,0">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Заголовок -->
+                <TextBlock Grid.Row="0" Text="Список валют" Classes="header"/>
+                
+                <!-- Таблица валют -->
+                <DataGrid Grid.Row="1" 
+                         ItemsSource="{Binding Currencies}"
+                         SelectedItem="{Binding SelectedCurrency}"
+                         AutoGenerateColumns="False"
+                         IsReadOnly="True"
+                         Margin="0,0,0,10">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Название" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="Код" Binding="{Binding Code}"/>
+                        <DataGridTextColumn Header="Символ" Binding="{Binding Symbol}"/>
+                        <DataGridTextColumn Header="Курс обмена" Binding="{Binding ExchangeRate}"/>
+                        <DataGridCheckBoxColumn Header="Для новых" Binding="{Binding IsDefaultForNewUsers}"/>
+                        <DataGridTextColumn Header="Начальная сумма" Binding="{Binding DefaultAmount}"/>
+                        <DataGridTextColumn Header="Последнее обновление" Binding="{Binding LastUpdateTime, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}"/>
+                    </DataGrid.Columns>
+                    
+                    <DataGrid.ContextMenu>
+                        <ContextMenu IsEnabled="{Binding SelectedCurrency, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <MenuItem Header="Удалить" Command="{Binding DeleteCurrencyCommand}"></MenuItem>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+                
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl> 

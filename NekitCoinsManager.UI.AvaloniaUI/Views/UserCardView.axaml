@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NekitCoinsManager.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NekitCoinsManager.Views.UserCardView"
+        x:DataType="vm:UserCardViewModel">
+
+    <Border Classes="card">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Заголовок -->
+            <TextBlock Grid.Column="0" Text="Информация о пользователе" Classes="header"/>
+            
+            <!-- Информация о пользователе -->
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                  ColumnDefinitions="Auto,*">
+                
+                <!-- Имя пользователя -->
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                          Text="Имя пользователя:"
+                          Classes="username"/>
+                <TextBlock Grid.Row="0" Grid.Column="1"
+                          Text="{Binding CurrentUser.Username}"
+                          Classes="balance"/>
+
+                <!-- ID -->
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                          Text="ID:"
+                          Classes="username"/>
+                <TextBlock Grid.Row="1" Grid.Column="1"
+                          Text="{Binding CurrentUser.Id}"
+                          Classes="balance"/>
+
+                <!-- Балансы -->
+                <TextBlock Grid.Row="2" Grid.Column="0"
+                          Text="Балансы:"
+                          Classes="username"/>
+                <ItemsControl Grid.Row="2" Grid.Column="1"
+                            ItemsSource="{Binding Balances}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="{Binding Amount}" Classes="balance"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Currency.Symbol}" Margin="5,0,0,0" Classes="balance"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+                <!-- Кнопки действий -->
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                            Orientation="Horizontal" Spacing="10" Margin="0,10,0,10">
+                    <!-- Кнопка просмотра токенов -->
+                    <Button Content="Просмотр токенов"
+                            Command="{Binding ViewUserTokensCommand}"
+                            Classes="action"/>
+                            
+                    <!-- Кнопка выхода -->
+                    <Button Content="Выйти"
+                            Command="{Binding LogoutCommand}"
+                            Classes="action"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl> 

@@ -13,6 +13,11 @@ public class User
     
     public DateTime CreatedAt { get; set; }
     
+    /// <summary>
+    /// Признак того, что аккаунт является системным банковским аккаунтом
+    /// </summary>
+    public bool IsBankAccount { get; set; }
+    
     public virtual ICollection<Transaction> SentTransactions { get; set; } = new List<Transaction>();
     
     public virtual ICollection<Transaction> ReceivedTransactions { get; set; } = new List<Transaction>();

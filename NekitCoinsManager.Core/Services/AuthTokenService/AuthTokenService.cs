@@ -1,25 +1,29 @@
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
-using NekitCoinsManager.Core.Data;
+using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
 public class AuthTokenService : IAuthTokenService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IUserAuthTokenRepository _tokenRepository;
+    private readonly IUserService _userService;
     private const int TokenLength = 64;
     private const int TokenExpirationDays = 30;
 
-    public AuthTokenService(AppDbContext dbContext)
+    public AuthTokenService(IUserAuthTokenRepository tokenRepository, IUserService userService)
     {
-        _dbContext = dbContext;
+        _tokenRepository = tokenRepository;
+        _userService = userService;
     }
 
     public async Task<UserAuthToken> CreateTokenAsync(int userId, string hardwareId)
     {
         // Деактивируем все предыдущие токены пользователя
-        await DeactivateAllUserTokensAsync(userId);
+        await _tokenRepository.DeactivateAllUserTokensAsync(userId);
 
         var token = new UserAuthToken
         {
@@ -31,60 +35,105 @@ public class AuthTokenService : IAuthTokenService
             IsActive = true
         };
 
-        _dbContext.AuthTokens.Add(token);
-        await _dbContext.SaveChangesAsync();
+        // Валидируем новый токен перед созданием
+        var (isValid, validationError) = await _tokenRepository.ValidateCreateAsync(token);
+        if (!isValid)
+        {
+            // В случае ошибки валидации генерируем новый токен
+            // (это маловероятно, но может произойти в случае коллизии токенов)
+            if (validationError == ErrorCode.AuthTokenAlreadyExists)
+            {
+                token.Token = GenerateSecureToken();
+                // Повторная проверка
+                (isValid, validationError) = await _tokenRepository.ValidateCreateAsync(token);
+                if (!isValid)
+                {
+                    throw new InvalidOperationException($"Не удалось создать токен: {validationError}");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Не удалось создать токен: {validationError}");
+            }
+        }
 
+        await _tokenRepository.AddAsync(token);
         return token;
     }
 
     public async Task<UserAuthToken?> ValidateTokenAsync(string token, string hardwareId)
     {
-        var authToken = await _dbContext.AuthTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.Token == token && t.IsActive);
-
-        if (authToken == null)
+        // Используем новый метод валидации из репозитория
+        var (isValid, validationError) = await _tokenRepository.ValidateTokenAsync(token, hardwareId);
+        if (!isValid)
         {
+            // Если токен невалидный и это из-за истечения срока, обновим его статус
+            if (validationError == ErrorCode.AuthTokenExpired)
+            {
+                var authToken = await _tokenRepository.GetByTokenAsync(token);
+                if (authToken != null)
+                {
+                    authToken.IsActive = false;
+                    await _tokenRepository.UpdateAsync(authToken);
+                }
+            }
             return null;
         }
 
-        if (authToken.HardwareId != hardwareId)
-        {
-            return null;
-        }
-
-        if (authToken.ExpiresAt < DateTime.UtcNow)
-        {
-            authToken.IsActive = false;
-            await _dbContext.SaveChangesAsync();
-            return null;
-        }
-
-        return authToken;
+        // Токен валидный, возвращаем его
+        return await _tokenRepository.GetByTokenAsync(token);
     }
 
     public async Task DeactivateTokenAsync(int tokenId)
     {
-        var token = await _dbContext.AuthTokens.FindAsync(tokenId);
+        var token = await _tokenRepository.GetByIdAsync(tokenId);
         if (token != null)
         {
             token.IsActive = false;
-            await _dbContext.SaveChangesAsync();
+            
+            // Валидируем обновление
+            var (isValid, validationError) = await _tokenRepository.ValidateUpdateAsync(token);
+            if (!isValid)
+            {
+                throw new InvalidOperationException($"Не удалось деактивировать токен: {validationError}");
+            }
+            
+            await _tokenRepository.UpdateAsync(token);
         }
     }
 
     public async Task DeactivateAllUserTokensAsync(int userId)
     {
-        var tokens = await _dbContext.AuthTokens
-            .Where(t => t.UserId == userId && t.IsActive)
-            .ToListAsync();
+        await _tokenRepository.DeactivateAllUserTokensAsync(userId);
+    }
 
-        foreach (var token in tokens)
+    public async Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId)
+    {
+        return await _tokenRepository.GetUserTokensAsync(userId);
+    }
+
+    public async Task<(bool success, string? error, User? user)> RestoreSessionAsync(string token, string hardwareId)
+    {
+        if (string.IsNullOrWhiteSpace(token))
         {
-            token.IsActive = false;
+            return (false, "Токен не может быть пустым", null);
         }
 
-        await _dbContext.SaveChangesAsync();
+        // Проверяем валидность токена
+        var authToken = await ValidateTokenAsync(token, hardwareId);
+        if (authToken == null)
+        {
+            return (false, "Недействительный токен", null);
+        }
+
+        // Получаем пользователя по id
+        var user = await _userService.GetUserByIdAsync(authToken.UserId);
+        if (user == null)
+        {
+            return (false, "Пользователь не найден", null);
+        }
+
+        return (true, null, user);
     }
 
     private string GenerateSecureToken()
