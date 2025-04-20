@@ -32,7 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IUserBalanceService, UserBalanceService>();
-        services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         services.AddScoped<IDbTransactionService, DbTransactionService>();
         

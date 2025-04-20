@@ -1,0 +1,6 @@
+@NekitCoinsManage.API_HostAddress = http://localhost:5122
+
+GET {{NekitCoinsManage.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
