@@ -1,8 +1,10 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
-namespace NekitCoinsManager.Core.Services;
+namespace NekitCoinsManager.Services;
 
 public class HardwareInfoService : IHardwareInfoService
 {

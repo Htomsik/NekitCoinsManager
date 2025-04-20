@@ -29,7 +29,6 @@ public static class DependencyInjection
         
         // Регистрируем бизнес-сервисы
         services.AddScoped<IAuthTokenService, AuthTokenService>();
-        services.AddTransient<IHardwareInfoService, HardwareInfoService>();
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IPasswordHasherService, PasswordHasherService>();
         services.AddScoped<ICurrencyService, CurrencyService>();

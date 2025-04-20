@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         services.AddTransient<IUserSettingsService, UserFileSettingsService>();
+        services.AddTransient<IHardwareInfoService, HardwareInfoService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<INavigationService, NavigationService>();
         
