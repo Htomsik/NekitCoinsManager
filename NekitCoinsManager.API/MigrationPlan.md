@@ -5,14 +5,14 @@
 - ✅ Настройка базовой инфраструктуры (DI, маппинг)
 - ✅ Настройка обработки ошибок через Middleware
 
-## 2. Создание контроллеров API (в процессе)
+## 2. Создание контроллеров API (завершено)
 - ✅ **AuthTokenController** - авторизация и работа с токенами
 - ✅ **UserController** - управление пользователями
 - ✅ **CurrencyController** - управление валютами
 - ✅ **UserBalanceController** - управление балансами пользователей
 - ✅ **TransactionController** - работа с транзакциями
 - ✅ **CurrencyConversionController** - конвертация валют
-- ⬜ **MoneyOperationsController** - управление денежными операциями
+- ✅ **MoneyOperationsController** - управление денежными операциями
 
 ## 3. Создание HTTP-клиентов для API (частично завершено)
 - ✅ Интерфейсы клиентов в Shared проекте
@@ -40,7 +40,7 @@
 
 1. ✅ **TransactionController** (сложность: 4) - работа с транзакциями
 2. ✅ **CurrencyConversionController** (сложность: 3) - конвертация валют
-3. **MoneyOperationsController** (сложность: 5) - сложные финансовые операции
+3. ✅ **MoneyOperationsController** (сложность: 5) - сложные финансовые операции
 
 ## Ключевые принципы реализации
 - Контроллеры должны быть простыми и только перенаправлять вызовы на сервисы
@@ -104,7 +104,7 @@
   - GET `/api/CurrencyConversion/rate` - получение курса обмена между валютами
   - GET `/api/CurrencyConversion/rates` - получение всех курсов обмена
 
-### MoneyOperationsController (⬜ В планах)
+### MoneyOperationsController (✅ Реализовано)
 - **Эндпоинты:**
   - POST `/api/MoneyOperations/transfer` - перевод денег
   - POST `/api/MoneyOperations/deposit` - пополнение баланса
@@ -112,5 +112,5 @@
   - POST `/api/MoneyOperations/welcomeBonus` - выдача приветственного бонуса
 
 ## Текущий прогресс
-- Контроллеры: 6 из 7 реализованы (86%)
-- Общий прогресс миграции: примерно 45% 
+- Контроллеры: 7 из 7 реализованы (100%)
+- Общий прогресс миграции: примерно 50% 
