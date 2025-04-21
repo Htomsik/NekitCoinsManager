@@ -91,43 +91,4 @@ public class CurrencyConversionService : ICurrencyConversionService
         
         return result;
     }
-
-    /// <summary>
-    /// Обновляет обменный курс между двумя валютами
-    /// </summary>
-    public async Task<(bool success, string? error)> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate)
-    {
-        // Валидация входных данных
-        if (rate <= 0)
-        {
-            return (false, "Курс обмена должен быть больше нуля");
-        }
-        
-        try
-        {
-            // Получаем валюты
-            var fromCurrency = await _currencyService.GetCurrencyByCodeAsync(fromCurrencyCode);
-            var toCurrency = await _currencyService.GetCurrencyByCodeAsync(toCurrencyCode);
-            
-            if (fromCurrency == null)
-                return (false, $"Валюта с кодом {fromCurrencyCode} не найдена");
-            
-            if (toCurrency == null)
-                return (false, $"Валюта с кодом {toCurrencyCode} не найдена");
-
-            // Рассчитываем новое значение ExchangeRate для целевой валюты
-            // Учитывая, что курс = toCurrency.ExchangeRate / fromCurrency.ExchangeRate
-            // Тогда toCurrency.ExchangeRate = rate * fromCurrency.ExchangeRate
-            decimal newExchangeRate = rate * fromCurrency.ExchangeRate;
-            
-            // Обновляем курс через CurrencyService
-            var updateResult = await _currencyService.UpdateExchangeRateAsync(toCurrency.Id, newExchangeRate);
-            
-            return updateResult;
-        }
-        catch (Exception ex)
-        {
-            return (false, $"Ошибка при обновлении курса: {ex.Message}");
-        }
-    }
 } 

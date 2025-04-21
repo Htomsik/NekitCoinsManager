@@ -43,10 +43,4 @@ public class CurrencyConversionServiceLocalClient : ICurrencyConversionServiceCl
     {
         return await _currencyConversionService.GetAllExchangeRatesAsync();
     }
-
-    /// <inheritdoc />
-    public async Task<(bool success, string? error)> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate)
-    {
-        return await _currencyConversionService.UpdateExchangeRateAsync(fromCurrencyCode, toCurrencyCode, rate);
-    }
 } 

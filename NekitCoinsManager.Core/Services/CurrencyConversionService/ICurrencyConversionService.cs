@@ -31,13 +31,4 @@ public interface ICurrencyConversionService
     /// </summary>
     /// <returns>Словарь обменных курсов [fromCurrencyCode][toCurrencyCode] = rate</returns>
     Task<Dictionary<string, Dictionary<string, decimal>>> GetAllExchangeRatesAsync();
-    
-    /// <summary>
-    /// Обновляет обменный курс между двумя валютами
-    /// </summary>
-    /// <param name="fromCurrencyCode">Код исходной валюты</param>
-    /// <param name="toCurrencyCode">Код целевой валюты</param>
-    /// <param name="rate">Новый обменный курс</param>
-    /// <returns>Результат операции (успех/ошибка)</returns>
-    Task<(bool success, string? error)> UpdateExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode, decimal rate);
 } 
