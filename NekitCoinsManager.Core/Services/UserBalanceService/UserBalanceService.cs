@@ -194,18 +194,7 @@ public class UserBalanceService : IUserBalanceService
         
         return (true, null);
     }
-
-    public async Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId)
-    {
-        var hasBalance = await _userBalanceRepository.HasBalanceAsync(userId, currencyId);
-        if (hasBalance)
-        {
-            return (true, null);
-        }
-
-        return await CreateBalanceAsync(userId, currencyId, 0);
-    }
-
+    
     /// <summary>
     /// Получает баланс пользователя, а если его нет - создает с указанной начальной суммой
     /// </summary>

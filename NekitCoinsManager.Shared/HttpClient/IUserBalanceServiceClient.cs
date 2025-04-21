@@ -31,11 +31,6 @@ public interface IUserBalanceServiceClient
     Task<(bool success, string? error)> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount);
     
     /// <summary>
-    /// Проверяет и создает баланс для пользователя, если его нет
-    /// </summary>
-    Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId);
-    
-    /// <summary>
     /// Создает новый баланс для пользователя
     /// </summary>
     Task<(bool success, string? error)> CreateBalanceAsync(int userId, int currencyId, decimal amount);

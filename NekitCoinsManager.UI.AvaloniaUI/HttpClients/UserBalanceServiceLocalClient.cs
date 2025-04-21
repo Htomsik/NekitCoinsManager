@@ -48,13 +48,7 @@ public class UserBalanceServiceLocalClient : IUserBalanceServiceClient
     {
         return await _userBalanceService.TransferBalanceAsync(fromUserId, toUserId, currencyId, amount);
     }
-
-    /// <inheritdoc />
-    public async Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId)
-    {
-        return await _userBalanceService.EnsureUserHasBalanceAsync(userId, currencyId);
-    }
-
+    
     /// <inheritdoc />
     public async Task<(bool success, string? error)> CreateBalanceAsync(int userId, int currencyId, decimal amount)
     {
