@@ -9,7 +9,8 @@ namespace NekitCoinsManager.ViewModels;
 
 public partial class UserRegistrationViewModel : ViewModelBase
 {
-    private readonly IUserServiceClient _userServiceClient;
+    
+    private readonly IUserAuthServiceClient _userAuthServiceClient;
     private readonly INotificationService _notificationService;
     private readonly IAuthService _authService;
     private readonly INavigationService _navigationService;
@@ -27,12 +28,12 @@ public partial class UserRegistrationViewModel : ViewModelBase
     private string _errorMessage = string.Empty;
 
     public UserRegistrationViewModel(
-        IUserServiceClient userServiceClient, 
+        IUserAuthServiceClient userAuthServiceClient,
         INotificationService notificationService,
         IAuthService authService,
         INavigationService navigationService)
     {
-        _userServiceClient = userServiceClient;
+        _userAuthServiceClient = userAuthServiceClient;
         _notificationService = notificationService;
         _authService = authService;
         _navigationService = navigationService;
@@ -41,7 +42,8 @@ public partial class UserRegistrationViewModel : ViewModelBase
     [RelayCommand]
     private async Task Register()
     {
-        var result = await _userServiceClient.AddUserAsync(Username, Password, ConfirmPassword);
+        // Используем новый сервис аутентификации для регистрации
+        var result = await _userAuthServiceClient.RegisterUserAsync(Username, Password, ConfirmPassword);
         
         if (!result.success)
         {

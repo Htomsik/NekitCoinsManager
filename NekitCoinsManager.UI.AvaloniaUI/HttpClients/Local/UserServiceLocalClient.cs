@@ -48,28 +48,8 @@ public class UserServiceLocalClient : IUserServiceClient
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword)
-    {
-        return await _userService.AddUserAsync(username, password, confirmPassword);
-    }
-
-    /// <inheritdoc />
     public async Task<(bool success, string? error)> DeleteUserAsync(int userId)
     {
         return await _userService.DeleteUserAsync(userId);
-    }
-
-    /// <inheritdoc />
-    public async Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password)
-    {
-        return await _userService.VerifyPasswordAsync(username, password);
-    }
-
-    /// <inheritdoc />
-    public async Task<(bool success, string? error, UserDto? user)> AuthenticateUserAsync(string username, string password)
-    {
-        var result = await _userService.AuthenticateUserAsync(username, password);
-        var userDto = result.user != null ? _mapper.Map<UserDto>(result.user) : null;
-        return (result.success, result.error, userDto);
     }
 } 

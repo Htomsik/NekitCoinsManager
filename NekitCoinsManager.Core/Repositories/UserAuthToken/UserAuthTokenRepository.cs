@@ -49,6 +49,24 @@ public class UserAuthTokenRepository : BaseRepository<UserAuthToken>, IUserAuthT
         await DbContext.SaveChangesAsync();
     }
 
+    public async Task DeactivateAllUserTokensAsync(int userId, string hardwareId)
+    {
+        // Получаем все активные токены пользователя
+        var tokens = await DbSet
+            .Where(t => t.UserId == userId && t.HardwareId == hardwareId && t.IsActive)
+            .ToListAsync();
+        
+        // Деактивируем все токены
+        foreach (var token in tokens)
+        {
+            token.IsActive = false;
+            token.ExpiresAt = DateTime.UtcNow; // Устанавливаем время истечения на текущее время
+        }
+        
+        // Сохраняем изменения
+        await DbContext.SaveChangesAsync();
+    }
+
     public async Task<bool> HasActiveTokensAsync(int userId)
     {
         return await DbSet

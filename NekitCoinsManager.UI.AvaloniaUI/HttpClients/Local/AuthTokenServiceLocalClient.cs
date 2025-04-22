@@ -58,12 +58,4 @@ public class AuthTokenServiceLocalClient : IAuthTokenServiceClient
         var tokens = await _authTokenService.GetUserTokensAsync(userId);
         return _mapper.Map<IEnumerable<UserAuthTokenDto>>(tokens);
     }
-    
-    /// <inheritdoc />
-    public async Task<(bool success, string? error, UserDto? user)> RestoreSessionAsync(string token, string hardwareId)
-    {
-        var result = await _authTokenService.RestoreSessionAsync(token, hardwareId);
-        var userDto = result.user != null ? _mapper.Map<UserDto>(result.user) : null;
-        return (result.success, result.error, userDto);
-    }
 } 

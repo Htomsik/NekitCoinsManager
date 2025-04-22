@@ -1,25 +1,24 @@
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Repositories;
 
 namespace NekitCoinsManager.Core.Services;
 
+/// <summary>
+/// Реализация сервиса для управления токенами аутентификации
+/// </summary>
 public class AuthTokenService : IAuthTokenService
 {
     private readonly IUserAuthTokenRepository _tokenRepository;
-    private readonly IUserService _userService;
     private const int TokenLength = 64;
     private const int TokenExpirationDays = 30;
 
-    public AuthTokenService(IUserAuthTokenRepository tokenRepository, IUserService userService)
+    public AuthTokenService(IUserAuthTokenRepository tokenRepository)
     {
         _tokenRepository = tokenRepository;
-        _userService = userService;
     }
 
+    /// <inheritdoc />
     public async Task<UserAuthToken> CreateTokenAsync(int userId, string hardwareId)
     {
         // Деактивируем все предыдущие токены пользователя
@@ -61,6 +60,7 @@ public class AuthTokenService : IAuthTokenService
         return token;
     }
 
+    /// <inheritdoc />
     public async Task<UserAuthToken?> ValidateTokenAsync(string token, string hardwareId)
     {
         // Используем новый метод валидации из репозитория
@@ -84,6 +84,7 @@ public class AuthTokenService : IAuthTokenService
         return await _tokenRepository.GetByTokenAsync(token);
     }
 
+    /// <inheritdoc />
     public async Task DeactivateTokenAsync(int tokenId)
     {
         var token = await _tokenRepository.GetByIdAsync(tokenId);
@@ -102,38 +103,22 @@ public class AuthTokenService : IAuthTokenService
         }
     }
 
+    /// <inheritdoc />
     public async Task DeactivateAllUserTokensAsync(int userId)
     {
         await _tokenRepository.DeactivateAllUserTokensAsync(userId);
     }
+    
+    /// <inheritdoc />
+    public async Task DeactivateAllUserTokensAsync(int userId, string hardwareId)
+    {
+        await _tokenRepository.DeactivateAllUserTokensAsync(userId, hardwareId);
+    }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId)
     {
         return await _tokenRepository.GetUserTokensAsync(userId);
-    }
-
-    public async Task<(bool success, string? error, User? user)> RestoreSessionAsync(string token, string hardwareId)
-    {
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            return (false, "Токен не может быть пустым", null);
-        }
-
-        // Проверяем валидность токена
-        var authToken = await ValidateTokenAsync(token, hardwareId);
-        if (authToken == null)
-        {
-            return (false, "Недействительный токен", null);
-        }
-
-        // Получаем пользователя по id
-        var user = await _userService.GetUserByIdAsync(authToken.UserId);
-        if (user == null)
-        {
-            return (false, "Пользователь не найден", null);
-        }
-
-        return (true, null, user);
     }
 
     private string GenerateSecureToken()

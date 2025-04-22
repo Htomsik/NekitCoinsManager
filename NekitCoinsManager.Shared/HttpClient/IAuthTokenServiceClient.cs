@@ -41,12 +41,4 @@ public interface IAuthTokenServiceClient
     /// <param name="userId">ID пользователя</param>
     /// <returns>Список токенов</returns>
     Task<IEnumerable<UserAuthTokenDto>> GetUserTokensAsync(int userId);
-    
-    /// <summary>
-    /// Восстанавливает сессию пользователя по токену
-    /// </summary>
-    /// <param name="token">Значение токена</param>
-    /// <param name="hardwareId">ID оборудования</param>
-    /// <returns>Результат операции и данные пользователя при успехе</returns>
-    Task<(bool success, string? error, UserDto? user)> RestoreSessionAsync(string token, string hardwareId);
 } 

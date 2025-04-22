@@ -5,9 +5,15 @@ namespace NekitCoinsManager.Core.Repositories;
 public interface IUserAuthTokenRepository : IRepository<UserAuthToken>
 {
     Task<UserAuthToken?> GetByTokenAsync(string token);
+    
     Task<IEnumerable<UserAuthToken>> GetUserTokensAsync(int userId);
+    
     Task<bool> IsTokenValidAsync(string token, string hardwareId);
+    
     Task DeactivateAllUserTokensAsync(int userId);
+    
+    Task DeactivateAllUserTokensAsync(int userId, string hardwareId);
+    
     Task<bool> HasActiveTokensAsync(int userId);
     
     // Специальный метод валидации токена

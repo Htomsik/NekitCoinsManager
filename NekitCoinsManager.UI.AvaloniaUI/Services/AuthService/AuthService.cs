@@ -1,6 +1,4 @@
-using System;
 using System.Threading.Tasks;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Shared.HttpClient;
 
@@ -8,24 +6,21 @@ namespace NekitCoinsManager.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IUserServiceClient _userServiceClient;
+    private readonly IUserAuthServiceClient _userAuthServiceClient;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IAuthTokenServiceClient _authTokenServiceClient;
     private readonly IHardwareInfoService _hardwareInfoService;
     private readonly IUserSettingsService _userSettingsService;
     private readonly IAppSettingsService _appSettingsService;
 
     public AuthService(
-        IUserServiceClient userServiceClient,
-        IAuthTokenServiceClient authTokenServiceClient,
+        IUserAuthServiceClient userAuthServiceClient,
         ICurrentUserService currentUserService,
         IHardwareInfoService hardwareInfoService,
         IUserSettingsService userSettingsService,
         IAppSettingsService appSettingsService)
     {
-        _userServiceClient = userServiceClient;
+        _userAuthServiceClient = userAuthServiceClient;
         _currentUserService = currentUserService;
-        _authTokenServiceClient = authTokenServiceClient;
         _hardwareInfoService = hardwareInfoService;
         _userSettingsService = userSettingsService;
         _appSettingsService = appSettingsService;
@@ -43,21 +38,24 @@ public class AuthService : IAuthService
             return (false, "Введите пароль");
         }
 
-        // Аутентифицируем пользователя по логшну + паролю
-        var authResult = await _userServiceClient.AuthenticateUserAsync(username, password);
+        // Получаем ID железа
+        var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
+
+        // Аутентифицируем пользователя и получаем токен в одном запросе
+        var authResult = await _userAuthServiceClient.AuthenticateUserAsync(username, password, hardwareId);
         if (!authResult.success || authResult.user == null)
         {
             return (false, authResult.error ?? "Ошибка аутентификации");
         }
 
-        // Получаем ID железа
-        var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
-
-        // Создаем токен авторизации
-        var tokenDto = await _authTokenServiceClient.CreateTokenAsync(authResult.user.Id, hardwareId);
+        // Проверяем, что токен был успешно создан
+        if (authResult.token == null)
+        {
+            return (false, "Не удалось создать токен авторизации");
+        }
 
         // Сохраняем токен в настройках пользователя
-        var settings = new UserSettings { AuthToken = tokenDto.Token };
+        var settings = new UserSettings { AuthToken = authResult.token.Token };
         await _userSettingsService.SaveSettingsAsync(authResult.user.Id, settings);
 
         // Сохраняем ID пользователя в настройках приложения
@@ -65,10 +63,10 @@ public class AuthService : IAuthService
         await _appSettingsService.SaveSettings();
 
         _currentUserService.SetCurrentUser(authResult.user);
-        return (true, tokenDto.Token);
+        return (true, authResult.token.Token);
     }
 
-    public async Task<(bool success, string? error)> RestoreSessionAsync(string token)
+    private async Task<(bool success, string? error)> RestoreSessionAsync(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
         {
@@ -76,7 +74,9 @@ public class AuthService : IAuthService
         }
 
         var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
-        var sessionResult = await _authTokenServiceClient.RestoreSessionAsync(token, hardwareId);
+        
+        // Используем IUserAuthServiceClient для восстановления сессии
+        var sessionResult = await _userAuthServiceClient.RestoreSessionAsync(token, hardwareId);
 
         if (!sessionResult.success || sessionResult.user == null)
         {
@@ -93,14 +93,16 @@ public class AuthService : IAuthService
 
     public async Task<(bool success, string? error)> LogoutAsync()
     {
-        var currentUser = _currentUserService.CurrentUser;
-        if (currentUser != null)
-        {
-            await _authTokenServiceClient.DeactivateAllUserTokensAsync(currentUser.Id);
-        }
-
+        // Независимые от пользователя операции
         // Очищаем ID пользователя в настройках приложения
         _appSettingsService.Settings.LoggedInUserId = 0;
+        
+        // зависимые от пользователя операции
+        var currentUser = _currentUserService.CurrentUser;
+        if (currentUser == null)
+        {
+            return (false, "Пользователь не авторизован");
+        }
         await _appSettingsService.SaveSettings();
 
         _currentUserService.SetCurrentUser(null);
@@ -137,7 +139,7 @@ public class AuthService : IAuthService
         {
             _appSettingsService.Settings.LoggedInUserId = 0;
             await _appSettingsService.SaveSettings();
-            return result; // Возвращаем сообщение об ошибке из RestoreSessionAsync
+            return result; // Возвращаем сообщение об ошибки из RestoreSessionAsync
         }
         
         return (true, null);

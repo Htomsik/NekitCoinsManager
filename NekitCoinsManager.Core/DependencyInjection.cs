@@ -45,6 +45,7 @@ public static class DependencyInjection
         
         // Сервисы с зависимостями от других сервисов регистрируем в последнюю очередь
         services.AddScoped<IAuthTokenService, AuthTokenService>();
+        services.AddScoped<IUserAuthService, UserAuthService>();
 
         return services;
     }

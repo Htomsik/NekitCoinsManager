@@ -28,6 +28,7 @@ public static class DependencyInjection
         // Регистрируем API сервисы
         services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
         services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
+        services.AddScoped<IUserAuthServiceClient, UserAuthServiceLocalClient>();
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
         services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
         services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();

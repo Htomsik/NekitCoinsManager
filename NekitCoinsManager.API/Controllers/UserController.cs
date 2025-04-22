@@ -63,25 +63,7 @@ public class UserController : BaseApiController
         return Ok(Mapper.Map<UserDto>(user));
     }
 
-    /// <summary>
-    /// Регистрирует нового пользователя
-    /// </summary>
-    /// <param name="request">Данные для регистрации</param>
-    /// <returns>Результат операции</returns>
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] UserRegistrationDto request)
-    {
-        var (success, error) = await _userService.AddUserAsync(
-            request.Username, 
-            request.Password, 
-            request.ConfirmPassword);
-
-        if (!success)
-            return BadRequest(new { error });
-
-        return Ok(new { message = "Пользователь успешно зарегистрирован" });
-    }
-
+    
     /// <summary>
     /// Удаляет пользователя
     /// </summary>
@@ -95,38 +77,5 @@ public class UserController : BaseApiController
             return BadRequest(new { error });
 
         return Ok(new { message = "Пользователь успешно удален" });
-    }
-
-    /// <summary>
-    /// Проверяет пароль пользователя
-    /// </summary>
-    /// <param name="request">Данные для проверки</param>
-    /// <returns>Результат проверки</returns>
-    [HttpPost("verifyPassword")]
-    public async Task<IActionResult> VerifyPassword([FromBody] UserLoginDto request)
-    {
-        var (success, error) = await _userService.VerifyPasswordAsync(request.Username, request.Password);
-        if (!success)
-            return BadRequest(new { error });
-
-        return Ok(new { message = "Пароль верный" });
-    }
-
-    /// <summary>
-    /// Аутентифицирует пользователя
-    /// </summary>
-    /// <param name="request">Данные для входа</param>
-    /// <returns>Данные пользователя при успешной аутентификации</returns>
-    [HttpPost("login")]
-    public async Task<ActionResult<UserDto>> Login([FromBody] UserLoginDto request)
-    {
-        var (success, error, user) = await _userService.AuthenticateUserAsync(request.Username, request.Password);
-        if (!success)
-            return BadRequest(new { error });
-
-        if (user == null)
-            return NotFound(new { error = "Пользователь не найден" });
-
-        return Ok(Mapper.Map<UserDto>(user));
     }
 } 

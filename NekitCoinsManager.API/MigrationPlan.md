@@ -41,6 +41,7 @@
 1. ✅ **TransactionController** (сложность: 4) - работа с транзакциями
 2. ✅ **CurrencyConversionController** (сложность: 3) - конвертация валют
 3. ✅ **MoneyOperationsController** (сложность: 5) - сложные финансовые операции
+4. **HTTP-клиенты для API** (сложность: 4) - создание и интеграция клиентов
 
 ## Ключевые принципы реализации
 - Контроллеры должны быть простыми и только перенаправлять вызовы на сервисы
@@ -49,6 +50,7 @@
 - Обеспечить единообразие API-ответов и обработки ошибок
 - Следовать RESTful-стилю в наименованиях эндпоинтов (camelCase)
 - Хранить все DTO модели в проекте Shared для повторного использования
+- HTTP-клиенты должны быть тонкими и четко соответствовать контроллерам API
 
 ## Детали по контроллерам
 
@@ -111,6 +113,77 @@
   - POST `/api/MoneyOperations/convert` - конвертация валют
   - POST `/api/MoneyOperations/welcomeBonus` - выдача приветственного бонуса
 
+## Детали по HTTP-клиентам для API
+
+### AuthTokenServiceClient (⬜ В планах)
+- **Методы:**
+  - `CreateTokenAsync` - создание токена
+  - `ValidateTokenAsync` - проверка токена
+  - `DeactivateTokenAsync` - деактивация токена
+  - `DeactivateAllUserTokensAsync` - деактивация всех токенов пользователя
+  - `GetUserTokensAsync` - получение токенов пользователя
+  - `RestoreSessionAsync` - восстановление сессии по токену
+
+### UserServiceClient (⬜ В планах)
+- **Методы:**
+  - `GetAllUsersAsync` - получение всех пользователей
+  - `GetUserByIdAsync` - получение пользователя по ID
+  - `GetUserByUsernameAsync` - получение пользователя по имени
+  - `RegisterUserAsync` - регистрация пользователя
+  - `DeleteUserAsync` - удаление пользователя
+  - `VerifyPasswordAsync` - проверка пароля
+  - `LoginAsync` - вход пользователя
+
+### CurrencyServiceClient (⬜ В планах)
+- **Методы:**
+  - `GetAllCurrenciesAsync` - получение всех валют
+  - `GetCurrencyByIdAsync` - получение валюты по ID
+  - `GetCurrencyByCodeAsync` - получение валюты по коду
+  - `AddCurrencyAsync` - добавление валюты
+  - `UpdateCurrencyAsync` - обновление валюты
+  - `DeleteCurrencyAsync` - удаление валюты
+  - `UpdateExchangeRateAsync` - обновление обменного курса
+
+### UserBalanceServiceClient (⬜ В планах)
+- **Методы:**
+  - `GetUserBalancesAsync` - получение всех балансов пользователя
+  - `GetUserBalanceAsync` - получение баланса по валюте
+  - `CreateBalanceAsync` - создание баланса
+  - `UpdateBalanceAsync` - обновление баланса
+  - `TransferBalanceAsync` - перевод средств между пользователями
+  - `GetOrCreateBalanceAsync` - получение баланса или создание, если не существует
+  - `ValidateUserBalanceAsync` - проверка доступности суммы
+
+### TransactionServiceClient (⬜ В планах)
+- **Методы:**
+  - `GetTransactionsAsync` - получение всех транзакций
+  - `GetTransactionByIdAsync` - получение транзакции по ID
+  - `AddTransactionAsync` - добавление транзакции
+  - `ValidateTransactionAsync` - валидация транзакции
+
+### CurrencyConversionServiceClient (⬜ В планах)
+- **Методы:**
+  - `ConvertAsync` - конвертация суммы
+  - `GetExchangeRateAsync` - получение курса обмена между валютами
+  - `GetAllExchangeRatesAsync` - получение всех курсов обмена
+
+### MoneyOperationsServiceClient (⬜ В планах)
+- **Методы:**
+  - `TransferAsync` - перевод денег
+  - `DepositAsync` - пополнение баланса
+  - `ConvertAsync` - конвертация валют
+  - `GrantWelcomeBonusAsync` - выдача приветственного бонуса
+
+## Ключевые аспекты реализации HTTP-клиентов
+- Использование `HttpClient` для взаимодействия с API
+- Обработка ошибок и исключений HTTP
+- Сериализация и десериализация DTO-объектов
+- Управление токенами аутентификации
+- Обработка повторных попыток и тайм-аутов
+- Кэширование результатов для часто используемых операций
+- Логирование запросов и ответов
+
 ## Текущий прогресс
 - Контроллеры: 7 из 7 реализованы (100%)
+- HTTP-клиенты: 0 из 7 реализованы (0%)
 - Общий прогресс миграции: примерно 50% 

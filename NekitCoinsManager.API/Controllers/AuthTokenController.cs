@@ -85,24 +85,4 @@ public class AuthTokenController : BaseApiController
         var tokens = await _authTokenService.GetUserTokensAsync(userId);
         return Ok(Mapper.Map<List<UserAuthTokenDto>>(tokens));
     }
-
-    /// <summary>
-    /// Восстанавливает сессию пользователя по токену
-    /// </summary>
-    /// <param name="request">Данные для восстановления сессии</param>
-    /// <returns>Результат операции и данные пользователя при успехе</returns>
-    [HttpPost("restoreSession")]
-    public async Task<ActionResult<UserDto>> RestoreSession([FromBody] UserAuthTokenValidateDto request)
-    {
-        // Делегируем логику проверки токена и получения пользователя сервису AuthTokenService
-        var (success, error, user) = await _authTokenService.RestoreSessionAsync(request.Token, request.HardwareId);
-        
-        if (!success)
-            return BadRequest(new { error });
-            
-        if (user == null)
-            return NotFound(new { error = "Пользователь не найден" });
-            
-        return Ok(Mapper.Map<UserDto>(user));
-    }
 } 
