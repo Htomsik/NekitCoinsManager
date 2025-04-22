@@ -5,6 +5,7 @@ using NekitCoinsManager.HttpClients;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.HttpClient;
 using NekitCoinsManager.ViewModels;
+using System;
 
 namespace NekitCoinsManager;
 
@@ -24,6 +25,12 @@ public static class DependencyInjection
         services.AddTransient<IHardwareInfoService, HardwareInfoService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<INavigationService, NavigationService>();
+        
+        // Регистрируем HttpClient для API
+        services.AddHttpClient("NekitCoinsManagerAPI", client =>
+        {
+            client.BaseAddress = new Uri("http://localhost:5000/");
+        });
         
         // Регистрируем API сервисы
         services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
