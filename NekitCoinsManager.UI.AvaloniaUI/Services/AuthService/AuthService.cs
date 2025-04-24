@@ -54,8 +54,8 @@ public class AuthService : IAuthService
             return (false, "Не удалось создать токен авторизации");
         }
 
-        // Сохраняем токен в настройках пользователя
-        var settings = new UserSettings { AuthToken = authResult.token.Token };
+        // Сохраняем токен и id машины в настройках пользователя
+        var settings = new UserSettings { AuthToken = authResult.token.Token, HardwareId = hardwareId };
         await _userSettingsService.SaveSettingsAsync(authResult.user.Id, settings);
 
         // Сохраняем ID пользователя в настройках приложения

@@ -27,10 +27,7 @@ public static class DependencyInjection
         services.AddSingleton<INavigationService, NavigationService>();
         
         // Регистрируем HttpClient для API
-        services.AddHttpClient("NekitCoinsManagerAPI", client =>
-        {
-            client.BaseAddress = new Uri("http://localhost:5000/");
-        });
+        services.AddApiHttpClients("http://localhost:5122/");
         
         // Регистрируем API сервисы
         services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
