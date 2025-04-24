@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.Services;
@@ -41,8 +42,15 @@ public class AuthService : IAuthService
         // Получаем ID железа
         var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
 
+        var loginDto = new UserAuthLoginDto
+        {
+            Username = username,
+            Password = password,
+            HardwareId = hardwareId
+        };
+
         // Аутентифицируем пользователя и получаем токен в одном запросе
-        var authResult = await _userAuthServiceClient.AuthenticateUserAsync(username, password, hardwareId);
+        var authResult = await _userAuthServiceClient.AuthenticateUserAsync(loginDto);
         if (!authResult.success || authResult.user == null)
         {
             return (false, authResult.error ?? "Ошибка аутентификации");
@@ -75,8 +83,14 @@ public class AuthService : IAuthService
 
         var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
         
+        var validateDto = new UserAuthTokenValidateDto
+        {
+            Token = token,
+            HardwareId = hardwareId
+        };
+        
         // Используем IUserAuthServiceClient для восстановления сессии
-        var sessionResult = await _userAuthServiceClient.RestoreSessionAsync(token, hardwareId);
+        var sessionResult = await _userAuthServiceClient.RestoreSessionAsync(validateDto);
 
         if (!sessionResult.success || sessionResult.user == null)
         {
@@ -93,16 +107,29 @@ public class AuthService : IAuthService
 
     public async Task<(bool success, string? error)> LogoutAsync()
     {
-        // Независимые от пользователя операции
-        // Очищаем ID пользователя в настройках приложения
-        _appSettingsService.Settings.LoggedInUserId = 0;
-        
-        // зависимые от пользователя операции
         var currentUser = _currentUserService.CurrentUser;
         if (currentUser == null)
         {
             return (false, "Пользователь не авторизован");
         }
+
+        var hardwareId = await _hardwareInfoService.GetHardwareIdAsync();
+        
+        var logoutDto = new UserAuthLogoutDto
+        {
+            UserId = currentUser.Id,
+            HardwareId = hardwareId
+        };
+        
+        // Выполняем выход через клиент
+        var logoutResult = await _userAuthServiceClient.LogoutAsync(logoutDto);
+        if (!logoutResult.success)
+        {
+            return logoutResult;
+        }
+
+        // Очищаем ID пользователя в настройках приложения
+        _appSettingsService.Settings.LoggedInUserId = 0;
         await _appSettingsService.SaveSettings();
 
         _currentUserService.SetCurrentUser(null);
@@ -144,4 +171,4 @@ public class AuthService : IAuthService
         
         return (true, null);
     }
-} 
+}

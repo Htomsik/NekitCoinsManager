@@ -26,15 +26,15 @@ public class UserAuthServiceLocalClient : IUserAuthServiceClient
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password)
+    public async Task<(bool success, string? error)> VerifyPasswordAsync(UserAuthLoginDto request)
     {
-        return await _userAuthService.VerifyPasswordAsync(username, password);
+        return await _userAuthService.VerifyPasswordAsync(request.Username, request.Password);
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string? error, UserDto? user, UserAuthTokenDto? token)> AuthenticateUserAsync(string username, string password, string hardwareId)
+    public async Task<(bool success, string? error, UserDto? user, UserAuthTokenDto? token)> AuthenticateUserAsync(UserAuthLoginDto request)
     {
-        var result = await _userAuthService.AuthenticateUserAsync(username, password, hardwareId);
+        var result = await _userAuthService.AuthenticateUserAsync(request.Username, request.Password, request.HardwareId);
         
         var userDto = result.user != null ? _mapper.Map<UserDto>(result.user) : null;
         var tokenDto = result.token != null ? _mapper.Map<UserAuthTokenDto>(result.token) : null;
@@ -43,18 +43,24 @@ public class UserAuthServiceLocalClient : IUserAuthServiceClient
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string? error)> RegisterUserAsync(string username, string password, string confirmPassword)
+    public async Task<(bool success, string? error)> RegisterUserAsync(UserAuthRegistrationDto request)
     {
-        return await _userAuthService.RegisterUserAsync(username, password, confirmPassword);
+        return await _userAuthService.RegisterUserAsync(request.Username, request.Password, request.ConfirmPassword);
     }
     
     /// <inheritdoc />
-    public async Task<(bool success, string? error, UserDto? user)> RestoreSessionAsync(string token, string hardwareId)
+    public async Task<(bool success, string? error, UserDto? user)> RestoreSessionAsync(UserAuthTokenValidateDto request)
     {
-        var result = await _userAuthService.RestoreSessionAsync(token, hardwareId);
+        var result = await _userAuthService.RestoreSessionAsync(request.Token, request.HardwareId);
         
         var userDto = result.user != null ? _mapper.Map<UserDto>(result.user) : null;
         
         return (result.success, result.error, userDto);
     }
-} 
+
+    /// <inheritdoc />
+    public async Task<(bool success, string? error)> LogoutAsync(UserAuthLogoutDto request)
+    {
+        return await _userAuthService.LogoutAsync(request.UserId, request.HardwareId);
+    }
+}

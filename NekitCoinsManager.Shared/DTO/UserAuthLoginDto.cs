@@ -5,7 +5,7 @@ namespace NekitCoinsManager.Shared.DTO;
 /// <summary>
 /// DTO для аутентификации пользователя (вход в систему)
 /// </summary>
-public class UserLoginDto
+public class UserAuthLoginDto
 {
     /// <summary>
     /// Имя пользователя
@@ -20,17 +20,10 @@ public class UserLoginDto
     [Required]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "Пароль должен содержать не менее 6 символов")]
     public string Password { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// DTO для регистрации нового пользователя (наследуется от DTO входа)
-/// </summary>
-public class UserRegistrationDto : UserLoginDto
-{
+    
     /// <summary>
-    /// Подтверждение пароля
+    /// Идентификатор устройства для генерации токена
     /// </summary>
     [Required]
-    [Compare("Password", ErrorMessage = "Пароли не совпадают")]
-    public string ConfirmPassword { get; set; } = string.Empty;
-} 
+    public string HardwareId { get; set; } = string.Empty;
+}

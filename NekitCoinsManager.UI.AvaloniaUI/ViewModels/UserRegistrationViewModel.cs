@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
@@ -42,8 +43,15 @@ public partial class UserRegistrationViewModel : ViewModelBase
     [RelayCommand]
     private async Task Register()
     {
+        var registrationDto = new UserAuthRegistrationDto
+        {
+            Username = Username,
+            Password = Password,
+            ConfirmPassword = ConfirmPassword
+        };
+
         // Используем новый сервис аутентификации для регистрации
-        var result = await _userAuthServiceClient.RegisterUserAsync(Username, Password, ConfirmPassword);
+        var result = await _userAuthServiceClient.RegisterUserAsync(registrationDto);
         
         if (!result.success)
         {
@@ -71,4 +79,4 @@ public partial class UserRegistrationViewModel : ViewModelBase
             ConfirmPassword = string.Empty;
         }
     }
-} 
+}
