@@ -1,7 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:models="clr-namespace:NekitCoinsManager.Core.Models;assembly=NekitCoinsManager.Core"
-                    xmlns:mtype="using:NekitCoinsManager.Core.Models"
+                    xmlns:shared="using:NekitCoinsManager.Shared.DTO"
                     xmlns:localModels="using:NekitCoinsManager.Models">
     
     <!-- Единый шаблон для отображения транзакции -->
@@ -15,19 +14,19 @@
                         <!-- Иконки типов транзакций -->
                         <Grid>
                             <PathIcon Classes="transaction-type-icon"
-                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Transfer}}"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static shared:TransactionTypeDto.Transfer}}"
                                  Data="{StaticResource TransferIcon}"/>
                             
                             <PathIcon Classes="transaction-type-icon"
-                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static shared:TransactionTypeDto.Deposit}}"
                                  Data="{StaticResource DepositIcon}"/>
                                  
                             <PathIcon Classes="transaction-type-icon"
-                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Conversion}}"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static shared:TransactionTypeDto.Conversion}}"
                                  Data="{StaticResource CurrencyConversionRegular}"/>
                                  
                             <PathIcon Classes="transaction-type-icon"
-                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Fee}}"
+                                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static shared:TransactionTypeDto.Fee}}"
                                  Data="{StaticResource FeeIcon}"/>
                         </Grid>
                         
@@ -55,7 +54,7 @@
                     <Grid HorizontalAlignment="Stretch">
                         <!-- Перевод или Комиссия или Конвертация: показываем "Отправитель → Получатель" -->
                         <Grid ColumnDefinitions="Auto,Auto,*" 
-                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}"
+                              IsVisible="{Binding Type, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static shared:TransactionTypeDto.Deposit}}"
                               HorizontalAlignment="Stretch">
                             <TextBlock Grid.Column="0" Text="{Binding FromUser.Username}" Classes="transaction-users"/>
                             <TextBlock Grid.Column="1" Text=" → " Margin="3,0"/>
@@ -63,7 +62,7 @@
                         </Grid>
                         
                         <!-- Депозит: показываем только получателя -->
-                        <Grid IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static mtype:TransactionType.Deposit}}">
+                        <Grid IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static shared:TransactionTypeDto.Deposit}}">
                             <TextBlock Text="{Binding ToUser.Username}" Classes="transaction-users"/>
                         </Grid>
                     </Grid>

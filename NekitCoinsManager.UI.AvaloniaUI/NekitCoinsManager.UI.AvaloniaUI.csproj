@@ -70,7 +70,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NekitCoinsManager.Core\NekitCoinsManager.Core.csproj" />
       <ProjectReference Include="..\NekitCoinsManager.Shared\NekitCoinsManager.Shared.csproj" />
     </ItemGroup>
 </Project>

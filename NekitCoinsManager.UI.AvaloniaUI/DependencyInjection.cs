@@ -1,6 +1,5 @@
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
-using NekitCoinsManager.Core;
 using NekitCoinsManager.HttpClients;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.HttpClient;
@@ -12,9 +11,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // Добавляем сервисы ядра (В будующем уедут на API)
-        services.AddCoreServices();
-        
         // Регистрируем сервисы
         services.AddTransient<IMapper, Mapper>();
         services.AddSingleton<INotificationService, NotificationService>();
