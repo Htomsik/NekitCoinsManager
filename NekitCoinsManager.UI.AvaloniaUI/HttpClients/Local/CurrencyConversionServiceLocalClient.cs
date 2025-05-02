@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MapsterMapper;
 using NekitCoinsManager.Core.Services;
+using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
@@ -27,15 +28,20 @@ public class CurrencyConversionServiceLocalClient : ICurrencyConversionServiceCl
     }
 
     /// <inheritdoc />
-    public async Task<decimal> ConvertAsync(decimal amount, string fromCurrencyCode, string toCurrencyCode)
+    public async Task<decimal> ConvertCurrencyAsync(CurrencyConversionDto conversionDto)
     {
-        return await _currencyConversionService.ConvertAsync(amount, fromCurrencyCode, toCurrencyCode);
+        return await _currencyConversionService.ConvertAsync(
+            conversionDto.Amount, 
+            conversionDto.FromCurrencyCode, 
+            conversionDto.ToCurrencyCode);
     }
 
     /// <inheritdoc />
-    public async Task<decimal> GetExchangeRateAsync(string fromCurrencyCode, string toCurrencyCode)
+    public async Task<decimal> GetExchangeRateAsync(CurrencyExchangeRateOperationDto queryDto)
     {
-        return await _currencyConversionService.GetExchangeRateAsync(fromCurrencyCode, toCurrencyCode);
+        return await _currencyConversionService.GetExchangeRateAsync(
+            queryDto.FromCurrencyCode, 
+            queryDto.ToCurrencyCode);
     }
 
     /// <inheritdoc />

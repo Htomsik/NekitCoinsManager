@@ -29,18 +29,19 @@ public class CurrencyConversionController : BaseApiController
     /// <param name="conversionDto">Данные для конвертации</param>
     /// <returns>Сконвертированная сумма</returns>
     [HttpPost("convert")]
-    public async Task<IActionResult> ConvertCurrency([FromBody] ConversionDto conversionDto)
+    public async Task<IActionResult> ConvertCurrency([FromBody] CurrencyConversionDto conversionDto)
     {
         var convertedAmount = await _currencyConversionService.ConvertAsync(
             conversionDto.Amount, 
-            conversionDto.CurrencyId.ToString(), 
-            conversionDto.TargetCurrencyId.ToString());
+            conversionDto.FromCurrencyCode, 
+            conversionDto.ToCurrencyCode);
             
-        return Ok(new { 
-            amount = convertedAmount,
-            fromCurrencyId = conversionDto.CurrencyId,
-            toCurrencyId = conversionDto.TargetCurrencyId
-        });
+        var result = new CurrencyConversionResultDto 
+        { 
+            Amount = convertedAmount
+        };
+        
+        return Ok(result);
     }
     
     /// <summary>
@@ -55,7 +56,9 @@ public class CurrencyConversionController : BaseApiController
             queryDto.FromCurrencyCode, 
             queryDto.ToCurrencyCode);
             
-        return Ok(new { rate });
+        var result = new CurrencyExchangeRateResultDto { Rate = rate };
+        
+        return Ok(result);
     }
     
     /// <summary>
@@ -66,6 +69,7 @@ public class CurrencyConversionController : BaseApiController
     public async Task<IActionResult> GetAllExchangeRates()
     {
         var rates = await _currencyConversionService.GetAllExchangeRatesAsync();
-        return Ok(rates);
+        var result = new CurrencyExchangeRatesDto { Rates = rates };
+        return Ok(result);
     }
 } 

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using NekitCoinsManager.Models;
 using NekitCoinsManager.Services;
+using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.DTO.Operations;
 using NekitCoinsManager.Shared.HttpClient;
 
@@ -134,11 +135,16 @@ public partial class TransactionConversionViewModel : ViewModelBase
         
         try
         {
-            // Получаем предварительный расчет
-            decimal convertedAmount = await _currencyConversionServiceClient.ConvertAsync(
-                DisplayModel.Amount, 
-                DisplayModel.FromCurrency.Code, 
-                DisplayModel.ToCurrency.Code);
+            // Создаем объект DTO для конвертации
+            var conversionDto = new CurrencyConversionDto()
+            {
+                FromCurrencyCode = DisplayModel.FromCurrency.Code,
+                ToCurrencyCode = DisplayModel.ToCurrency.Code,
+                Amount = DisplayModel.Amount
+            };
+            
+            // Получаем предварительный расчет используя новый метод
+            decimal convertedAmount = await _currencyConversionServiceClient.ConvertCurrencyAsync(conversionDto);
                 
             ConvertedAmount = convertedAmount;
         }
