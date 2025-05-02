@@ -29,13 +29,13 @@ public static class DependencyInjection
         // Регистрируем HttpClient для API
         services.AddApiHttpClients("http://localhost:5122/");
         
-        // Регистрируем API сервисы
-        services.AddScoped<IAuthTokenServiceClient, AuthTokenServiceLocalClient>();
-        services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
-        
-        // Регистрируем API-клиент аутентификации с использованием именованного HttpClient
+        // Регистрируем API клиенты
+        services.AddHttpClient<IAuthTokenServiceClient, AuthTokenServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserAuthServiceClient, UserAuthServiceApiClient>("ApiClient");
+        
+        // Регистрируем временные локальные клиенты
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
+        services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
         services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
         services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();
         services.AddScoped<IMoneyOperationsServiceClient, MoneyOperationsServiceLocalClient>();
