@@ -107,5 +107,29 @@ namespace NekitCoinsManager.Shared.HttpClient
             /// <param name="id">Идентификатор пользователя</param>
             public static string Delete(int id) => $"{Base}/{id}";
         }
+        
+        /// <summary>
+        /// Базовый путь к API балансов пользователей
+        /// </summary>
+        public static class UserBalance
+        {
+            /// <summary>
+            /// Базовый путь к API балансов
+            /// </summary>
+            public const string Base = "api/UserBalance";
+            
+            /// <summary>
+            /// Эндпоинт для получения всех балансов пользователя
+            /// </summary>
+            /// <param name="userId">Идентификатор пользователя</param>
+            public static string GetUserBalances(int userId) => $"{Base}/user/{userId}";
+            
+            /// <summary>
+            /// Эндпоинт для получения конкретного баланса пользователя
+            /// </summary>
+            /// <param name="userId">Идентификатор пользователя</param>
+            /// <param name="currencyId">Идентификатор валюты</param>
+            public static string GetUserBalance(int userId, int currencyId) => $"{Base}/user/{userId}/currency/{currencyId}";
+        }
     }
 }
