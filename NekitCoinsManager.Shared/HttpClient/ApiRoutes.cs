@@ -131,5 +131,31 @@ namespace NekitCoinsManager.Shared.HttpClient
             /// <param name="currencyId">Идентификатор валюты</param>
             public static string GetUserBalance(int userId, int currencyId) => $"{Base}/user/{userId}/currency/{currencyId}";
         }
+        
+        /// <summary>
+        /// Базовый путь к API денежных операций
+        /// </summary>
+        public static class MoneyOperations
+        {
+            /// <summary>
+            /// Базовый путь к API денежных операций
+            /// </summary>
+            public const string Base = "api/MoneyOperations";
+            
+            /// <summary>
+            /// Эндпоинт для перевода средств между пользователями
+            /// </summary>
+            public const string Transfer = Base + "/transfer";
+            
+            /// <summary>
+            /// Эндпоинт для пополнения баланса пользователя
+            /// </summary>
+            public const string Deposit = Base + "/deposit";
+            
+            /// <summary>
+            /// Эндпоинт для конвертации валюты пользователя
+            /// </summary>
+            public const string Convert = Base + "/convert";
+        }
     }
 }

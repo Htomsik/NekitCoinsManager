@@ -1,5 +1,6 @@
 using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
+using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Shared.DTO.Operations;
 
@@ -10,25 +11,22 @@ namespace NekitCoinsManager.API.Controllers;
 /// </summary>
 public class MoneyOperationsController : BaseApiController
 {
-    private readonly IMoneyOperationService<Core.Models.TransferOperation> _transferService;
-    private readonly IMoneyOperationService<Core.Models.DepositOperation> _depositService;
-    private readonly IMoneyOperationService<Core.Models.ConversionOperation> _conversionService;
-    private readonly IMoneyOperationService<Core.Models.WelcomeBonusOperation> _welcomeBonusService;
-
+    private readonly IMoneyOperationService<TransferOperation> _transferService;
+    private readonly IMoneyOperationService<DepositOperation> _depositService;
+    private readonly IMoneyOperationService<ConversionOperation> _conversionService;
+    
     /// <summary>
     /// Конструктор контроллера
     /// </summary>
     public MoneyOperationsController(
-        IMoneyOperationService<Core.Models.TransferOperation> transferService,
-        IMoneyOperationService<Core.Models.DepositOperation> depositService,
-        IMoneyOperationService<Core.Models.ConversionOperation> conversionService,
-        IMoneyOperationService<Core.Models.WelcomeBonusOperation> welcomeBonusService,
+        IMoneyOperationService<TransferOperation> transferService,
+        IMoneyOperationService<DepositOperation> depositService,
+        IMoneyOperationService<ConversionOperation> conversionService,
         IMapper mapper) : base(mapper)
     {
         _transferService = transferService;
         _depositService = depositService;
         _conversionService = conversionService;
-        _welcomeBonusService = welcomeBonusService;
     }
 
     /// <summary>
@@ -75,23 +73,6 @@ public class MoneyOperationsController : BaseApiController
     {
         var operation = Mapper.Map<Core.Models.ConversionOperation>(conversionDto);
         var result = await _conversionService.ExecuteAsync(operation);
-        
-        if (!result.Success)
-            return BadRequest(new { error = result.Error });
-            
-        return Ok(Mapper.Map<MoneyOperationResultDto>(result));
-    }
-    
-    /// <summary>
-    /// Выдает приветственный бонус новому пользователю
-    /// </summary>
-    /// <param name="welcomeBonusDto">Данные пользователя</param>
-    /// <returns>Результат операции</returns>
-    [HttpPost("welcomeBonus")]
-    public async Task<IActionResult> GrantWelcomeBonus([FromBody] WelcomeBonusDto welcomeBonusDto)
-    {
-        var operation = Mapper.Map<Core.Models.WelcomeBonusOperation>(welcomeBonusDto);
-        var result = await _welcomeBonusService.ExecuteAsync(operation);
         
         if (!result.Success)
             return BadRequest(new { error = result.Error });

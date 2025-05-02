@@ -7,18 +7,18 @@ namespace NekitCoinsManager.Core.Services;
 /// </summary>
 public class MoneyOperationsManager : IMoneyOperationsManager
 {
-    private readonly MoneyTransferOperationService _transferOperationServiceService;
-    private readonly MoneyDepositOperationService _depositOperationService;
-    private readonly MoneyConversionOperationService _conversionOperationService;
+    private readonly IMoneyOperationService<TransferOperation> _transferOperationService;
+    private readonly IMoneyOperationService<DepositOperation> _depositOperationService;
+    private readonly IMoneyOperationService<ConversionOperation> _conversionOperationService;
     private readonly MoneyWelcomeBonusOperationService _welcomeBonusOperationService;
 
     public MoneyOperationsManager(
-        MoneyTransferOperationService transferOperationServiceService,
-        MoneyDepositOperationService depositOperationService,
-        MoneyConversionOperationService conversionOperationService,
+        IMoneyOperationService<TransferOperation> transferOperationService,
+        IMoneyOperationService<DepositOperation> depositOperationService,
+        IMoneyOperationService<ConversionOperation> conversionOperationService,
         MoneyWelcomeBonusOperationService welcomeBonusOperationService)
     {
-        _transferOperationServiceService = transferOperationServiceService;
+        _transferOperationService = transferOperationService;
         _depositOperationService = depositOperationService;
         _conversionOperationService = conversionOperationService;
         _welcomeBonusOperationService = welcomeBonusOperationService;
@@ -29,7 +29,7 @@ public class MoneyOperationsManager : IMoneyOperationsManager
     /// </summary>
     public async Task<MoneyOperationResult> TransferAsync(TransferOperation transferOperationData)
     {
-        return await _transferOperationServiceService.ExecuteAsync(transferOperationData);
+        return await _transferOperationService.ExecuteAsync(transferOperationData);
     }
 
     /// <summary>

@@ -65,17 +65,4 @@ public class MoneyOperationsServiceLocalClient : IMoneyOperationsServiceClient
         // Преобразуем результат в DTO через маппер
         return _mapper.Map<MoneyOperationResultDto>(result);
     }
-
-    /// <inheritdoc />
-    public async Task<MoneyOperationResultDto> GrantWelcomeBonusAsync(WelcomeBonusDto welcomeBonusDto)
-    {
-        // Маппим DTO на модель операции
-        var welcomeBonusOperation = _mapper.Map<WelcomeBonusOperation>(welcomeBonusDto);
-        
-        // Выполняем операцию выдачи бонуса
-        var result = await _moneyOperationsManager.GrantWelcomeBonusAsync(welcomeBonusOperation);
-        
-        // Преобразуем результат в DTO через маппер
-        return _mapper.Map<MoneyOperationResultDto>(result);
-    }
 } 

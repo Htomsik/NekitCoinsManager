@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
+using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Repositories;
 using NekitCoinsManager.Core.Services;
 
@@ -37,9 +38,9 @@ public static class DependencyInjection
         services.AddScoped<IDbTransactionService, DbTransactionService>();
         
         // Регистрируем сервисы для операций с деньгами
-        services.AddScoped<MoneyTransferOperationService>();
-        services.AddScoped<MoneyDepositOperationService>();
-        services.AddScoped<MoneyConversionOperationService>();
+        services.AddScoped<IMoneyOperationService<TransferOperation>, MoneyTransferOperationService>();
+        services.AddScoped<IMoneyOperationService<DepositOperation>, MoneyDepositOperationService>();
+        services.AddScoped<IMoneyOperationService<ConversionOperation>, MoneyConversionOperationService>();
         services.AddScoped<MoneyWelcomeBonusOperationService>();
         services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
         
