@@ -32,10 +32,10 @@ public static class DependencyInjection
         // Регистрируем API клиенты
         services.AddHttpClient<IAuthTokenServiceClient, AuthTokenServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserAuthServiceClient, UserAuthServiceApiClient>("ApiClient");
-        
+        services.AddHttpClient<IUserServiceClient, UserServiceApiClient>("ApiClient");
+       
         // Регистрируем временные локальные клиенты
         services.AddScoped<IUserBalanceServiceClient, UserBalanceServiceLocalClient>();
-        services.AddScoped<IUserServiceClient, UserServiceLocalClient>();
         services.AddScoped<ICurrencyConversionServiceClient, CurrencyConversionServiceLocalClient>();
         services.AddScoped<ICurrencyServiceClient, CurrencyServiceLocalClient>();
         services.AddScoped<IMoneyOperationsServiceClient, MoneyOperationsServiceLocalClient>();

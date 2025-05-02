@@ -96,6 +96,28 @@ namespace NekitCoinsManager.HttpClients
             }
         }
         
+        protected async Task<(bool success, string? error)> DeleteAsync(string url)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync(url);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        
         private async Task<T?> ProcessResponseAsync<T>(HttpResponseMessage response)
         {
             if (response.StatusCode == HttpStatusCode.NoContent)
