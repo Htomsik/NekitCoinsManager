@@ -1,4 +1,4 @@
-namespace NekitCoinsManager.Core.Models;
+namespace NekitCoinsManager.Models;
 
 public class AppSettings
 {

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using NekitCoinsManager.API.Infrastructure;
 using NekitCoinsManager.Core;
+using NekitCoinsManager.Core.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,13 @@ builder.Services.AddSwaggerGen();
 
 // Построение приложения
 var app = builder.Build();
+
+// Инициализируем базу данных
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbInitializer.Initialize(dbContext);
+}
 
 // Настройка пайплайна HTTP запросов
 if (app.Environment.IsDevelopment())
