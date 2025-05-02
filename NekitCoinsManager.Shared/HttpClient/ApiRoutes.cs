@@ -157,5 +157,39 @@ namespace NekitCoinsManager.Shared.HttpClient
             /// </summary>
             public const string Convert = Base + "/convert";
         }
+        
+        /// <summary>
+        /// Базовый путь к API валют
+        /// </summary>
+        public static class Currency
+        {
+            /// <summary>
+            /// Базовый путь к API валют
+            /// </summary>
+            public const string Base = "api/Currency";
+            
+            /// <summary>
+            /// Эндпоинт для получения валюты по идентификатору
+            /// </summary>
+            /// <param name="id">Идентификатор валюты</param>
+            public static string GetById(int id) => $"{Base}/{id}";
+            
+            /// <summary>
+            /// Эндпоинт для получения валюты по коду
+            /// </summary>
+            /// <param name="code">Код валюты</param>
+            public static string GetByCode(string code) => $"{Base}/byCode/{code}";
+            
+            /// <summary>
+            /// Эндпоинт для обновления курса обмена
+            /// </summary>
+            public const string UpdateRate = Base + "/rate";
+            
+            /// <summary>
+            /// Эндпоинт для удаления валюты
+            /// </summary>
+            /// <param name="id">Идентификатор валюты</param>
+            public static string Delete(int id) => $"{Base}/{id}";
+        }
     }
 }

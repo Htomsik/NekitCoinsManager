@@ -118,6 +118,122 @@ namespace NekitCoinsManager.HttpClients
             }
         }
         
+        protected async Task<(bool success, string? error)> DeleteAsync<T>(string url)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync(url);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        
+        protected async Task<(bool success, string? error, TResponse? data)> PutAsync<TRequest, TResponse>(string url, TRequest data)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync(url, data, _jsonOptions);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await ProcessResponseAsync<TResponse>(response);
+                    return (true, null, result);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage, default);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, default);
+            }
+        }
+        
+        protected async Task<(bool success, string? error)> PutAsync<TRequest>(string url, TRequest data)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync(url, data, _jsonOptions);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        
+        protected async Task<(bool success, string? error, TResponse? data)> PatchAsync<TRequest, TResponse>(string url, TRequest data)
+        {
+            try
+            {
+                var content = JsonContent.Create(data, null, _jsonOptions);
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), url) { Content = content };
+                var response = await _httpClient.SendAsync(request);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await ProcessResponseAsync<TResponse>(response);
+                    return (true, null, result);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage, default);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, default);
+            }
+        }
+        
+        protected async Task<(bool success, string? error)> PatchAsync<TRequest>(string url, TRequest data)
+        {
+            try
+            {
+                var content = JsonContent.Create(data, null, _jsonOptions);
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), url) { Content = content };
+                var response = await _httpClient.SendAsync(request);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+                else
+                {
+                    var errorMessage = await GetErrorMessageAsync(response);
+                    return (false, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        
         private async Task<T?> ProcessResponseAsync<T>(HttpResponseMessage response)
         {
             if (response.StatusCode == HttpStatusCode.NoContent)
