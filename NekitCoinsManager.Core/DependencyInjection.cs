@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using NekitCoinsManager.Core.Data;
+using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Core.Repositories;
 using NekitCoinsManager.Core.Services;
 
@@ -32,19 +33,20 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IUserBalanceService, UserBalanceService>();
-        services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         services.AddScoped<IDbTransactionService, DbTransactionService>();
         
         // Регистрируем сервисы для операций с деньгами
-        services.AddScoped<MoneyTransferOperationService>();
-        services.AddScoped<MoneyDepositOperationService>();
-        services.AddScoped<MoneyConversionOperationService>();
+        services.AddScoped<IMoneyOperationService<TransferOperation>, MoneyTransferOperationService>();
+        services.AddScoped<IMoneyOperationService<DepositOperation>, MoneyDepositOperationService>();
+        services.AddScoped<IMoneyOperationService<ConversionOperation>, MoneyConversionOperationService>();
         services.AddScoped<MoneyWelcomeBonusOperationService>();
         services.AddScoped<IMoneyOperationsManager, MoneyOperationsManager>();
         
         // Сервисы с зависимостями от других сервисов регистрируем в последнюю очередь
         services.AddScoped<IAuthTokenService, AuthTokenService>();
+        services.AddScoped<IUserAuthService, UserAuthService>();
 
         return services;
     }

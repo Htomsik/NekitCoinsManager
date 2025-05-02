@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Models;
+using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.ViewModels;
 
 namespace NekitCoinsManager.Services;
@@ -70,7 +70,7 @@ public class NavigationService : INavigationService
         // Инициализируем вьюмодель в соответствии с типом параметра
         switch (viewModel)
         {
-            case UserTokensViewModel tokenViewModel when parameters is User user:
+            case UserTokensViewModel tokenViewModel when parameters is UserDto user:
                 await tokenViewModel.LoadUserTokens(user);
                 break;
             // Добавьте другие типы вьюмоделей и параметров здесь по мере необходимости

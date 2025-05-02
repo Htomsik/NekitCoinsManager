@@ -12,3 +12,5 @@ riderModule.iml
 *.idea/
 logs/
 *.db*
+*.DotSettings*
+*MigrationPlan.md*

@@ -5,6 +5,17 @@ using NekitCoinsManager.Shared.DTO.Operations;
 namespace NekitCoinsManager.Shared.HttpClient;
 
 /// <summary>
+/// Интерфейс наблюдателя за операциями с деньгами
+/// </summary>
+public interface IMoneyOperationsObserverClient
+{
+    /// <summary>
+    /// Вызывается при изменении операций с деньгами
+    /// </summary>
+    void OnMoneyOperationsChanged();
+}
+
+/// <summary>
 /// Клиентский интерфейс для денежных операций
 /// </summary>
 public interface IMoneyOperationsServiceClient
@@ -29,11 +40,21 @@ public interface IMoneyOperationsServiceClient
     /// <param name="conversionDto">Данные для конвертации</param>
     /// <returns>Результат операции конвертации</returns>
     Task<MoneyOperationResultDto> ConvertAsync(ConversionDto conversionDto);
-
+    
     /// <summary>
-    /// Выдает приветственный бонус новому пользователю
+    /// Подписаться на обновления операций с деньгами
     /// </summary>
-    /// <param name="welcomeBonusDto">Данные для выдачи приветственного бонуса</param>
-    /// <returns>Результат операции выдачи бонуса</returns>
-    Task<MoneyOperationResultDto> GrantWelcomeBonusAsync(WelcomeBonusDto welcomeBonusDto);
+    /// <param name="observer">Наблюдатель операций</param>
+    void Subscribe(IMoneyOperationsObserverClient observer);
+    
+    /// <summary>
+    /// Отписаться от обновлений операций с деньгами
+    /// </summary>
+    /// <param name="observer">Наблюдатель операций</param>
+    void Unsubscribe(IMoneyOperationsObserverClient observer);
+    
+    /// <summary>
+    /// Уведомить наблюдателей об изменениях
+    /// </summary>
+    void NotifyObservers();
 } 

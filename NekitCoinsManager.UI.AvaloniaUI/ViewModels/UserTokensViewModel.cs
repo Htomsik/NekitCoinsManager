@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NekitCoinsManager.Core.Models;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.HttpClient;
@@ -16,7 +15,7 @@ public partial class UserTokensViewModel : ViewModelBase
     private readonly INavigationService _navigationService;
     
     [ObservableProperty]
-    private User? _user;
+    private UserDto? _user;
     
     [ObservableProperty]
     private ObservableCollection<UserAuthTokenDto> _tokens = new();
@@ -31,7 +30,7 @@ public partial class UserTokensViewModel : ViewModelBase
         _navigationService = navigationService;
     }
     
-    public async Task LoadUserTokens(User user)
+    public async Task LoadUserTokens(UserDto user)
     {
         User = user;
         await RefreshTokensAsync();

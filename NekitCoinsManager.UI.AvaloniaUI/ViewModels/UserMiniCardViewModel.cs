@@ -1,21 +1,18 @@
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MapsterMapper;
-using NekitCoinsManager.Core.Models;
-using NekitCoinsManager.Core.Services;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.DTO;
 using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver, ITransactionObserverClient
+public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver, IMoneyOperationsObserverClient
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserBalanceServiceClient _userBalanceServiceClient;
     private readonly ITransactionServiceClient _transactionServiceClient;
+    private readonly IMoneyOperationsServiceClient _moneyOperationsServiceClient;
     private readonly IMapper _mapper;
     
     [ObservableProperty]
@@ -28,14 +25,19 @@ public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver
         ICurrentUserService currentUserService,
         IUserBalanceServiceClient userBalanceServiceClient,
         ITransactionServiceClient transactionServiceClient,
+        IMoneyOperationsServiceClient moneyOperationsServiceClient,
         IMapper mapper)
     {
         _currentUserService = currentUserService;
         _userBalanceServiceClient = userBalanceServiceClient;
         _transactionServiceClient = transactionServiceClient;
+        _moneyOperationsServiceClient = moneyOperationsServiceClient;
         _mapper = mapper;
+        
+        // Подписываемся на обновления
         _currentUserService.Subscribe(this);
-        _transactionServiceClient.Subscribe(this);
+        _moneyOperationsServiceClient.Subscribe(this);
+        
         LoadCurrentUser();
         LoadBalancesAsync();
     }
@@ -70,8 +72,9 @@ public partial class UserMiniCardViewModel : ViewModelBase, ICurrentUserObserver
     {
         LoadCurrentUser();
     }
-
-    public void OnTransactionsChanged()
+    
+    // Обработчик для IMoneyOperationsObserverClient
+    public void OnMoneyOperationsChanged()
     {
         LoadBalancesAsync();
     }

@@ -2,13 +2,28 @@ using NekitCoinsManager.Core.Models;
 
 namespace NekitCoinsManager.Core.Services;
 
+/// <summary>
+/// Сервис для работы с пользователями (CRUD)
+/// </summary>
 public interface IUserService
 {
+    /// <summary>
+    /// Получает список всех пользователей
+    /// </summary>
     Task<IEnumerable<User>> GetUsersAsync();
+    
+    /// <summary>
+    /// Получает пользователя по имени
+    /// </summary>
     Task<User?> GetUserByUsernameAsync(string username);
+    
+    /// <summary>
+    /// Получает пользователя по идентификатору
+    /// </summary>
     Task<User?> GetUserByIdAsync(int userId);
-    Task<(bool success, string? error)> AddUserAsync(string username, string password, string confirmPassword);
+    
+    /// <summary>
+    /// Удаляет пользователя по идентификатору
+    /// </summary>
     Task<(bool success, string? error)> DeleteUserAsync(int userId);
-    Task<(bool success, string? error)> VerifyPasswordAsync(string username, string password);
-    Task<(bool success, string? error, User? user)> AuthenticateUserAsync(string username, string password);
 } 

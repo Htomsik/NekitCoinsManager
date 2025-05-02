@@ -1,7 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using NekitCoinsManager.Core.Models;
+using NekitCoinsManager.Shared.DTO;
 
 namespace NekitCoinsManager.Models;
 
@@ -56,25 +56,25 @@ public partial class TransactionDisplayModel : ObservableObject
     /// Тип транзакции
     /// </summary>
     [ObservableProperty]
-    private TransactionType _type = TransactionType.Transfer;
+    private TransactionTypeDto _type = TransactionTypeDto.Transfer;
     
     /// <summary>
     /// Информация о пользователе-отправителе
     /// </summary>
     [ObservableProperty]
-    private User _fromUser = null!;
+    private UserDto _fromUser = null!;
     
     /// <summary>
     /// Информация о пользователе-получателе
     /// </summary>
     [ObservableProperty]
-    private User _toUser = null!;
+    private UserDto _toUser = null!;
     
     /// <summary>
     /// Информация о валюте транзакции
     /// </summary>
     [ObservableProperty]
-    private Currency _currency = null!;
+    private CurrencyDto _currency = null!;
     
     /// <summary>
     /// ID родительской транзакции (если текущая транзакция связана с другой)

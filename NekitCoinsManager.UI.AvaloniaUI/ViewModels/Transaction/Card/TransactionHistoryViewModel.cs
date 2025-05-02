@@ -9,10 +9,10 @@ using NekitCoinsManager.Shared.HttpClient;
 
 namespace NekitCoinsManager.ViewModels;
 
-public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionObserverClient
+public partial class TransactionHistoryViewModel : ViewModelBase, IMoneyOperationsObserverClient
 {
     private readonly ITransactionServiceClient _transactionServiceClient;
-    
+    private readonly IMoneyOperationsServiceClient _moneyOperationsServiceClient;
     private readonly IMapper _mapper;
 
     [ObservableProperty]
@@ -27,11 +27,18 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
     [ObservableProperty]
     private UserDto? _secondUser;
 
-    public TransactionHistoryViewModel(ITransactionServiceClient transactionServiceClient, IMapper mapper)
+    public TransactionHistoryViewModel(
+        ITransactionServiceClient transactionServiceClient, 
+        IMoneyOperationsServiceClient moneyOperationsServiceClient,
+        IMapper mapper)
     {
         _transactionServiceClient = transactionServiceClient;
+        _moneyOperationsServiceClient = moneyOperationsServiceClient;
         _mapper = mapper;
-        _transactionServiceClient.Subscribe(this);
+        
+        // Подписываемся только на обновления финансовых операций
+        _moneyOperationsServiceClient.Subscribe(this);
+        
         LoadTransactionsAsync();
     }
 
@@ -57,8 +64,9 @@ public partial class TransactionHistoryViewModel : ViewModelBase, ITransactionOb
 
     private static bool IsUserInvolved(UserDto? user, TransactionDto transaction) =>
         user == null || transaction.FromUserId == user.Id || transaction.ToUserId == user.Id;
-
-    public void OnTransactionsChanged() => LoadTransactionsAsync();
+    
+    // Обработчик для IMoneyOperationsObserverClient
+    public void OnMoneyOperationsChanged() => LoadTransactionsAsync();
 
     partial void OnShowAllTransactionsChanged(bool value) => LoadTransactionsAsync();
 

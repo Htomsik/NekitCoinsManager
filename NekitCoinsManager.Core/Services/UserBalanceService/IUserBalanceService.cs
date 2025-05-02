@@ -10,7 +10,6 @@ public interface IUserBalanceService
     Task<UserBalance?> GetUserBalanceAsync(int userId, int currencyId);
     Task<(bool success, string? error)> UpdateBalanceAsync(int userId, int currencyId, decimal amount);
     Task<(bool success, string? error)> TransferBalanceAsync(int fromUserId, int toUserId, int currencyId, decimal amount);
-    Task<(bool success, string? error)> EnsureUserHasBalanceAsync(int userId, int currencyId);
     Task<(bool success, string? error)> CreateBalanceAsync(int userId, int currencyId, decimal amount);
     Task<(bool success, string? error, UserBalance? balance)> GetOrCreateBalanceAsync(int userId, int currencyId, decimal initialAmount = 0);
     Task<(bool isValid, string? errorMessage)> ValidateUserBalanceAsync(int userId, int currencyId, decimal amount);
