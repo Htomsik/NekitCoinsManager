@@ -28,18 +28,16 @@ public static class DependencyInjection
         // Регистрируем HttpClient для API
         services.AddApiHttpClients("http://localhost:5122/");
         
-        // Регистрируем API клиенты (используем singleton для MoneyOperationsServiceApiClient)
+        // Регистрируем API клиенты
         services.AddHttpClient<IAuthTokenServiceClient, AuthTokenServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserAuthServiceClient, UserAuthServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserServiceClient, UserServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserBalanceServiceClient, UserBalanceServiceApiClient>("ApiClient");
         services.AddHttpClient<ICurrencyServiceClient, CurrencyServiceApiClient>("ApiClient");
         services.AddHttpClient<ICurrencyConversionServiceClient, CurrencyConversionServiceApiClient>("ApiClient");
+        services.AddHttpClient<ITransactionServiceClient, TransactionServiceApiClient>("ApiClient");
         services.AddHttpClientAsSingleton<IMoneyOperationsServiceClient, MoneyOperationsServiceApiClient>(
             httpClient => new MoneyOperationsServiceApiClient(httpClient));
-       
-        // Регистрируем временные локальные клиенты
-        services.AddScoped<ITransactionServiceClient, TransactionServiceLocalClient>();
         
         // Регистрируем вьюмодели
         services.AddSingleton<MainWindowViewModel>();

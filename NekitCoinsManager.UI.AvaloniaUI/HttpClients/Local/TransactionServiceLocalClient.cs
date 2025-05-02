@@ -40,18 +40,4 @@ public class TransactionServiceLocalClient : ITransactionServiceClient
         var transaction = await _transactionService.GetTransactionByIdAsync(id);
         return transaction != null ? _mapper.Map<TransactionDto>(transaction) : null;
     }
-
-    /// <inheritdoc />
-    public async Task<(bool success, string? error)> AddTransactionAsync(TransactionDto transaction)
-    {
-        var transactionModel = _mapper.Map<Transaction>(transaction);
-        return await _transactionService.AddTransactionAsync(transactionModel);
-    }
-
-    /// <inheritdoc />
-    public async Task<(bool isValid, string? errorMessage)> ValidateTransactionAsync(TransactionDto transaction)
-    {
-        var transactionModel = _mapper.Map<Transaction>(transaction);
-        return await _transactionService.ValidateTransactionAsync(transactionModel);
-    }
 } 

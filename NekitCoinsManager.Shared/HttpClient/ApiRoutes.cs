@@ -217,5 +217,22 @@ namespace NekitCoinsManager.Shared.HttpClient
             /// </summary>
             public const string Rates = Base + "/rates";
         }
+        
+        /// <summary>
+        /// Базовый путь к API транзакций
+        /// </summary>
+        public static class Transaction
+        {
+            /// <summary>
+            /// Базовый путь к API транзакций
+            /// </summary>
+            public const string Base = "api/Transaction";
+            
+            /// <summary>
+            /// Эндпоинт для получения транзакции по идентификатору
+            /// </summary>
+            /// <param name="id">Идентификатор транзакции</param>
+            public static string GetById(int id) => $"{Base}/{id}";
+        }
     }
 }

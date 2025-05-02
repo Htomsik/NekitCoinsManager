@@ -16,14 +16,4 @@ public interface ITransactionServiceClient
     /// Получает транзакцию по идентификатору
     /// </summary>
     Task<TransactionDto?> GetTransactionByIdAsync(int id);
-    
-    /// <summary>
-    /// Добавляет новую транзакцию
-    /// </summary>
-    Task<(bool success, string? error)> AddTransactionAsync(TransactionDto transaction);
-    
-    /// <summary>
-    /// Валидирует транзакцию
-    /// </summary>
-    Task<(bool isValid, string? errorMessage)> ValidateTransactionAsync(TransactionDto transaction);
 } 

@@ -48,36 +48,4 @@ public class TransactionController : BaseApiController
             
         return Ok(Mapper.Map<TransactionDto>(transaction));
     }
-    
-    /// <summary>
-    /// Добавляет новую транзакцию
-    /// </summary>
-    /// <param name="transactionDto">Данные транзакции</param>
-    /// <returns>Результат операции</returns>
-    [HttpPost]
-    public async Task<IActionResult> AddTransaction([FromBody] TransactionDto transactionDto)
-    {
-        var transaction = Mapper.Map<Transaction>(transactionDto);
-        
-        var (success, error) = await _transactionService.AddTransactionAsync(transaction);
-        if (!success)
-            return BadRequest(new { error });
-            
-        return Ok(new { message = "Транзакция успешно добавлена" });
-    }
-    
-    /// <summary>
-    /// Валидирует транзакцию
-    /// </summary>
-    /// <param name="transactionDto">Данные транзакции для проверки</param>
-    /// <returns>Результат валидации</returns>
-    [HttpPost("validate")]
-    public async Task<ActionResult<bool>> ValidateTransaction([FromBody] TransactionDto transactionDto)
-    {
-        var transaction = Mapper.Map<Transaction>(transactionDto);
-        
-        var (isValid, errorMessage) = await _transactionService.ValidateTransactionAsync(transaction);
-        
-        return Ok(new { isValid, errorMessage });
-    }
 } 
