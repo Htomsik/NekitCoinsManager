@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NekitCoinsManager.Shared.DTO;
@@ -11,6 +14,8 @@ namespace NekitCoinsManager.HttpClients
     /// </summary>
     public class MoneyOperationsServiceApiClient : BaseApiClient, IMoneyOperationsServiceClient
     {
+        private readonly List<IMoneyOperationsObserverClient> _observers = new();
+        
         /// <summary>
         /// Создает экземпляр API-клиента денежных операций
         /// </summary>
@@ -32,6 +37,11 @@ namespace NekitCoinsManager.HttpClients
             if (!result.success || result.data == null)
                 return new MoneyOperationResultDto { Success = false, Error = result.error ?? "Ошибка при выполнении перевода" };
                 
+            if (result.data.Success)
+            {
+                NotifyObservers();
+            }
+                
             return result.data;
         }
         
@@ -47,6 +57,11 @@ namespace NekitCoinsManager.HttpClients
             
             if (!result.success || result.data == null)
                 return new MoneyOperationResultDto { Success = false, Error = result.error ?? "Ошибка при выполнении пополнения" };
+                
+            if (result.data.Success)
+            {
+                NotifyObservers();
+            }
                 
             return result.data;
         }
@@ -64,7 +79,44 @@ namespace NekitCoinsManager.HttpClients
             if (!result.success || result.data == null)
                 return new MoneyOperationResultDto { Success = false, Error = result.error ?? "Ошибка при выполнении конвертации" };
                 
+            if (result.data.Success)
+            {
+                NotifyObservers();
+            }
+                
             return result.data;
+        }
+        
+        /// <summary>
+        /// Подписаться на обновления операций с деньгами
+        /// </summary>
+        /// <param name="observer">Наблюдатель операций</param>
+        public void Subscribe(IMoneyOperationsObserverClient observer)
+        {
+            if (!_observers.Contains(observer))
+            {
+                _observers.Add(observer);
+            }
+        }
+        
+        /// <summary>
+        /// Отписаться от обновлений операций с деньгами
+        /// </summary>
+        /// <param name="observer">Наблюдатель операций</param>
+        public void Unsubscribe(IMoneyOperationsObserverClient observer)
+        {
+            _observers.Remove(observer);
+        }
+        
+        /// <summary>
+        /// Уведомить наблюдателей об изменениях
+        /// </summary>
+        public void NotifyObservers()
+        {
+            foreach (var observer in _observers)
+            {
+                observer.OnMoneyOperationsChanged();
+            }
         }
     }
 } 

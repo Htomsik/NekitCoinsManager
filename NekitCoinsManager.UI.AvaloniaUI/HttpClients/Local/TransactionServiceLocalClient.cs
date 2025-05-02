@@ -15,7 +15,6 @@ public class TransactionServiceLocalClient : ITransactionServiceClient
 {
     private readonly ITransactionService _transactionService;
     private readonly IMapper _mapper;
-    private readonly List<ITransactionObserverClient> _observers = new List<ITransactionObserverClient>();
 
     /// <summary>
     /// Инициализирует новый экземпляр класса TransactionServiceLocalClient
@@ -26,9 +25,6 @@ public class TransactionServiceLocalClient : ITransactionServiceClient
     {
         _transactionService = transactionService;
         _mapper = mapper;
-        
-        // Подписываемся на изменения транзакций через адаптер
-        _transactionService.Subscribe(new TransactionObserverAdapter(this));
     }
 
     /// <inheritdoc />
@@ -57,41 +53,5 @@ public class TransactionServiceLocalClient : ITransactionServiceClient
     {
         var transactionModel = _mapper.Map<Transaction>(transaction);
         return await _transactionService.ValidateTransactionAsync(transactionModel);
-    }
-
-    /// <inheritdoc />
-    public void Subscribe(ITransactionObserverClient observer)
-    {
-        if (!_observers.Contains(observer))
-        {
-            _observers.Add(observer);
-        }
-    }
-
-    /// <inheritdoc />
-    public void NotifyObservers()
-    {
-        foreach (var observer in _observers)
-        {
-            observer.OnTransactionsChanged();
-        }
-    }
-
-    /// <summary>
-    /// Адаптер для преобразования наблюдателя транзакций из Core в наблюдателя клиента
-    /// </summary>
-    private class TransactionObserverAdapter : ITransactionObserver
-    {
-        private readonly TransactionServiceLocalClient _client;
-
-        public TransactionObserverAdapter(TransactionServiceLocalClient client)
-        {
-            _client = client;
-        }
-
-        public void OnTransactionsChanged()
-        {
-            _client.NotifyObservers();
-        }
     }
 } 

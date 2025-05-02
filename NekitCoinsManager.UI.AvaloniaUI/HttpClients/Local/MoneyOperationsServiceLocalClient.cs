@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MapsterMapper;
 using NekitCoinsManager.Core.Models;
@@ -15,6 +16,7 @@ public class MoneyOperationsServiceLocalClient : IMoneyOperationsServiceClient
 {
     private readonly IMoneyOperationsManager _moneyOperationsManager;
     private readonly IMapper _mapper;
+    private readonly List<IMoneyOperationsObserverClient> _observers = new();
 
     /// <summary>
     /// Создает экземпляр локального клиента денежных операций
@@ -36,6 +38,12 @@ public class MoneyOperationsServiceLocalClient : IMoneyOperationsServiceClient
         // Выполняем операцию перевода
         var result = await _moneyOperationsManager.TransferAsync(transferOperation);
 
+        // Если операция успешна, уведомляем наблюдателей
+        if (result.Success)
+        {
+            NotifyObservers();
+        }
+
         // Преобразуем результат в DTO через маппер
         return _mapper.Map<MoneyOperationResultDto>(result);
     }
@@ -48,6 +56,12 @@ public class MoneyOperationsServiceLocalClient : IMoneyOperationsServiceClient
         
         // Выполняем операцию пополнения
         var result = await _moneyOperationsManager.DepositAsync(depositOperation);
+        
+        // Если операция успешна, уведомляем наблюдателей
+        if (result.Success)
+        {
+            NotifyObservers();
+        }
         
         // Преобразуем результат в DTO через маппер
         return _mapper.Map<MoneyOperationResultDto>(result);
@@ -62,7 +76,45 @@ public class MoneyOperationsServiceLocalClient : IMoneyOperationsServiceClient
         // Выполняем операцию конвертации
         var result = await _moneyOperationsManager.ConvertAsync(conversionOperation);
         
+        // Если операция успешна, уведомляем наблюдателей
+        if (result.Success)
+        {
+            NotifyObservers();
+        }
+        
         // Преобразуем результат в DTO через маппер
         return _mapper.Map<MoneyOperationResultDto>(result);
+    }
+    
+    /// <summary>
+    /// Подписаться на обновления операций с деньгами
+    /// </summary>
+    /// <param name="observer">Наблюдатель операций</param>
+    public void Subscribe(IMoneyOperationsObserverClient observer)
+    {
+        if (!_observers.Contains(observer))
+        {
+            _observers.Add(observer);
+        }
+    }
+    
+    /// <summary>
+    /// Отписаться от обновлений операций с деньгами
+    /// </summary>
+    /// <param name="observer">Наблюдатель операций</param>
+    public void Unsubscribe(IMoneyOperationsObserverClient observer)
+    {
+        _observers.Remove(observer);
+    }
+    
+    /// <summary>
+    /// Уведомить наблюдателей об изменениях
+    /// </summary>
+    public void NotifyObservers()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.OnMoneyOperationsChanged();
+        }
     }
 } 

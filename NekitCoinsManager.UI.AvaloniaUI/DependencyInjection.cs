@@ -5,7 +5,6 @@ using NekitCoinsManager.HttpClients;
 using NekitCoinsManager.Services;
 using NekitCoinsManager.Shared.HttpClient;
 using NekitCoinsManager.ViewModels;
-using System;
 
 namespace NekitCoinsManager;
 
@@ -29,14 +28,15 @@ public static class DependencyInjection
         // Регистрируем HttpClient для API
         services.AddApiHttpClients("http://localhost:5122/");
         
-        // Регистрируем API клиенты
+        // Регистрируем API клиенты (используем singleton для MoneyOperationsServiceApiClient)
         services.AddHttpClient<IAuthTokenServiceClient, AuthTokenServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserAuthServiceClient, UserAuthServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserServiceClient, UserServiceApiClient>("ApiClient");
         services.AddHttpClient<IUserBalanceServiceClient, UserBalanceServiceApiClient>("ApiClient");
-        services.AddHttpClient<IMoneyOperationsServiceClient, MoneyOperationsServiceApiClient>("ApiClient");
         services.AddHttpClient<ICurrencyServiceClient, CurrencyServiceApiClient>("ApiClient");
         services.AddHttpClient<ICurrencyConversionServiceClient, CurrencyConversionServiceApiClient>("ApiClient");
+        services.AddHttpClientAsSingleton<IMoneyOperationsServiceClient, MoneyOperationsServiceApiClient>(
+            httpClient => new MoneyOperationsServiceApiClient(httpClient));
        
         // Регистрируем временные локальные клиенты
         services.AddScoped<ITransactionServiceClient, TransactionServiceLocalClient>();
@@ -51,13 +51,14 @@ public static class DependencyInjection
         services.AddTransient<TransactionDepositViewModel>();
         services.AddTransient<TransactionConversionViewModel>();
         services.AddSingleton<NotificationViewModel>();
-        services.AddTransient<UserMiniCardViewModel>();
+        services.AddSingleton<UserMiniCardViewModel>();
         
         // Регистрируем конкретные реализации TransactionViewModel
         services.AddTransient<TransactionMainTransferViewModel>();
         services.AddTransient<TransactionMainDepositViewModel>();
         services.AddTransient<TransactionMainConversionViewModel>();
         
+        // Регистрируем TransactionHistoryViewModel как transient
         services.AddTransient<TransactionHistoryViewModel>();
         services.AddTransient<CurrencyManagementViewModel>();
         services.AddTransient<UserTokensViewModel>();
