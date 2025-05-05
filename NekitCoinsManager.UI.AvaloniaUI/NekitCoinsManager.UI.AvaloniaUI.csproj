@@ -72,4 +72,10 @@
     <ItemGroup>
       <ProjectReference Include="..\NekitCoinsManager.Shared\NekitCoinsManager.Shared.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 </Project>

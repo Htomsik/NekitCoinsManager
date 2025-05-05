@@ -10,19 +10,29 @@ namespace NekitCoinsManager.Models;
 public static class SettingsConstants
 {
     /// <summary>
-    /// Базовая директория для хранения всех настроек
+    /// Базовая директория для хранения настроек пользователей
     /// </summary>
-    public static readonly string SettingsDirectory = Path.Combine(Environment.CurrentDirectory, "Data");
+    public static readonly string UserSettingsDirectory = Path.Combine(Environment.CurrentDirectory, "Data");
     
     /// <summary>
     /// Имя файла настроек пользователя
     /// </summary>
-    public const string UserSettingsFileName = "settings.json";
+    public const string UserSettingsFileName = "userSettings.json";
+    
+    /// <summary>
+    /// Базовая директория для хранения глобальных настроек
+    /// </summary>
+    public static readonly string AppSettingsDirectory = Environment.CurrentDirectory;
     
     /// <summary>
     /// Имя файла настроек приложения
     /// </summary>
     public const string AppSettingsFileName = "appSettings.json";
+    
+    /// <summary>
+    ///  Имя глобального клиента ДЛЯ СРАНОЙ ФАБРИКИ
+    /// </summary>
+    public const string HttpClientName = "HttpClient";
     
     /// <summary>
     /// Стандартные настройки JSON сериализации

@@ -12,7 +12,7 @@ public class AppSettingsService : IAppSettingsService
 
     public AppSettingsService()
     {
-        Directory.CreateDirectory(SettingsConstants.SettingsDirectory);
+        Directory.CreateDirectory(SettingsConstants.AppSettingsDirectory);
     }
 
     public async Task LoadSettings()
@@ -42,7 +42,7 @@ public class AppSettingsService : IAppSettingsService
 
     public async Task SaveSettings()
     {
-        Directory.CreateDirectory(SettingsConstants.SettingsDirectory);
+        Directory.CreateDirectory(SettingsConstants.AppSettingsDirectory);
         var filePath = GetSettingsFilePath();
         var json = JsonSerializer.Serialize(Settings, SettingsConstants.JsonOptions);
         await File.WriteAllTextAsync(filePath, json);
@@ -62,6 +62,6 @@ public class AppSettingsService : IAppSettingsService
 
     private string GetSettingsFilePath()
     {
-        return Path.Combine(SettingsConstants.SettingsDirectory, SettingsConstants.AppSettingsFileName);
+        return Path.Combine(SettingsConstants.AppSettingsDirectory, SettingsConstants.AppSettingsFileName);
     }
 } 

@@ -9,7 +9,7 @@ public class UserFileSettingsService : IUserSettingsService
 {
     public UserFileSettingsService()
     {
-        Directory.CreateDirectory(SettingsConstants.SettingsDirectory);
+        Directory.CreateDirectory(SettingsConstants.UserSettingsDirectory);
     }
 
     public async Task SaveSettingsAsync(int userId, UserSettings settings)
@@ -45,7 +45,7 @@ public class UserFileSettingsService : IUserSettingsService
 
     private string GetUserDirectory(int userId)
     {
-        return Path.Combine(SettingsConstants.SettingsDirectory, userId.ToString());
+        return Path.Combine(SettingsConstants.UserSettingsDirectory, userId.ToString());
     }
 
     private string GetSettingsFilePath(int userId)

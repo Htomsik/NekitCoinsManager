@@ -24,17 +24,19 @@ namespace NekitCoinsManager
             // Конфигурируем маппинг
             MappingConfig.ConfigureMapping();
             
+            // Загружаем настройки приложения при старте
+            IAppSettingsService appSettingsService = Task.Run(async () =>
+            {
+                var localSettingsService = new AppSettingsService();
+                await localSettingsService.LoadSettings();
+                
+                return localSettingsService;
+            }).GetAwaiter().GetResult();
+            
             var services = new ServiceCollection();
-            services.AddServices();
+            services.AddServices(appSettingsService);
             Services = services.BuildServiceProvider();
             
-            // Загружаем настройки приложения при старте
-            Task.Run(async () => 
-            {
-                var appSettingsService = Services.GetRequiredService<IAppSettingsService>();
-                await appSettingsService.LoadSettings();
-            }).GetAwaiter().GetResult();
-
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow

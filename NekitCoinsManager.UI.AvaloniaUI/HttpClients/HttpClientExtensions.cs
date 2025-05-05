@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
+using NekitCoinsManager.Models;
+using NekitCoinsManager.Services;
 
 namespace NekitCoinsManager.HttpClients
 {
@@ -15,15 +17,17 @@ namespace NekitCoinsManager.HttpClients
         /// <param name="services">Коллекция сервисов</param>
         /// <param name="baseApiUrl">Базовый URL API</param>
         /// <returns>Коллекция сервисов</returns>
-        public static IServiceCollection AddApiHttpClients(this IServiceCollection services, string baseApiUrl)
+        public static IServiceCollection AddApiHttpClients(this IServiceCollection services)
         {
             // Регистрируем AuthHeaderHandler как транзиентный сервис
             services.AddTransient<AuthHeaderHandler>();
             
             // Базовая конфигурация для всех API-клиентов
-            services.AddHttpClient("ApiClient", client =>
+            services.AddHttpClient(SettingsConstants.HttpClientName,
+            (sp, client) =>
             {
-                client.BaseAddress = new Uri(baseApiUrl);
+                var appSettingsService = sp.GetRequiredService<IAppSettingsService>();
+                client.BaseAddress = new Uri(appSettingsService.Settings.ApiUrl);
             }).AddHttpMessageHandler<AuthHeaderHandler>();
             
             return services;
